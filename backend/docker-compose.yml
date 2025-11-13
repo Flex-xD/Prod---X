@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  kafka:
+    image: bitnami/kafka:latest
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+  redis:
+    image: redis:7
+  api-gateway:
+    build: ./services/api-gateway
+    depends_on:
+      - kafka
+      - redis
+  tasks-service:
+    build: ./services/tasks-service
+    depends_on:
+      - kafka
+  analytics-service:
+    build: ./services/analytics-service
+    depends_on:
+      - kafka
+  leaderboard-service:
+    build: ./services/leaderboard-service
+    depends_on:
+      - kafka
+      - redis
+  notification-service:
+    build: ./services/notification-service
+    depends_on:
+      - kafka
+      - redis
+  scheduler-service:
+    build: ./services/scheduler-service
+    depends_on:
+      - kafka
+      - redis

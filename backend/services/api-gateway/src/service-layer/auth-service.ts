@@ -1,5 +1,7 @@
+import { sendResponse } from "@shared/utils/response-utils";
 import User from "../models/User"
-
+import { loginType, registerType } from "../schemas/user-schema";
+import { StatusCodes } from "http-status-codes";
 
 export const authService = {
     findOrCreateGoogleUser: async (googleUser: any) => {
@@ -15,11 +17,16 @@ export const authService = {
         }
         return user;
     },
-    registerLocalUser: async () => {
-        // remember to put provider:local
-        // I also have to set jwt system
+    registerLocalUser: async (body:registerType) => {
+        const user = await User.create({
+            ...body , 
+            provider:"local" , 
+            userTodos:[] , 
+            avatar:"" , 
+        })
+        return user;
     },
-    loginLocalUser: async () => {
-
+    loginLocalUser: async (body:loginType) => {
+  // remember to put provider:local
     }
 }

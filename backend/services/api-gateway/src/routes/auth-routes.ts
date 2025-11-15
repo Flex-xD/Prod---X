@@ -1,10 +1,12 @@
 import {Router} from "express";
-import { registerController } from "../controllers/auth-controller";
+import { googleAuthController, loginController, registerController } from "../controllers/auth-controller";
 import { validate } from "../middleware/zod-middleware";
-import { registerSchema } from "../schemas/user-schema";
+import { loginSchema, registerSchema } from "../schemas/user-schema";
 
 const authRoutes = Router();
 
 authRoutes.post("/register" , validate(registerSchema) ,  registerController);
+authRoutes.post("/login" , validate(loginSchema) ,  loginController);
+authRoutes.post("/google-auth" , googleAuthController);
 
 export default authRoutes;

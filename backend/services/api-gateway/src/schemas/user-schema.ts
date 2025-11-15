@@ -6,6 +6,10 @@ export const userSchema = z.object({
     email:z.email() , 
     password:z.string().min(8 , "Password must be at least 8 characters") , 
     userTodos:todoSchema.array() , 
+    provider:z.string().default("local").optional() , 
+    avatar:z.string().optional() , 
+    _id:z.string().optional()
+    // I have to think of adding _id here which will be provided by mongoose
 })
 
 

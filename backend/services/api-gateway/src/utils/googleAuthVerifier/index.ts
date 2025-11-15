@@ -15,8 +15,10 @@ export const verifyGoogleAuthToken = async (idToken: string) => {
 
     return {
         email: payload.email!,
-        name: payload.name!,
-        picture: payload.picture,
-        email_verified: payload.email_verified,
+        nameme: payload.name!,
+        avatar: payload.picture,
+        provider:"google" ,
+        userTodos:[]
+       // email_verified: payload.email_verified,
     };
 }

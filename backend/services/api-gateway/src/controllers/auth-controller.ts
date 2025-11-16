@@ -4,14 +4,23 @@ import { verifyGoogleAuthToken } from "../utils/googleAuthVerifier";
 import { authService } from "../service-layer/auth-service";
 import { sendResponse } from "@shared/utils/response-utils";
 import { StatusCodes } from "http-status-codes";
-import { generateUserToken } from "../utils/generate-token";
-import { userType } from "../schemas/user-schema";
 import User from "../models/User";
+import { signAccessToken, signRefreshToken } from "../utils/generate-token";
+import { uuidv4 } from "zod";
+import { hashToken } from "../utils/hash";
+import { userType } from "../schemas/user-schema";
 
 
 // ? REGISER CONTROLLER (Local Auth)
 
 const maxAge: number = 7 * 24 * 60 * 60 * 1000
+const REFRESH_COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/auth/refresh",
+    maxAge: 30 * 24 * 60 * 60 * 1000
+};
 
 export const registerController = asyncHandler(async (req: Request, res: Response) => {
     const { email, password, username } = req.body;
@@ -34,22 +43,27 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
         })
     }
 
-    // hash user's password
-
     // ! convert user._id to string everywhere or use mongoose _id type ,  see what is more significant in for the future
-    const token = await generateUserToken(user._id!.toString());
+    const accessToken = signRefreshToken({ sub: user._id!.toString() });
+    const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
+    const hashed = hashToken(refreshPlain)
 
-    res.cookie("token", token, {
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        httpOnly: true,
-        maxAge: maxAge
+    const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);   // 30 days
+    const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // FIXED 30 days
+    user.refreshTokens.push({
+        hashedToken: hashed,
+        userAgent: req.headers["user-agent"] as string,
+        ip: req.ip as string,
+        expiresAt: slidingExpiresAt,
+        absoluteExpiresAt
     })
-    return sendResponse(res ,{
-        statusCode:StatusCodes.CREATED ,
-        success:true , 
-        data:user , 
-        message:"User registered successfully !"
+    await user.save();
+    res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
+    return sendResponse(res, {
+        statusCode: StatusCodes.CREATED,
+        success: true,
+        data: { accessToken, user },
+        message: "User registered successfully !"
     })
 
 })
@@ -66,9 +80,9 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     const { id_token } = req.body;
     const googleUser = await verifyGoogleAuthToken(id_token);
 
-    const user: userType = await authService.findOrCreateGoogleUser(googleUser);
-    const token = await generateUserToken(user._id!.toString());
-    res.cookie("token", token, {
+    const user = await authService.findOrCreateGoogleUser(googleUser);
+    const accessToken = signAccessToken((user as any)._id!.toString());
+    res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",

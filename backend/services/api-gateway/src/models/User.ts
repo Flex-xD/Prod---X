@@ -1,6 +1,8 @@
 import mongoose, { Model } from "mongoose";
 import { userType } from "../schemas/user-schema";
-export interface userDocument extends userType, mongoose.Document { }
+import bcrypt from "bcrypt";
+import refreshTokenSchema from "../schemas/refresh-token-schema";
+export interface userDocument extends Omit<userType, "_id">, mongoose.Document { }
 
 const userSchema = new mongoose.Schema<userDocument>({
     username: {
@@ -33,8 +35,17 @@ const userSchema = new mongoose.Schema<userDocument>({
         type: String,
         enum: ["local", "google"],
         default: "local"
-    }
+    } ,
+    refreshTokens:[refreshTokenSchema]
 })
+
+userSchema.pre("save", async function (next) {
+    if (this.isModified("password")) {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+    }
+    next();
+});
 
 const User: Model<userDocument> = mongoose.model<userDocument>("User", userSchema);
 export default User;

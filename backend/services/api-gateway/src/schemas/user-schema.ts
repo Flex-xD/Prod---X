@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { todoSchema } from "./todo-schema";
+import refreshTokenSchema from "./refresh-token-schema";
 
 export const userSchema = z.object({
     username:z.string().min(4 , "Username must be at least 4 characters") ,
@@ -8,8 +9,8 @@ export const userSchema = z.object({
     userTodos:todoSchema.array() , 
     provider:z.string().default("local").optional() , 
     avatar:z.string().optional() , 
-    _id:z.string().optional()
-    // I have to think of adding _id here which will be provided by mongoose
+    _id:z.string() ,
+    refreshTokens:refreshTokenSchema.array()
 })
 
 

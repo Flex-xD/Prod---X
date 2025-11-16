@@ -1,7 +1,16 @@
 import jwt from "jsonwebtoken";
+export const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET!;
+export const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET!;
 
-export const generateUserToken = async (email: string) => {
-    return jwt.sign({ id: email }, process.env.JWT_SECRET_KEY as string, {
-        expiresIn: "7d",
-    })
+export function signAccessToken(payload: object) {
+    return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "15m" });
+}
+export function signRefreshToken(payload: object) {
+    return jwt.sign(payload, REFRESH_SECRET, { expiresIn: "30d" });
+}
+export function verifyAccessToken(token: string) {
+    return jwt.verify(token, ACCESS_SECRET);
+}
+export function verifyRefreshToken(token: string) {
+    return jwt.verify(token, REFRESH_SECRET);
 }

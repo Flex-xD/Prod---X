@@ -1,4 +1,4 @@
-import { sendError } from "@shared/utils/response-utils";
+import { sendError } from "@shared/src/utils/response-utils";
 import { NextFunction, Response, Request } from "express";
 
 export const validate = (schema: any) => (req: Request, res: Response, next: NextFunction) => {

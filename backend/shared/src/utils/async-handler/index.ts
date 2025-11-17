@@ -1,4 +1,3 @@
-// @shared/utils/async-handler.ts
 import { Request, Response, NextFunction } from "express";
 
 export const asyncHandler = (

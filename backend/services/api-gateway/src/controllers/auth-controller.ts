@@ -1,19 +1,14 @@
-import { asyncHandler } from "@shared/utils/async-handler";
+import { asyncHandler } from "@shared/src/utils/async-handler";
 import { Request, Response } from "express";
 import { verifyGoogleAuthToken } from "../utils/googleAuthVerifier";
 import { authService } from "../service-layer/auth-service";
-import { sendResponse } from "@shared/utils/response-utils";
 import { StatusCodes } from "http-status-codes";
-import User from "../models/User";
-import { signAccessToken, signRefreshToken } from "../utils/generate-token";
+import { signRefreshToken } from "../utils/generate-token";
 import { uuidv4 } from "zod";
 import { hashToken } from "../utils/hash";
-import { userType } from "../schemas/user-schema";
+import { logger } from "@shared/src/utils/winston-logger";
+import { sendResponse } from "@shared/src/utils/response-utils";
 
-
-// ? REGISER CONTROLLER (Local Auth)
-
-const maxAge: number = 7 * 24 * 60 * 60 * 1000
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -22,43 +17,36 @@ const REFRESH_COOKIE_OPTIONS = {
     maxAge: 30 * 24 * 60 * 60 * 1000
 };
 
+// ? REGISTER CONTROLLER (Local Auth)
 export const registerController = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password, username } = req.body;
-    const userExists = await User.find({ email });
-    if (userExists) {
-        return sendResponse(res, {
-            statusCode: StatusCodes.CONFLICT,
-            success: false,
-            message: "User already exists !"
-        })
-    }
-    const user = await authService.registerLocalUser({ ...req.body });
-    // ? Hash user's password also
-    // VERIFY that do you even need to check this or not ? as this will be handled by the main server file.
-    if (!user) {
-        return sendResponse(res, {
-            statusCode: StatusCodes.BAD_REQUEST,
-            success: false,
-            message: "User was not able to register , try again later !"
-        })
-    }
+    const { email, username, password } = req.body;
+
+    logger.info("Registering user with the email : ", email, "req body : ", req.body);
+
+    const user = await authService.registerLocalUser({ email, username, password });
 
     // ! convert user._id to string everywhere or use mongoose _id type ,  see what is more significant in for the future
     const accessToken = signRefreshToken({ sub: user._id!.toString() });
     const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
 
-    const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);   // 30 days
-    const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // FIXED 30 days
+    // ? Think about slidingExpiry (I think it should be shorter than absolute expiry)
+
+    const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     user.refreshTokens.push({
         hashedToken: hashed,
         userAgent: req.headers["user-agent"] as string,
         ip: req.ip as string,
         expiresAt: slidingExpiresAt,
         absoluteExpiresAt
-    })
+    });
     await user.save();
+    logger.info("Tokens created for user : ", user.email);
+
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
+    logger.info("Tokens set in the cookie : ", user.email);
+
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         success: true,
@@ -71,7 +59,26 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
 // ? LOGIN CONTROLLER (Local Auth)
 export const loginController = asyncHandler(async (req: Request, res: Response) => {
     const { email, password, username } = req.body;
+    const user = await authService.loginLocalUser({ email, password });
+    const accessToken = signRefreshToken({ sub: user._id!.toString() });
+    const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
+    const hashed = hashToken(refreshPlain)
 
+    const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    user.refreshTokens.push({
+        hashedToken: hashed,
+        userAgent: req.headers["user-agent"] as string,
+        ip: req.ip as string,
+        expiresAt: slidingExpiresAt,
+        absoluteExpiresAt
+    })
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        message: "User logged in successfully !",
+        data: { accessToken, user },
+        success: true
+    })
 })
 
 
@@ -81,13 +88,21 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     const googleUser = await verifyGoogleAuthToken(id_token);
 
     const user = await authService.findOrCreateGoogleUser(googleUser);
-    const accessToken = signAccessToken((user as any)._id!.toString());
-    res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: maxAge
+    const accessToken = signRefreshToken({ sub: user._id!.toString() });
+    const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
+    const hashed = hashToken(refreshPlain)
+
+    // ? Think about slidingExpiry 
+    const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    user.refreshTokens.push({
+        hashedToken: hashed,
+        userAgent: req.headers["user-agent"] as string,
+        ip: req.ip as string,
+        expiresAt: slidingExpiresAt,
+        absoluteExpiresAt
     })
+    await user.save();
     if (!user) {
         return sendResponse(res, {
             statusCode: 400,
@@ -98,7 +113,7 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         message: "User created successfully !",
-        data: user,
+        data: { accessToken, user },
         success: true
     })
 })

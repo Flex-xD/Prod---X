@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema<userDocument>({
         enum: ["local", "google"],
         default: "local"
     } ,
-    refreshTokens:[refreshTokenSchema]
+    refreshTokens:[{refreshTokenSchema}]
 })
 
 userSchema.pre("save", async function (next) {

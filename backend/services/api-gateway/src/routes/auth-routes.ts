@@ -1,7 +1,7 @@
 import {Router} from "express";
 import { googleAuthController, loginController, registerController } from "../controllers/auth-controller";
 import { validate } from "../middleware/zod-middleware";
-import { loginSchema, registerSchema } from "../schemas/user-schema";
+import { loginSchema, registerSchema } from "@shared/src/schemas/user-schema";
 
 const authRoutes = Router();
 

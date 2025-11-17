@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { todoSchema } from "./todo-schema";
 import refreshTokenSchema from "./refresh-token-schema";
 
 export const userSchema = z.object({
     username:z.string().min(4 , "Username must be at least 4 characters") ,
     email:z.email() , 
     password:z.string().min(8 , "Password must be at least 8 characters") , 
-    userTodos:todoSchema.array() , 
+    // ? Fix the user todos type later
+    userTodos:z.array(z.object({})) , 
     provider:z.string().default("local").optional() , 
     avatar:z.string().optional() , 
     _id:z.string() ,
@@ -16,7 +16,7 @@ export const userSchema = z.object({
 
 export const registerSchema = z.object({
     body: z.object({
-        name: z.string().min(3, "Name must be at least 3 characters"),
+        username: z.string().min(3, "Username must be at least 3 characters"),
         email: z.email("Invalid email format"),
         password: z.string().min(8, "Password must be 8+ chars"),
     }),

@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import User from "../models/User";
 import { hashToken } from "../utils/hash";
 import { signAccessToken } from "../utils/generate-token";
-import { sendResponse } from "@shared/utils/response-utils";
 import { StatusCodes } from "http-status-codes";
 import uuidv4 from "uuidv4";
+import User from "@shared/src/models/User";
+import { sendResponse } from "@shared/src/utils/response-utils";
 
 export async function refresh(req: Request, res: Response) {
     const refreshPlain = req.cookies?.refreshToken;

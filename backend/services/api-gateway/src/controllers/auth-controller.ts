@@ -21,8 +21,6 @@ const REFRESH_COOKIE_OPTIONS = {
 export const registerController = asyncHandler(async (req: Request, res: Response) => {
     const { email, username, password } = req.body;
 
-    logger.info("Registering user with the email : ", email, "req body : ", req.body);
-
     const user = await authService.registerLocalUser({ email, username, password });
 
     // ! convert user._id to string everywhere or use mongoose _id type ,  see what is more significant in for the future
@@ -42,11 +40,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
         absoluteExpiresAt
     });
     await user.save();
-    logger.info("Tokens created for user : ", user.email);
-
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
-    logger.info("Tokens set in the cookie : ", user.email);
-
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         success: true,
@@ -75,7 +69,7 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
     })
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
-        message: "User logged in successfully !",
+        message: "User logged in successfully!",
         data: { accessToken, user },
         success: true
     })

@@ -6,7 +6,6 @@ import { StatusCodes } from "http-status-codes";
 import { signRefreshToken } from "../utils/generate-token";
 import { uuidv4 } from "zod";
 import { hashToken } from "../utils/hash";
-import { logger } from "@shared/src/utils/winston-logger";
 import { sendResponse } from "@shared/src/utils/response-utils";
 
 const REFRESH_COOKIE_OPTIONS = {
@@ -73,10 +72,10 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
         data: { accessToken, user },
         success: true
     })
-})
-
+});
 
 // ? GOOGLE AUTH CONTROLLER (Google Auth)
+// ! STILL NEEDS TESTING
 export const googleAuthController = asyncHandler(async (req: Request, res: Response) => {
     const { id_token } = req.body;
     const googleUser = await verifyGoogleAuthToken(id_token);
@@ -109,5 +108,15 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
         message: "User created successfully !",
         data: { accessToken, user },
         success: true
+    })
+})
+
+export const logoutController = asyncHandler(async (req:Request , res:Response) => {
+    res.clearCookie("refreshToken" , REFRESH_COOKIE_OPTIONS);
+    // ? See what to do with the refresh tokens in db , whether to delete them or keep them for history
+    return sendResponse(res , {
+        statusCode:StatusCodes.OK , 
+        message:"Logged out successfully !" , 
+        success:true 
     })
 })

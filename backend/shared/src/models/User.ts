@@ -37,6 +37,8 @@ const userSchema = new mongoose.Schema<userDocument>({
         default: "local"
     } ,
     refreshTokens:[{refreshTokenSchema}]
+} , {
+    timestamps:true
 })
 
 userSchema.pre("save", async function (next) {

@@ -3,6 +3,7 @@ import { userType } from "../schemas/user-schema";
 import bcrypt from "bcrypt";
 import refreshTokenSchema from "../schemas/refresh-token-schema";
 export interface userDocument extends Omit<userType, "_id">, mongoose.Document { }
+// Define a interface for User document and make it a bit simple
 
 const userSchema = new mongoose.Schema<userDocument>({
     username: {

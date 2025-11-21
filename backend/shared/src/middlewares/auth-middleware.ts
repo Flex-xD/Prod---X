@@ -1,13 +1,14 @@
-import { sendError, sendResponse } from "@shared/utils/response-utils";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { sendError, sendResponse } from "../utils/response-utils";
 
 
 export interface IAuthRequest extends Request {
     userId?: string | null | mongoose.Types.ObjectId;
 }
+
 export const authMiddleware = async (req: IAuthRequest, res: Response, next: NextFunction) => {
     try {
         const token = req.cookies.token;

@@ -1,27 +1,60 @@
-import mongoose, { Model } from "mongoose";
-import { taskSchemaType } from "../schema/task-schema";
+import mongoose, { Schema, Model, Document, Types } from "mongoose";
 
-export interface TaskModel extends mongoose.Document, Omit<taskSchemaType, "_id"> {}
-const taskSchema = new mongoose.Schema<TaskModel>({
-    author:{
-        type:mongoose.Schema.Types.ObjectId , 
-        ref:"User"
-    } ,
-    title:{
-        type:String , 
-        required:true  
-    } ,
-    description:{
-        type:String , 
-        required:false 
-    } , 
-    status:{
-        type:String , 
-        enum:["pending" , "in-progress"  , "completed"]
-    } 
-} , {
-    timestamps:true
-})
+interface ITask extends Document {
+    title: string;
+    description?: string;
+    author: Types.ObjectId;        
+    status: "pending" | "in-progress" | "completed";
+    createdAt: Date;
+    updatedAt: Date;
 
-const Task : Model<TaskModel> = mongoose.model<TaskModel>("Task" , taskSchema);
+    // Virtual field (populated later)
+    authorDetails?: {
+        username: string;
+        avatar?: string;
+    };
+}
+
+const taskSchema = new Schema<ITask>(
+    {
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+            minlength: 1,
+            maxlength: 200,
+        },
+        description: {
+            type: String,
+            trim: true,
+        },
+        author: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+            index: true,
+        },
+        status: {
+            type: String,
+            enum: ["pending", "in-progress", "completed"] as const,
+            default: "pending",
+        },
+    },
+    {
+        timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
+    }
+);
+
+taskSchema.virtual("authorDetails", {
+    ref: "User",
+    localField: "author",
+    foreignField: "_id",
+    justOne: true,
+});
+
+taskSchema.index({ author: 1, createdAt: -1 });
+
+const Task: Model<ITask> = mongoose.model<ITask>("Task", taskSchema);
 export default Task;

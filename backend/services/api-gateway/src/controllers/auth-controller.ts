@@ -7,6 +7,8 @@ import { signRefreshToken } from "../utils/generate-token";
 import { uuidv4 } from "zod";
 import { hashToken } from "../utils/hash";
 import { sendResponse } from "@shared/src/utils/response-utils";
+import Token from "@shared/src/models/Token";
+import { toObjectId } from "@shared/src/utils/into-objectId";
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
@@ -23,7 +25,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
     const user = await authService.registerLocalUser({ email, username, password });
 
     // ! convert user._id to string everywhere or use mongoose _id type ,  see what is more significant in for the future
-    const accessToken = signRefreshToken({ sub: user._id!.toString() });
+    const accessToken = signRefreshToken({ sub: user._id! });
     const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
 
@@ -31,13 +33,17 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
 
     const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    user.refreshTokens.push({
+
+    const refreshToken = await Token.create({
         hashedToken: hashed,
         userAgent: req.headers["user-agent"] as string,
         ip: req.ip as string,
         expiresAt: slidingExpiresAt,
         absoluteExpiresAt
-    });
+    })
+
+    user.refreshTokens.push(refreshToken._id);
+
     await user.save();
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
     return sendResponse(res, {
@@ -51,7 +57,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
 
 // ? LOGIN CONTROLLER (Local Auth)
 export const loginController = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password, username } = req.body;
+    const { email, password } = req.body;
     const user = await authService.loginLocalUser({ email, password });
     const accessToken = signRefreshToken({ sub: user._id!.toString() });
     const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
@@ -59,13 +65,17 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
 
     const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    user.refreshTokens.push({
+
+    const refreshToken = await Token.create({
         hashedToken: hashed,
         userAgent: req.headers["user-agent"] as string,
         ip: req.ip as string,
         expiresAt: slidingExpiresAt,
         absoluteExpiresAt
     })
+
+    user.refreshTokens.push(toObjectId(refreshToken._id));
+
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "User logged in successfully!",
@@ -88,13 +98,17 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     // ? Think about slidingExpiry 
     const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    user.refreshTokens.push({
+
+    const refreshToken = await Token.create({
         hashedToken: hashed,
         userAgent: req.headers["user-agent"] as string,
         ip: req.ip as string,
         expiresAt: slidingExpiresAt,
         absoluteExpiresAt
     })
+
+    user.refreshTokens.push(toObjectId(refreshToken._id));
+
     await user.save();
     if (!user) {
         return sendResponse(res, {
@@ -111,12 +125,12 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     })
 })
 
-export const logoutController = asyncHandler(async (req:Request , res:Response) => {
-    res.clearCookie("refreshToken" , REFRESH_COOKIE_OPTIONS);
+export const logoutController = asyncHandler(async (req: Request, res: Response) => {
+    res.clearCookie("refreshToken", REFRESH_COOKIE_OPTIONS);
     // ? See what to do with the refresh tokens in db , whether to delete them or keep them for history
-    return sendResponse(res , {
-        statusCode:StatusCodes.OK , 
-        message:"Logged out successfully !" , 
-        success:true 
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        message: "Logged out successfully !",
+        success: true
     })
 })

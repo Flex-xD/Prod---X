@@ -1,16 +1,21 @@
 import mongoose, { Model } from "mongoose";
-import { refreshTokenType } from "../schemas/refresh-token-schema";
-export interface userDocument extends refreshTokenType, mongoose.Document { }
 
+interface IToken extends mongoose.Document {
+    _id:mongoose.Types.ObjectId ,
+    hashedToken:string ,
+    userAgent?:string ,
+    ip:string ,
+    expiresAt:Date , 
+    absoluteExpiresAt:Date
+}
 
-const refreshTokenSchema = new mongoose.Schema<userDocument>({
+const refreshTokenSchema = new mongoose.Schema<IToken>({
     hashedToken: { type: String, required: true },
     userAgent: String,
     ip: String,
-    createdAt: { type: Date, default: Date.now },
     expiresAt: Date , 
     absoluteExpiresAt:Date
 }, { _id: true });
 
-const Token :Model<userDocument>= mongoose.model<userDocument>("Token", refreshTokenSchema);
+const Token :Model<IToken>= mongoose.model<IToken>("Token", refreshTokenSchema);
 export default Token;

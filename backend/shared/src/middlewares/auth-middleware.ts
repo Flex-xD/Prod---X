@@ -6,7 +6,7 @@ import { sendError, sendResponse } from "../utils/response-utils";
 
 
 export interface IAuthRequest extends Request {
-    userId?: string | null | mongoose.Types.ObjectId;
+    userId?:mongoose.Types.ObjectId;
 }
 
 export const authMiddleware = async (req: IAuthRequest, res: Response, next: NextFunction) => {
@@ -19,7 +19,7 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
                 success: false
             })
         }
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {userId:mongoose.Types.ObjectId}
         if (!decoded.userId) {
             return sendResponse(res , {
                 statusCode:StatusCodes.CONFLICT , 

@@ -6,7 +6,7 @@ import { StatusCodes } from "http-status-codes";
 import taskService from "../services/task-service";
 import { CreateTaskInput, taskSchemaType } from "../schema/task-schema";
 import { ApiError } from "@shared/src/utils/api-error";
-import { getUserOrThrow } from "@shared/src/utils/user-exits";
+import { getUserOrThrow } from "@shared/src/utils/user-exists";
 import { toObjectId } from "@shared/src/utils/into-objectId";
 
 

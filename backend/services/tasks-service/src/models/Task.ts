@@ -1,13 +1,13 @@
 import mongoose, { Schema, Model, Document, Types } from "mongoose";
 
 interface ITask extends Document {
+    _id:Types.ObjectId ;
     title: string;
     description?: string;
     author: Types.ObjectId;        
     status: "pending" | "in-progress" | "completed";
     createdAt: Date;
     updatedAt: Date;
-
     // Virtual field (populated later)
     authorDetails?: {
         username: string;

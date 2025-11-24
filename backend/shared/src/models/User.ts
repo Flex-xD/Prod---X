@@ -1,11 +1,19 @@
 import mongoose, { Model } from "mongoose";
-import { userType } from "../schemas/user-schema";
 import bcrypt from "bcrypt";
 import refreshTokenSchema from "../schemas/refresh-token-schema";
-export interface userDocument extends Omit<userType, "_id">, mongoose.Document { }
-// Define a interface for User document and make it a bit simple
 
-const userSchema = new mongoose.Schema<userDocument>({
+interface IUser extends mongoose.Document {
+    _id:mongoose.Types.ObjectId ,
+    username:string ,
+    email:string , 
+    password:string , 
+    avatar:string ,
+    userTasks:mongoose.Types.ObjectId[] , 
+    provider:"local" | "google" ,
+    refreshTokens:mongoose.Types.ObjectId[]
+}
+
+const userSchema = new mongoose.Schema<IUser>({
     username: {
         type: String,
         required: true,
@@ -18,7 +26,7 @@ const userSchema = new mongoose.Schema<userDocument>({
     },
     password: {
         type: String,
-        required: function (this: userDocument): boolean {
+        required: function (this: IUser): boolean {
             return this.provider === "local"
         },
     },
@@ -26,7 +34,7 @@ const userSchema = new mongoose.Schema<userDocument>({
         type: String,
         required: false
     },
-    userTodos: {
+    userTasks: {
         type: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "Todo"
@@ -37,7 +45,10 @@ const userSchema = new mongoose.Schema<userDocument>({
         enum: ["local", "google"],
         default: "local"
     } ,
-    refreshTokens:[{refreshTokenSchema}]
+    refreshTokens:[{
+        type:mongoose.Schema.Types.ObjectId , 
+        ref:"RefreshToken"
+    }]
 } , {
     timestamps:true
 })
@@ -50,5 +61,5 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-const User: Model<userDocument> = mongoose.model<userDocument>("User", userSchema);
+const User: Model<IUser> = mongoose.model<IUser>("User", userSchema);
 export default User;

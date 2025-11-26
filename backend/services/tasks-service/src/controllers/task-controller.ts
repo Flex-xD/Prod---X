@@ -8,6 +8,7 @@ import { CreateTaskInput, taskSchemaType } from "../schema/task-schema";
 import { ApiError } from "@shared/src/utils/api-error";
 import { getUserOrThrow } from "@shared/src/utils/user-exists";
 import { toObjectId } from "@shared/src/utils/into-objectId";
+import { emitEvent } from "@shared/src/kafka-producer";
 
 
 export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) => {
@@ -20,6 +21,12 @@ export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) 
     await getUserOrThrow(toObjectId(userId));
     const task = await taskService.createTask(toObjectId(userId), { title, description });
 
+    await emitEvent("task.created" , {
+        userId:toObjectId(userId) ,
+        taskId:task._id ,
+        task
+    })
+
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         success: true,
@@ -28,3 +35,5 @@ export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) 
     })
 })
 
+// * Each microservice should have it's kafka instance with the same brokers across all along , with independent producers and consumers 
+// Fix this

@@ -1,14 +1,9 @@
-import { IAuthRequest } from "@shared/src/middlewares/auth-middleware";
-import { asyncHandler } from "@shared/src/utils/async-handler";
-import { sendResponse } from "@shared/src/utils/response-utils";
+
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import taskService from "../services/task-service";
 import { CreateTaskInput, taskSchemaType } from "../schema/task-schema";
-import { ApiError } from "@shared/src/utils/api-error";
-import { getUserOrThrow } from "@shared/src/utils/user-exists";
-import { toObjectId } from "@shared/src/utils/into-objectId";
-import { emitEvent } from "@shared/src/kafka-producer";
+import { ApiError, asyncHandler, emitEvent, getUser, IAuthRequest, sendResponse, toObjectId } from "../shared";
 
 
 export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) => {
@@ -18,12 +13,16 @@ export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) 
 
     // ! User the zod middleware to validate the request body (before testing it)
 
-    await getUserOrThrow(toObjectId(userId));
+    const user = await getUser(toObjectId(userId));
+    if (!user) {
+        throw ApiError(StatusCodes.NOT_FOUND, "User not found !");
+    }
+
     const task = await taskService.createTask(toObjectId(userId), { title, description });
 
-    await emitEvent("task.created" , {
-        userId:toObjectId(userId) ,
-        taskId:task._id ,
+    await emitEvent("task.created", {
+        userId: toObjectId(userId),
+        taskId: task._id,
         task
     })
 
@@ -35,5 +34,5 @@ export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) 
     })
 })
 
-// * Each microservice should have it's kafka instance with the same brokers across all along , with independent producers and consumers 
+// * Each microservice should have it's kafka instance with the same brokers across all along , with independent producers and consumers
 // Fix this

@@ -1,6 +1,6 @@
-import { logger } from "@shared/src/utils/winston-logger";
 import express from "express";
 import dotenv from "dotenv";
+import { logger } from "./shared";
 dotenv.config();
 
 

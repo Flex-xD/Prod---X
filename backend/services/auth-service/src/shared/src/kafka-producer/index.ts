@@ -1,11 +1,14 @@
-import { Producer } from "kafkajs";
-import { kafka } from "..";
-import { logger } from "../../shared";
+import { Kafka, logLevel, Producer } from "kafkajs";
+import { logger } from "../utils/winston-logger";
 
+const kafka = new Kafka({
+    clientId: "ProdX",
+    brokers: ["localhost:9092"],
+    logLevel: logLevel.ERROR
+})
 
 let producer: Producer | null = null;
 let isConnected: boolean = false;
-
 // const producer = kafka.producer();
 const connectProducer = async (retries = 5) => {
 
@@ -23,6 +26,7 @@ const connectProducer = async (retries = 5) => {
             retries--;
             logger.error("❌ kafka connection producer failed ,", retries, "left");
             await new Promise((resolve) => setTimeout(resolve, 2000));
+
         }
         console.error("❌ Kafka connection failed after all retries. Exiting.");
         process.exit(1);

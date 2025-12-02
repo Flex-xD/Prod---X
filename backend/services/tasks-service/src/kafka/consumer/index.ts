@@ -1,5 +1,5 @@
-import { logger } from "@shared/src/utils/winston-logger";
 import { kafka } from "..";
+import { logger } from "../../shared";
 
 const consumer = kafka.consumer({
     groupId:"task-servie"

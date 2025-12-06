@@ -18,11 +18,12 @@ const createProductivityTimerSchemaForBody = z.object({
     deadline:z.date() , 
 })
 
-type createProductivityTimerInput = z.infer<typeof createProductivityTimerSchema>;
 
-type createProductivityTimerInputForBody = z.infer<typeof createProductivityTimerSchemaForBody>;
+type TcreateProductivityTimerInput = z.infer<typeof createProductivityTimerSchema>;
+
+type TcreateProductivityTimerInputForBody = z.infer<typeof createProductivityTimerSchemaForBody>;
 
 export {
-    createProductivityTimerInput , 
-    createProductivityTimerInputForBody
+    TcreateProductivityTimerInput , 
+    TcreateProductivityTimerInputForBody
 }

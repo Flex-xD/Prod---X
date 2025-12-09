@@ -2,7 +2,7 @@ import { kafka } from "..";
 import { logger } from "../../shared";
 
 const consumer = kafka.consumer({
-    groupId:"task-servie"
+    groupId:"scheduler-servie"
 });
 
 

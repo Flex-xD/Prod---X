@@ -3,9 +3,10 @@ import { hashToken } from "../utils/hash";
 import { signAccessToken } from "../utils/generate-token";
 import { StatusCodes } from "http-status-codes";
 import uuidv4 from "uuidv4";
-import User from "../shared/dist/models/User";
-import { sendResponse } from "../shared/dist/utils/response-utils";
-import Token from "../shared/dist/models/Token";
+import { sendResponse } from "../shared/src/utils/response-utils";
+import User from "../shared/src/models/User";
+import Token from "../shared/src/models/Token";
+
 
 export async function refresh(req: Request, res: Response) {
     const refreshPlain = req.cookies?.refreshToken;

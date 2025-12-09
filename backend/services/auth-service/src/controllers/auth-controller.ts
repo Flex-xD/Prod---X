@@ -5,10 +5,9 @@ import { StatusCodes } from "http-status-codes";
 import { signAccessToken, signRefreshToken } from "../utils/generate-token";
 import { uuidv4 } from "zod";
 import { hashToken } from "../utils/hash";
-import { asyncHandler } from "../shared/dist/utils/async-handler";
-import Token from "../shared/dist/models/Token";
-import { sendResponse } from "../shared/dist/utils/response-utils";
-import { toObjectId } from "../shared/dist/utils/into-objectId";
+import { asyncHandler } from "../shared/src/utils/async-handler";
+import { sendResponse } from "../shared/src/utils/response-utils";
+import Token from "../shared/src/models/Token";
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
@@ -76,7 +75,7 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
         absoluteExpiresAt
     })
 
-    user.refreshTokens.push(toObjectId(refreshToken._id));
+    user.refreshTokens.push(refreshToken._id);
     await user.save();
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
     return sendResponse(res, {
@@ -110,7 +109,7 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
         absoluteExpiresAt
     })
 
-    user.refreshTokens.push(toObjectId(refreshToken._id));
+    user.refreshTokens.push(refreshToken._id);
 
     await user.save();
     if (!user) {

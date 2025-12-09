@@ -9,6 +9,7 @@ interface IUser extends mongoose.Document {
     password:string , 
     avatar:string ,
     userTasks:mongoose.Types.ObjectId[] , 
+    userProductivityTimer:mongoose.Types.ObjectId[] ,
     provider:"local" | "google" ,
     refreshTokens:mongoose.Types.ObjectId[]
 }
@@ -38,6 +39,12 @@ const userSchema = new mongoose.Schema<IUser>({
         type: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "Todo"
+        }]
+    }, 
+    userProductivityTimer:{
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "ProductivityTimer"
         }]
     },
     provider: {

@@ -1,6 +1,5 @@
 import mongoose, { Model } from "mongoose";
 import bcrypt from "bcrypt";
-import refreshTokenSchema from "../schemas/refresh-token-schema";
 
 export interface IUser extends mongoose.Document {
     _id:mongoose.Types.ObjectId ,
@@ -8,7 +7,8 @@ export interface IUser extends mongoose.Document {
     email:string , 
     password:string , 
     avatar:string ,
-    userTasks:mongoose.Types.ObjectId[] , 
+    userTasks:mongoose.Types.ObjectId[] ,  
+    userProductivityTimer:mongoose.Types.ObjectId[] ,
     provider:"local" | "google" ,
     refreshTokens:mongoose.Types.ObjectId[]
 }
@@ -40,6 +40,12 @@ const userSchema = new mongoose.Schema<IUser>({
             ref: "Todo"
         }]
     },
+    userProductivityTimer:{
+        type:[{
+            type:mongoose.Schema.Types.ObjectId , 
+            ref:"Timer"
+        }]
+    }, 
     provider: {
         type: String,
         enum: ["local", "google"],

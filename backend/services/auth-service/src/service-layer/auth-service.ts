@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
-import User from "../shared/dist/models/User";
-import { loginType, registerType } from "../shared/dist/schemas/user-schema";
-import { ApiError } from "../shared/dist/utils/api-error";
+import User from "../shared/src/models/User";
+import { loginType, registerType } from "../shared/src/schemas/user-schema";
+import { ApiError } from "../shared/src/utils/api-error";
 
 export const authService = {
     findOrCreateGoogleUser: async (googleUser: any) => {
@@ -26,7 +26,8 @@ export const authService = {
         const user = await User.create({
             ...body,
             provider: "local",
-            userTodos: [],
+            userTasks: [],
+            userProductivityTimers:[] ,
             avatar: "",
         })
         return user;

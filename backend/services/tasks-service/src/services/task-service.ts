@@ -4,6 +4,8 @@ import { CreateTaskInput } from "../schema/task-schema";
 import { ApiError, getUser } from "../shared";
 import { StatusCodes } from "http-status-codes";
 
+// * Implement Redis for caching tasks
+
 const taskService = {
     createTask: async (userId: Types.ObjectId, data: CreateTaskInput) => {
         const task = await Task.create({

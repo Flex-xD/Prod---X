@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import express, { Request, Response, NextFunction } from "express";
 import authRoutes from "./routes/auth-routes";
-import { sendError } from "./shared/dist/utils/response-utils";
-import connectDb from "./shared/dist/config/db";
+import { sendError } from "./shared/src/utils/response-utils";
+import connectDb from "./shared/src/config/db";
 
 dotenv.config();
 

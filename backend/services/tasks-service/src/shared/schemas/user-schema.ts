@@ -6,7 +6,8 @@ export const userSchema = z.object({
     email:z.email() , 
     password:z.string().min(8 , "Password must be at least 8 characters") , 
     // ? Fix the user todos type later
-    userTodos:z.array(z.object({})) , 
+    userTasks:z.array(z.string()) , 
+    userProductivityTimer:z.array(z.string()) ,
     provider:z.string().default("local").optional() , 
     avatar:z.string().optional() , 
     _id:z.string() ,

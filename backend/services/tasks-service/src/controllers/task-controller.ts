@@ -11,17 +11,14 @@ export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) 
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
     const { title, description }: CreateTaskInput = req.body;
 
-    // ! User the zod middleware to validate the request body (before testing it)
-
-    const user = await getUser(toObjectId(userId));
-    if (!user) {
-        throw ApiError(StatusCodes.NOT_FOUND, "User not found !");
+    if (!title || !description) {
+        throw ApiError(StatusCodes.BAD_REQUEST , "Title and Description are required !");
     }
 
-    const task = await taskService.createTask(toObjectId(userId), { title, description });
+    const task = await taskService.createTask(userId, { title, description });
 
     await emitEvent("task.created", {
-        userId: toObjectId(userId),
+        userId ,
         taskId: task._id,
         task
     })

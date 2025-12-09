@@ -18,7 +18,10 @@
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
+    "@react-oauth/google": "^0.12.2",
     "@tailwindcss/vite": "^4.1.15",
+    "@tanstack/react-query": "^5.90.12",
+    "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.548.0",
@@ -27,7 +30,8 @@
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.5",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.15"
+    "tailwindcss": "^4.1.15",
+    "tanstack": "^1.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

@@ -3,6 +3,7 @@ import ProdXDashboard from "./pages/Dashboard";
 import ProdXLandingPage from "./pages/LandingPage";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+
 function App() {
   return (
     <BrowserRouter>

@@ -11,7 +11,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
-app.use(cors());
+app.use(cors({
+    origin:"http://localhost:5173" ,
+    credentials:true ,
+    methods:["GET" , "POST" , "PUT" , "DELETE" , "PATCH"]
+}));
 app.use(express.json());
 // Use morgan and helmet lateron , first just build the basic structure
 
@@ -45,10 +49,10 @@ app.all(/.*/, async (req: Request, res: Response) => {
             validateStatus: () => true
         })
         return sendResponse(res , {
-            statusCode:response.status ,
-            data:response.data , 
-            message:"Request forwarded successfully" , 
-            success:true
+            statusCode:response.data.statusCode , 
+            success:response.data.success , 
+            message:response.data.message , 
+            data:response.data.data
         })
     } catch (error) {
         sendError(res, { error });

@@ -89,8 +89,8 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
 // ? GOOGLE AUTH CONTROLLER (Google Auth)
 // ! STILL NEEDS TESTING
 export const googleAuthController = asyncHandler(async (req: Request, res: Response) => {
-    const { id_token } = req.body;
-    const googleUser = await verifyGoogleAuthToken(id_token);
+    const { idToken } = req.body;
+    const googleUser = await verifyGoogleAuthToken(idToken);
 
     const user = await authService.findOrCreateGoogleUser(googleUser);
     const accessToken = signRefreshToken({ sub: user._id!.toString() });

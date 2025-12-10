@@ -6,14 +6,11 @@ import { ApiError } from "../shared/src/utils/api-error";
 
 export const authService = {
     findOrCreateGoogleUser: async (googleUser: any) => {
-        let user = await User.findById({ email: googleUser.email });
+        let user = await User.findOne({ email: googleUser.email });
+        console.log("This is google user: " ,googleUser);
         if (!user) {
             user = await User.create({
-                username: googleUser.name,
-                email: googleUser.email,
-                userTodos: [],
-                provider: "google",
-                avatar: googleUser.profilePicture
+                ...googleUser
             })
         }
         return user;
@@ -21,26 +18,26 @@ export const authService = {
     registerLocalUser: async (body: registerType) => {
         const userExists = await User.findOne({ email: body.email });
         if (userExists) {
-            throw ApiError( StatusCodes.CONFLICT, "User already exists !");
+            throw ApiError(StatusCodes.CONFLICT, "User already exists !");
         }
         const user = await User.create({
             ...body,
             provider: "local",
             userTasks: [],
-            userProductivityTimers:[] ,
+            userProductivityTimers: [],
             avatar: "",
         })
         return user;
     },
 
     loginLocalUser: async (body: loginType) => {
-        const user = await User.findOne({ email: body.email , provider:"local" });
+        const user = await User.findOne({ email: body.email, provider: "local" });
         if (!user) {
-            throw ApiError( StatusCodes.NOT_FOUND ,"User not found ! Invalid email or password !");
+            throw ApiError(StatusCodes.NOT_FOUND, "User not found ! Invalid email or password !");
         }
-        const isPasswordValid = await bcrypt.compare(body.password , user.password);
+        const isPasswordValid = await bcrypt.compare(body.password, user.password);
         if (!isPasswordValid) {
-            throw ApiError(StatusCodes.UNAUTHORIZED , "Invalid email or password !");
+            throw ApiError(StatusCodes.UNAUTHORIZED, "Invalid email or password !");
         }
         return user;
     }

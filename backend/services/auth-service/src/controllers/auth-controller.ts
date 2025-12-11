@@ -45,6 +45,8 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
 
     await user.save();
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
+
+    // Think of omitting the password before sending the response
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         success: true,

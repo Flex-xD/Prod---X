@@ -4,11 +4,11 @@ import type { IUser } from "@/types/user";
 import apiClient from "@/utils/Axios-client";
 import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-
-
 const useRegisterMutation = () => {
+    const navigate = useNavigate();
     return useMutation({
         mutationFn: async (formdata: { email: string, username: string, password: string }) => {
             const response = await apiClient.post(ENDPOINTS.AUTH_ENDPOINTS.REGISTER, formdata);
@@ -21,6 +21,7 @@ const useRegisterMutation = () => {
             }
             console.log("User registered successfully : ", data.data.email);
             toast.success(data.message);
+            navigate("/dashboard");
             return;
         },
         onError: (error: AxiosError | Error) => {

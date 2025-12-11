@@ -1,9 +1,9 @@
-import LandingNavbar from './LandingPageComponents/Navbar';
-import HeroSection from './LandingPageComponents/HeroSection';
-import FeaturesSection from './LandingPageComponents/FeaturesSection';
-import WorkingSection from './LandingPageComponents/WorkingSection';
-import Testimonials from './LandingPageComponents/Testimonial';
-import Footer from './LandingPageComponents/Footer';
+import FeaturesSection from "./landingPage-components/FeaturesSection";
+import Footer from "./landingPage-components/Footer";
+import HeroSection from "./landingPage-components/HeroSection";
+import LandingNavbar from "./landingPage-components/Navbar";
+import Testimonials from "./landingPage-components/Testimonial";
+import WorkingSection from "./landingPage-components/WorkingSection";
 
 const ProdXLandingPage = () => {
 

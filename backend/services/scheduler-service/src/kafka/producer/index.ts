@@ -17,11 +17,11 @@ const connectProducer = async (retries = 5) => {
 
             await producer.connect();
             isConnected = true;
-            logger.info("✅ Kafka Producer is connected !");
+            logger.info("✅ Kafka Producer is connected ! --> [ scheduler-service ]");
             return;
         } catch (err) {
             retries--;
-            logger.error("❌ kafka connection producer failed ,", retries, "left");
+            logger.error("❌ kafka connection producer failed --> [ auth-service ] ,", retries, "left");
             await new Promise((resolve) => setTimeout(resolve, 2000));
         }
         console.error("❌ Kafka connection failed after all retries. Exiting.");

@@ -8,6 +8,7 @@ import { hashToken } from "../utils/hash";
 import { asyncHandler } from "../shared/src/utils/async-handler";
 import { sendResponse } from "../shared/src/utils/response-utils";
 import Token from "../shared/src/models/Token";
+import { emitEvent } from "../kafka/producer";
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
@@ -46,6 +47,11 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
     await user.save();
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
 
+    await emitEvent("user.registered", {
+        email,
+        username
+    });
+
     // Think of omitting the password before sending the response
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
@@ -80,6 +86,11 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
     user.refreshTokens.push(refreshToken._id);
     await user.save();
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
+
+    await emitEvent("user.login", {
+        email,
+    });
+
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "User logged in successfully!",
@@ -121,6 +132,11 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
             success: false
         })
     }
+
+    await emitEvent("user.login" , {
+        email:googleUser.email
+    })
+    
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         message: "User created successfully !",

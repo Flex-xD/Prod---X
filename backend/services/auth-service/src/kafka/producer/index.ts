@@ -1,11 +1,10 @@
 import { Producer } from "kafkajs";
 import { kafka } from "..";
-import { logger } from "../../shared";
+import { logger } from "../../shared/src/utils/winston-logger";
 
 
 let producer: Producer | null = null;
 let isConnected: boolean = false;
-
 
 // const producer = kafka.producer();
 export const connectProducer = async (retries = 5) => {
@@ -18,11 +17,11 @@ export const connectProducer = async (retries = 5) => {
 
             await producer.connect();
             isConnected = true;
-            logger.info("✅ Kafka Producer is connected ! --> [ task-service ]");
+            logger.info("✅ Kafka Producer is connected ! --> [ auth-service ]");
             return;
         } catch (err) {
             retries--;
-            logger.error("❌ kafka connection producer failed --> [ task-service ] ,", retries, "left");
+            logger.error("❌ kafka connection producer failed --> [ auth-service ] ,", retries, "left");
             await new Promise((resolve) => setTimeout(resolve, 2000));
         }
         console.error("❌ Kafka connection failed after all retries. Exiting.");
@@ -32,7 +31,7 @@ export const connectProducer = async (retries = 5) => {
 
 
 export const emitEvent =
-// ? Here classify what the event type should be , later on
+    // ? Here classify what the event type should be , later on
     async <T extends object>(topic: string, event: T) => {
         try {
             if (!producer || !isConnected) {
@@ -52,6 +51,7 @@ export const emitEvent =
         }
     }
 
+
 async function disconnectProducer() {
     if (producer && isConnected) {
         try {
@@ -63,6 +63,8 @@ async function disconnectProducer() {
     }
 }
 
-process.on("SIGTTIN" , disconnectProducer);
-process.on("SIGINT" , disconnectProducer);
+
+
+process.on("SIGTTIN", disconnectProducer);
+process.on("SIGINT", disconnectProducer);
 

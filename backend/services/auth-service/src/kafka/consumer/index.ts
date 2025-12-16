@@ -1,21 +1,23 @@
 import { kafka } from "..";
-import { logger } from "../../shared";
+import { logger } from "../../shared/src/utils/winston-logger";
 
 const consumer = kafka.consumer({
-    groupId:"analytics-servie"
+    groupId:"auth-servie"
 });
 
-const connectConsumer = async () => {
+
+
+export const connectConsumer = async () => {
     try {
         await consumer.connect();
-        logger.info("✅ kafka consumer is connected !");
+        logger.info("✅ kafka consumer is connected ! --> [ auth-service ]");
     } catch (error) {
-        logger.error("❌ kafka consumer connection failed : " , {error});
+        logger.error("❌ kafka consumer connection failed --> [ auth-service ] : " , {error});
     }
     process.exit(1);
 }
 
-const handleConsumer = async (topics:string[]) => {
+export const handleConsumer = async (topics:string[]) => {
     try {
         for (const topic of topics) {
             await consumer.subscribe({topic:topic , fromBeginning:true});

@@ -1,23 +1,37 @@
-version: "3.8"
 services:
   zookeeper:
-    image: bitnami/zookeeper:latest
+    image: confluentinc/cp-zookeeper:7.5.0
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
   kafka:
-    image: bitnami/kafka:latest
+    image: confluentinc/cp-kafka:7.5.0
+    ports:
+      - "9092:9092"
     environment:
-      - KAFKA_BROKER_ID=1
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-      - ALLOW_PLAINTEXT_LISTENER=yes
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+
   redis:
     image: redis:7
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    ports:
+      - "5000:5000"
   api-gateway:
-    build: ./services/api-gateway
+    build: 
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    ports:
+      - "3000:3000"
     depends_on:
       - kafka
       - redis
@@ -26,25 +40,35 @@ services:
       context: .
       dockerfile: services/tasks-service/Dockerfile
     ports:
-      - "3000:3000"
+      - "4000:4000"
     depends_on:
       - kafka
   analytics-service:
     build: ./services/analytics-service
+    ports:
+      - "7000:7000"
     depends_on:
       - kafka
   leaderboard-service:
-    build: ./services/leaderboard-service
+    build:
+      context: .
+      dockerfile: services/leaderboard-service/Dockerfile
     depends_on:
       - kafka
       - redis
   point-distribution-service:
-    build: ./services/point-distribution-service
+    build: 
+      context: .
+      dockerfile: services/point-distribution-service/Dockerfile
     depends_on:
       - kafka
       - redis
   scheduler-service:
-    build: ./services/scheduler-service
+    build: 
+      context: .
+      dockerfile: services/scheduler-service/Dockerfile
+    ports:
+      - "6000:6000"
     depends_on:
       - kafka
       - redis

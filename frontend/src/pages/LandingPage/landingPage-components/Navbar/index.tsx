@@ -2,6 +2,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@/components/ui/navigation-menu';
 import { Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Navigate, Link } from "react-router-dom";
 
 function LandingNavbar() {
     const { scrollY } = useScroll();
@@ -63,7 +64,9 @@ function LandingNavbar() {
                 {/* RIGHT BUTTONS */}
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" className="text-blue-600 font-inter font-medium hover:bg-blue-50">
-                        Sign In
+                        <Link to="/auth">
+                            Sign In
+                        </Link>
                     </Button>
                     <motion.div
                         whileHover={{ scale: 1.05 }}

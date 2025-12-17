@@ -46,6 +46,7 @@ export const emitEvent =
                     }
                 ]
             })
+            console.log(`Event emitted successfully : ${topic} & event: ${{event}} --> [ auth-service ]`);
         } catch (error) {
             logger.error("❌ Failed to emit event : ", { error });
         }

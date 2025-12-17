@@ -5,17 +5,17 @@ const consumer = kafka.consumer({
     groupId:"analytics-servie"
 });
 
-const connectConsumer = async () => {
+export const connectConsumer = async () => {
     try {
         await consumer.connect();
-        logger.info("✅ kafka consumer is connected !");
+        logger.info("✅ kafka consumer is connected ! --> [ analytic-service ]");
     } catch (error) {
-        logger.error("❌ kafka consumer connection failed : " , {error});
+        logger.error("❌ kafka consumer connection failed : --> [ analytic-service ] " , {error});
+        process.exit(1); 
     }
-    process.exit(1);
 }
 
-const handleConsumer = async (topics:string[]) => {
+export const handleConsumer = async (topics:string[]) => {
     try {
         for (const topic of topics) {
             await consumer.subscribe({topic:topic , fromBeginning:true});
@@ -29,7 +29,7 @@ const handleConsumer = async (topics:string[]) => {
             }
         })
     } catch (error) {
-        
+        logger.error("❌ kafka consumer connection failed : " , {error});
     }
 }
 
@@ -38,11 +38,7 @@ const authEvents:string[] = ["user.register" , "user.login" , "user.google-auth"
 const taskEvents:string[] = ["task.created" , "task.completed" , "task.updated" , "task.deleted"];
 const timerEvents:string[] = ["timer.created" , "timer.started" , "timer.paused" , "timer.resumed" , "timer.submitted" , "timer.updated" , "timer.deleted"];
 
-const events:string[] = [...authEvents , ...taskEvents , ...timerEvents];
+export const events:string[] = [...authEvents , ...taskEvents , ...timerEvents];
 // ? I have to add a disconnect function here 
 
-(async() => {
-    await connectConsumer();
-    await handleConsumer(events);
-})()
 

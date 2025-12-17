@@ -7,7 +7,7 @@ let producer: Producer | null = null;
 let isConnected: boolean = false;
 
 // const producer = kafka.producer();
-const connectProducer = async (retries = 5) => {
+export const connectProducer = async (retries = 5) => {
 
     while (retries > 0) {
         try {
@@ -17,14 +17,14 @@ const connectProducer = async (retries = 5) => {
 
             await producer.connect();
             isConnected = true;
-            logger.info("✅ Kafka Producer is connected !");
+            logger.info("✅ Kafka Producer is connected ! --> [ analytic-service ]");
             return;
         } catch (err) {
             retries--;
-            logger.error("❌ kafka connection producer failed ,", retries, "left");
+            logger.error("❌ kafka connection producer failed ,", retries, "left" , " --> [ analytic-service ]");
             await new Promise((resolve) => setTimeout(resolve, 2000));
         }
-        console.error("❌ Kafka connection failed after all retries. Exiting.");
+        console.error("❌ Kafka connection failed after all retries. Exiting. --> [ analytic-service ]");
         process.exit(1);
     }
 }
@@ -62,10 +62,6 @@ async function disconnectProducer() {
         }
     }
 }
-
-(async() => {
-    await connectProducer();
-})()
 
 process.on("SIGTTIN", disconnectProducer);
 process.on("SIGINT", disconnectProducer);

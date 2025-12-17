@@ -25,15 +25,12 @@ app.use(express.json());
 
 app.use("/api/v1/auth", authRoutes);
 
-(async () => {
-    await initKafka();
-})()
-
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
     return sendError(res, { error: err });
 })
 
 app.listen(PORT, async () => {
     await connectDb(MONGODB_URI || "");
-    logger.info("AUTH-SERVICE is running on PORT: 👤", PORT);
+    logger.info(`AUTH-SERVICE is running on PORT: 👤 ${PORT}`);
+    await initKafka();
 })

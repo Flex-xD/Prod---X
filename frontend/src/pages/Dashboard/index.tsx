@@ -27,7 +27,7 @@ const Dashboard = () => {
   const dailyGoal = 240; // 4 hours
 
   // GitHub-style calendar data (last 12 weeks)
-  const generateCalendarData = () => {
+  const generateCalendarData = (): Array<Array<{ intensity: "high" | "medium" | "low" | "none"; hours: number }>> => {
     const data = [];
     for (let week = 0; week < 12; week++) {
       const weekData = [];
@@ -40,7 +40,7 @@ const Dashboard = () => {
       }
       data.push(weekData);
     }
-    return data;
+    return data as Array<Array<{ intensity: "high" | "medium" | "low" | "none"; hours: number }>>;
   };
 
   const calendarData = generateCalendarData();
@@ -97,7 +97,7 @@ const Dashboard = () => {
             icon={<CheckCircle2 className="w-8 h-8" />}
             badgeText="Today"
             colorFrom="green-500"
-            colorTo="emerald-600"
+            colorTo="emerald-300"
           />
           <StatCard
             title="Focus Time Today"

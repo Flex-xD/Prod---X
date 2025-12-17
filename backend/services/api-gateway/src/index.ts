@@ -23,7 +23,7 @@ app.use(express.json());
 const services = {
     // Later on add the paths to the env file
     "/tasks": "http://localhost:3000/api/v1",
-    "/auth": "http://localhost:4000/api/v1",
+    "/auth": "http://localhost:5000/api/v1",
 } as Record<string, string>;
 
 app.all(/.*/, async (req: Request, res: Response) => {

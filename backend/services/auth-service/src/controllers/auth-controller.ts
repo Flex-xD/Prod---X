@@ -47,7 +47,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
     await user.save();
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
 
-    await emitEvent("user.registered", {
+    await emitEvent("user.register", {
         email,
         username
     });

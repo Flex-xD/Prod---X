@@ -21,7 +21,7 @@ const StatCard = ({ title, value, subtitle, icon, badgeText, colorFrom, colorTo,
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4  , delay:delay}}
         >
-            <Card className={`rounded-3xl border-0 shadow-lg bg-gradient-to-br from-${colorFrom} to-${colorTo} text-white relative overflow-hidden`}>
+            <Card className={`rounded-3xl border-0 shadow-lg bg-linear-to-br from-${colorFrom} to-${colorTo} text-white relative overflow-hidden`}>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                 <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-3">

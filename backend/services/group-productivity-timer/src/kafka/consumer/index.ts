@@ -1,8 +1,8 @@
 import { kafka } from "..";
-import { logger } from "../../shared/src/utils/winston-logger";
+import { logger } from "../../shared";
 
 const consumer = kafka.consumer({
-    groupId: "auth-servie"
+    groupId: "group-productivity-timer"
 });
 
 
@@ -10,7 +10,7 @@ const consumer = kafka.consumer({
 export const connectConsumer = async () => {
     try {
         await consumer.connect();
-        logger.info("✅ kafka consumer is connected ! --> [ auth-service ]");
+        logger.info("✅ kafka consumer is connected ! --> [ group-productivity-service ]");
     } catch (error) {
         logger.error("❌ kafka consumer connection failed --> [ auth-service ] : ", { error });
         process.exit(1);

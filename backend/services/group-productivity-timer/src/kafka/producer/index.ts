@@ -1,16 +1,12 @@
-import { Kafka, logLevel, Producer } from "kafkajs";
-import { logger } from "../utils/winston-logger";
+import { Producer } from "kafkajs";
+import { kafka } from "..";
+import { logger } from "../../shared";
 
-const kafka = new Kafka({
-    clientId: "ProdX",
-    brokers: ["localhost:9092"],
-    logLevel: logLevel.ERROR
-})
 
 let producer: Producer | null = null;
 let isConnected: boolean = false;
-// const producer = kafka.producer();
-const connectProducer = async (retries = 5) => {
+
+export const connectProducer = async (retries = 5) => {
 
     while (retries > 0) {
         try {
@@ -20,13 +16,12 @@ const connectProducer = async (retries = 5) => {
 
             await producer.connect();
             isConnected = true;
-            logger.info("✅ Kafka Producer is connected !");
+            logger.info("✅ Kafka Producer is connected ! --> [ group-productivity-service ]");
             return;
         } catch (err) {
             retries--;
-            logger.error("❌ kafka connection producer failed ,", retries, "left");
+            logger.error("❌ kafka connection producer failed --> [ auth-service ] ,", retries, "left");
             await new Promise((resolve) => setTimeout(resolve, 2000));
-
         }
         console.error("❌ Kafka connection failed after all retries. Exiting.");
         process.exit(1);
@@ -35,7 +30,7 @@ const connectProducer = async (retries = 5) => {
 
 
 export const emitEvent =
-// ? Here classify what the event type should be , later on
+    // ? Here classify what the event type should be , later on
     async <T extends object>(topic: string, event: T) => {
         try {
             if (!producer || !isConnected) {
@@ -50,10 +45,12 @@ export const emitEvent =
                     }
                 ]
             })
+            console.log(`Event emitted successfully : ${topic} & event: ${{event}} --> [ auth-service ]`);
         } catch (error) {
             logger.error("❌ Failed to emit event : ", { error });
         }
     }
+
 
 async function disconnectProducer() {
     if (producer && isConnected) {
@@ -66,6 +63,8 @@ async function disconnectProducer() {
     }
 }
 
-process.on("SIGTTIN" , disconnectProducer);
-process.on("SIGINT" , disconnectProducer);
+
+
+process.on("SIGTTIN", disconnectProducer);
+process.on("SIGINT", disconnectProducer);
 

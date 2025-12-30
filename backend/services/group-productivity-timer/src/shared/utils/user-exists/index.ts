@@ -1,5 +1,5 @@
-import User, { IUser } from "../../models/User";
 import { Types } from "mongoose";
+import User, { IUser } from "../../models/User";
 
 
 export const getUser = async (userId: Types.ObjectId): Promise<IUser> => {

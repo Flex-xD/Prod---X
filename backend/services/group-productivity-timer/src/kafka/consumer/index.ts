@@ -5,8 +5,6 @@ const consumer = kafka.consumer({
     groupId: "group-productivity-timer"
 });
 
-
-
 export const connectConsumer = async () => {
     try {
         await consumer.connect();
@@ -37,11 +35,11 @@ export const handleConsumer = async (topics: string[]) => {
 }
 
 
-const authEvents: string[] = ["user.register", "user.login", "user.google-auth", "user.logout"];
-const taskEvents: string[] = ["task.created", "task.completed", "task.updated", "task.deleted"];
-const timerEvents: string[] = ["timer.created", "timer.started", "timer.paused", "timer.resumed", "timer.submitted", "timer.updated", "timer.deleted"];
+// const authEvents: string[] = ["user.register", "user.login", "user.google-auth", "user.logout"];
+// const taskEvents: string[] = ["task.created", "task.completed", "task.updated", "task.deleted"];
+const timerEvents: string[] = ["group.timer.created", "group.timer.started", "group.timer.paused", "group.timer.resumed", "group.timer.submitted", "group.timer.updated", "group.timer.deleted"];
 
-export const events: string[] = [...authEvents, ...taskEvents, ...timerEvents];
+export const events: string[] = [ ...timerEvents];
 // ? I have to add a disconnect function here 
 
 

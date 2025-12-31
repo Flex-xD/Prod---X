@@ -3,10 +3,14 @@ import { ApiError, asyncHandler, logger, sendResponse } from "../shared";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { emitEvent } from "../kafka/producer";
+import { groupProductivityTimerServices } from "../services";
+import { TcreateGroupProductivityTimerInputForBody } from "../schemas";
 
 interface IAuthRequest extends Request {
     userId?: mongoose.Types.ObjectId
 }
+
+// ? In this controller the timer is being created for a group , now I have to also add the user inviting logic into this 
 
 export const createGroupProductivityTimer = asyncHandler(async (req: IAuthRequest, res: Response) => {
     const { userId } = req;
@@ -17,20 +21,19 @@ export const createGroupProductivityTimer = asyncHandler(async (req: IAuthReques
         throw ApiError(StatusCodes.BAD_REQUEST, "Title , specifiedTime and deadline are required !");
     }
 
-    // const productivityTimer = await productivityTimerServices.createProductivityTimer(userId, { title, body, deadline, specifiedTime } as TcreateProductivityTimerInputForBody);
+    const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(userId, { title, body, deadline, specifiedTime } as TcreateGroupProductivityTimerInputForBody);
     logger.info(`Sending Response to client ✅ with userid: ${userId}`);
 
-    await emitEvent("groupProductivityTimer.created", {
+    await emitEvent("group.timer.created", {
         userId: userId,
-        // productivityTimerId: productivityTimer._id,
-        // productivityTimer
+        groupProductivityTimer
     })
 
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         success: true,
-        message: "Productivity Timer created successfully !",
-        data: "productivityTimer"
+        message: "Group-roductivity-Timer created successfully !",
+        data: groupProductivityTimer
     })
 
 })

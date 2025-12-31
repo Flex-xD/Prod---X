@@ -23,6 +23,15 @@ const io = new Server(server, {
 
 io.on("connection", (socket: any) => {
     console.log(`User connected 🔗: ${socket.id}`)
+    socket.emit("coding" , () => {
+        const techStack = {
+            skills:["javascript" , "python"] ,
+            name:"Muskan Yadav" , 
+            aga:44 , 
+            experience:3
+        }
+        return techStack;
+    })
 })
 
 server.listen(PORT, async () => {

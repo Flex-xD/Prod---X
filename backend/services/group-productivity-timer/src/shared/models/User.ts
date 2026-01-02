@@ -1,4 +1,5 @@
 import mongoose, { Model } from "mongoose";
+import bcrypt from "bcrypt";
 
 export interface IUser extends mongoose.Document {
     _id:mongoose.Types.ObjectId ,
@@ -11,6 +12,7 @@ export interface IUser extends mongoose.Document {
     userGroupProductivityTimer:mongoose.Types.ObjectId[] ,
     provider:"local" | "google" ,
     refreshTokens:mongoose.Types.ObjectId[]
+    notifications:mongoose.Types.ObjectId[];
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -60,11 +62,14 @@ const userSchema = new mongoose.Schema<IUser>({
     refreshTokens:[{
         type:mongoose.Schema.Types.ObjectId , 
         ref:"RefreshToken"
+    }] , 
+    notifications:[{
+        type:mongoose.Schema.Types.ObjectId ,
+        ref:"Notification"
     }]
 } , {
     timestamps:true
 })
-
 
 const User: Model<IUser> = mongoose.model<IUser>("User", userSchema);
 export default User;

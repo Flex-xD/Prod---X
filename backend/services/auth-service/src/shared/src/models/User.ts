@@ -12,6 +12,7 @@ interface IUser extends mongoose.Document {
     userGroupProductivityTimer:mongoose.Types.ObjectId[] ,
     provider:"local" | "google" ,
     refreshTokens:mongoose.Types.ObjectId[]
+    notifications:mongoose.Types.ObjectId[];
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -61,6 +62,10 @@ const userSchema = new mongoose.Schema<IUser>({
     refreshTokens:[{
         type:mongoose.Schema.Types.ObjectId , 
         ref:"RefreshToken"
+    }] , 
+    notifications:[{
+        type:mongoose.Schema.Types.ObjectId ,
+        ref:"Notification"
     }]
 } , {
     timestamps:true

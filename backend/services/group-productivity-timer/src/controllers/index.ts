@@ -1,10 +1,11 @@
-import mongoose from "mongoose";
-import { ApiError, asyncHandler, logger, sendResponse } from "../shared";
+import mongoose, { Mongoose, Types } from "mongoose";
+import { ApiError, asyncHandler, getUser, logger, sendResponse, toObjectId } from "../shared";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { emitEvent } from "../kafka/producer";
 import { groupProductivityTimerServices } from "../services";
 import { TcreateGroupProductivityTimerInputForBody } from "../schemas";
+import User, { IUser } from "../shared/models/User";
 
 interface IAuthRequest extends Request {
     userId?: mongoose.Types.ObjectId
@@ -16,7 +17,17 @@ export const createGroupProductivityTimer = asyncHandler(async (req: IAuthReques
     const { userId } = req;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
-    const { title, body, deadline, specifiedTime } = req.body;
+    const { title, body, deadline, specifiedTime, invitedUsersId }: TcreateGroupProductivityTimerInputForBody = req.body;
+
+    let invitedUsers: Array<IUser | null> = [];
+    
+    for (let i = 0; i < invitedUsers.length; i++) {
+        const invitedUser:IUser | null = await User.findById(toObjectId(invitedUsersId[i]));
+        invitedUsers.push(invitedUser);
+    }
+    
+    console.log("Invited Users 👤 : " , invitedUsers);
+
     if (!title || !specifiedTime || !deadline) {
         throw ApiError(StatusCodes.BAD_REQUEST, "Title , specifiedTime and deadline are required !");
     }

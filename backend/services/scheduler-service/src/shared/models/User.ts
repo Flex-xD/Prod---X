@@ -1,16 +1,18 @@
 import mongoose, { Model } from "mongoose";
 import bcrypt from "bcrypt";
 
-export interface IUser extends mongoose.Document {
+interface IUser extends mongoose.Document {
     _id:mongoose.Types.ObjectId ,
     username:string ,
     email:string , 
     password:string , 
     avatar:string ,
-    userTasks:mongoose.Types.ObjectId[] ,  
+    userTasks:mongoose.Types.ObjectId[] , 
     userProductivityTimer:mongoose.Types.ObjectId[] ,
+    userGroupProductivityTimer:mongoose.Types.ObjectId[] ,
     provider:"local" | "google" ,
     refreshTokens:mongoose.Types.ObjectId[]
+    notifications:mongoose.Types.ObjectId[];
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -39,13 +41,19 @@ const userSchema = new mongoose.Schema<IUser>({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Todo"
         }]
-    },
+    }, 
     userProductivityTimer:{
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Timer"
+        }]
+    },
+    userGroupProductivityTimer:{
         type:[{
             type:mongoose.Schema.Types.ObjectId , 
-            ref:"Timer"
+            ref:"GroupTimer",
         }]
-    }, 
+    } ,
     provider: {
         type: String,
         enum: ["local", "google"],
@@ -54,19 +62,15 @@ const userSchema = new mongoose.Schema<IUser>({
     refreshTokens:[{
         type:mongoose.Schema.Types.ObjectId , 
         ref:"RefreshToken"
+    }] , 
+    notifications:[{
+        type:mongoose.Schema.Types.ObjectId ,
+        ref:"Notification"
     }]
 } , {
     timestamps:true
 })
 
-// fix this issue later on
-userSchema.pre("save", async function (next) {
-    if (this.isModified("password")) {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
-    }
-    next();
-});
 
 const User: Model<IUser> = mongoose.model<IUser>("User", userSchema);
 export default User;

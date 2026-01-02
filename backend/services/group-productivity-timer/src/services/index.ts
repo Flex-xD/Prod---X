@@ -16,6 +16,7 @@ export const groupProductivityTimerServices = {
         if (!user) {
             throw ApiError(StatusCodes.NOT_FOUND, "User not found !");
         }
+        
     const groupProductivityTimer = await GroupTimer.create({
         ...data
     })

@@ -15,6 +15,7 @@ const createGroupProductivityTimerSchemaForBody = z.object({
     body: z.string().optional(),
     specifiedTime: z.number(),
     deadline: z.date(),
+    invitedUsersId:z.array(z.string())
 })
 
 

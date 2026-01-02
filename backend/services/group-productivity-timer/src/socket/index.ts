@@ -18,7 +18,6 @@ export const initSocket = (server: any) => {
 };
 
 export const getSocket = () => {
-    // Fix the type of the io in above and below function
     if(!io) {
         throw ApiError( StatusCodes.NOT_FOUND,"io not created yet !");
     }

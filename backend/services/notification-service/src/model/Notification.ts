@@ -1,0 +1,31 @@
+import mongoose, { Model } from "mongoose";
+
+export interface INotification extends mongoose.Document {
+    _id: mongoose.Types.ObjectId,
+    topic: string,
+    message: string,
+    from?: mongoose.Types.ObjectId,
+    to?: mongoose.Types.ObjectId
+}
+
+const notificationSchema = new mongoose.Schema<INotification>({
+    topic: {
+        type: String,
+        required: true
+    },
+    message: {
+        type: String,
+        required: true,
+    },
+    from: {
+        type: mongoose.Types.ObjectId,
+        ref: "User"
+    },
+    to: {
+        type: mongoose.Types.ObjectId,
+        ref: "User"
+    }
+});
+
+const Notification : Model<INotification> = mongoose.model<INotification>("Notification" , notificationSchema);
+export default INotification;

@@ -2,6 +2,7 @@ import mongoose, { Model } from "mongoose";
 
 export interface INotification extends mongoose.Document {
     _id: mongoose.Types.ObjectId,
+    notificationType:"group-timer-request" | "daily-quote" | "productivity-hack"
     topic: string,
     message: string,
     from?: mongoose.Types.ObjectId,
@@ -9,6 +10,11 @@ export interface INotification extends mongoose.Document {
 }
 
 const notificationSchema = new mongoose.Schema<INotification>({
+    notificationType:{
+        type:String , 
+        enum :["group-timer-request" , "daily-quote" , "productivity-hack"] , 
+        required:true
+    },
     topic: {
         type: String,
         required: true
@@ -28,4 +34,4 @@ const notificationSchema = new mongoose.Schema<INotification>({
 });
 
 const Notification : Model<INotification> = mongoose.model<INotification>("Notification" , notificationSchema);
-export default INotification;
+export default Notification;

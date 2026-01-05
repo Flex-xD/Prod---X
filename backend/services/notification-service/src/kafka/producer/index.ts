@@ -8,7 +8,6 @@ let isConnected: boolean = false;
 
 // const producer = kafka.producer();
 const connectProducer = async (retries = 5) => {
-
     while (retries > 0) {
         try {
             if (isConnected) return;
@@ -17,11 +16,11 @@ const connectProducer = async (retries = 5) => {
 
             await producer.connect();
             isConnected = true;
-            logger.info("✅ Kafka Producer is connected ! --> [ scheduler-service ]");
+            logger.info("✅ Kafka Producer is connected ! --> [ notification-service ]");
             return;
         } catch (err) {
             retries--;
-            logger.error("❌ kafka connection producer failed --> [ auth-service ] ,", retries, "left");
+            logger.error("❌ kafka connection producer failed --> [ notification-service ] ,", retries, "left");
             await new Promise((resolve) => setTimeout(resolve, 2000));
         }
         console.error("❌ Kafka connection failed after all retries. Exiting.");

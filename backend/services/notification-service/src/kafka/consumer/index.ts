@@ -16,7 +16,8 @@ const connectConsumer = async () => {
     process.exit(1);
 }
 
-// Should I be using web-sockets or depend upon the kafka ?
+
+// ! I will call the api for sendingNotification as soon as it the notification service's consumer listens to the desired topic from other service's producers
 
 const handleConsumer = async (topics:string[]) => {
     try {
@@ -35,7 +36,8 @@ const handleConsumer = async (topics:string[]) => {
     }
 }
 
-// ? I have to add a disconnect function here 
+
+//  I have to add a disconnect function here 
 
 
 (async() => {

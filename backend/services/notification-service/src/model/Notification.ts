@@ -5,9 +5,15 @@ export interface INotification extends mongoose.Document {
     notificationType:"group-timer-request" | "daily-quote" | "productivity-hack"
     topic: string,
     message: string,
-    from?: mongoose.Types.ObjectId,
-    to?: mongoose.Types.ObjectId
+    // I have removed the optional for now on from both the field below
+    from: mongoose.Types.ObjectId,
+    to: mongoose.Types.ObjectId , 
+    invitation : {
+        timerName:string, 
+    }
 }
+
+// ? I can add some fields related to the group-productivity-timer
 
 const notificationSchema = new mongoose.Schema<INotification>({
     notificationType:{

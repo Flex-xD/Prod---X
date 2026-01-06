@@ -7,7 +7,7 @@ let producer: Producer | null = null;
 let isConnected: boolean = false;
 
 // const producer = kafka.producer();
-const connectProducer = async (retries = 5) => {
+export const connectProducer = async (retries = 5) => {
     while (retries > 0) {
         try {
             if (isConnected) return;

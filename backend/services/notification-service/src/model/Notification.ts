@@ -23,7 +23,7 @@ const notificationSchema = new mongoose.Schema<INotification>({
     },
     topic: {
         type: String,
-        required: true
+        requiredcd : true
     },
     message: {
         type: String,

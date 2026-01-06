@@ -19,25 +19,27 @@ export const createGroupProductivityTimer = asyncHandler(async (req: IAuthReques
 
     const { title, body, deadline, specifiedTime, invitedUsersId }: TcreateGroupProductivityTimerInputForBody = req.body;
 
-    let invitedUsers: Array<IUser | null> = [];
-    
-    for (let i = 0; i < invitedUsers.length; i++) {
-        const invitedUser:IUser | null = await User.findById(toObjectId(invitedUsersId[i]));
-        invitedUsers.push(invitedUser);
-    }
-    
-    console.log("Invited Users 👤 : " , invitedUsers);
-
     if (!title || !specifiedTime || !deadline) {
         throw ApiError(StatusCodes.BAD_REQUEST, "Title , specifiedTime and deadline are required !");
     }
 
-    const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(userId, { title, body, deadline, specifiedTime } as TcreateGroupProductivityTimerInputForBody);
+    let invitedUsers: Array<IUser | null> = [];
+
+    for (let i = 0; i < invitedUsers.length; i++) {
+        const invitedUser: IUser | null = await User.findById(toObjectId(invitedUsersId[i]));
+        invitedUsers.push(invitedUser);
+    }
+
+
+    console.log("Invited Users 👤 : ", invitedUsers);
+
+
+    const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(userId, { title, body, deadline, specifiedTime , invitedUsersId} as TcreateGroupProductivityTimerInputForBody);
     logger.info(`Sending Response to client ✅ with userid: ${userId}`);
 
     await emitEvent("group.timer.created", {
         userId: userId,
-        groupProductivityTimer
+        groupProductivityTimer 
     })
 
     return sendResponse(res, {

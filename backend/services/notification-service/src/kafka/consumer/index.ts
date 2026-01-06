@@ -6,7 +6,7 @@ const consumer = kafka.consumer({
 });
 
 
-const connectConsumer = async () => {
+export const connectConsumer = async () => {
     try {
         await consumer.connect();
         logger.info("✅ kafka consumer is connected !");
@@ -19,7 +19,7 @@ const connectConsumer = async () => {
 
 // ! I will call the api for sendingNotification as soon as it the notification service's consumer listens to the desired topic from other service's producers
 
-const handleConsumer = async (topics:string[]) => {
+export const handleConsumer = async (topics:string[]) => {
     try {
         for (const topic of topics) {
             await consumer.subscribe({topic:topic , fromBeginning:true});
@@ -40,8 +40,8 @@ const handleConsumer = async (topics:string[]) => {
 //  I have to add a disconnect function here 
 
 
-(async() => {
-    await connectConsumer();
-    await handleConsumer(["task.created"]);
-})()
+// (async() => {
+//     await connectConsumer();
+//     await handleConsumer(["group.timer.created"]);
+// })()
 

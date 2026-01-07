@@ -3,9 +3,9 @@ import { hashToken } from "../utils/hash";
 import { signAccessToken } from "../utils/generate-token";
 import { StatusCodes } from "http-status-codes";
 import uuidv4 from "uuidv4";
-import { sendResponse } from "../shared/src/utils/response-utils";
-import User from "../shared/src/models/User";
-import Token from "../shared/src/models/Token";
+import { sendResponse } from "../shared/utils/response-utils";
+import User from "../shared/models/User";
+import Token from "../shared/models/Token";
 
 
 export async function refresh(req: Request, res: Response) {
@@ -57,7 +57,7 @@ export async function refresh(req: Request, res: Response) {
     }
 
     // ? Check wether this line provides any value or not
-    user.refreshTokens = user.refreshTokens.filter(rt =>  rt !== userRefreshToken._id);
+    user.refreshTokens = user.refreshTokens.filter(rt => rt !== userRefreshToken._id);
 
     const newAccessToken = signAccessToken({ sub: user._id });
     const newRefreshPlain = `${uuidv4}.${crypto.randomUUID()}`;

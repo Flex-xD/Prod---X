@@ -1,8 +1,8 @@
 import { kafka } from "..";
-import { logger } from "../../shared/src/utils/winston-logger";
+import { logger } from "../../shared/utils/winston-logger";
 
 const consumer = kafka.consumer({
-    groupId: "auth-servie"
+    groupId: "auth-service"
 });
 
 
@@ -26,9 +26,8 @@ export const handleConsumer = async (topics: string[]) => {
         await consumer.run({
             eachMessage: async ({ topic, message }) => {
                 console.log(`Message received from topic ${topic}: ${message.value}`);
-                const key = message.key?.toString();
                 const value = message.value?.toString();
-                logger.info("This is the KEY : ", key, "and this is value : ", value, "of topic : ", topic);
+                console.log("VALUE : " , value);
             }
         })
     } catch (error) {

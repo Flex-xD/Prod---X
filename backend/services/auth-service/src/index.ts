@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import express, { Request, Response, NextFunction } from "express";
 import authRoutes from "./routes/auth-routes";
-import { sendError } from "./shared/src/utils/response-utils";
-import connectDb from "./shared/src/config/db";
+import { sendError } from "./shared/utils/response-utils";
+import connectDb from "./shared/config/db";
 import cors from "cors";
 import { initKafka } from "./utils/init-kafka";
-import { logger } from "./shared/src/utils/winston-logger";
+import { logger } from "./shared/utils/winston-logger";
 
 dotenv.config();
 

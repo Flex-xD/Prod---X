@@ -10,7 +10,7 @@ export const connectConsumer = async () => {
         await consumer.connect();
         logger.info("✅ kafka consumer is connected ! --> [ group-productivity-service ]");
     } catch (error) {
-        logger.error("❌ kafka consumer connection failed --> [ auth-service ] : ", { error });
+        logger.error("❌ kafka consumer connection failed --> [ group-productivity-service ] : ", { error });
         process.exit(1);
     }
 

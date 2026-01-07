@@ -5,9 +5,9 @@ import { StatusCodes } from "http-status-codes";
 import { signAccessToken, signRefreshToken } from "../utils/generate-token";
 import { uuidv4 } from "zod";
 import { hashToken } from "../utils/hash";
-import { asyncHandler } from "../shared/src/utils/async-handler";
-import { sendResponse } from "../shared/src/utils/response-utils";
-import Token from "../shared/src/models/Token";
+import { asyncHandler } from "../shared/utils/async-handler";
+import { sendResponse } from "../shared/utils/response-utils";
+import Token from "../shared/models/Token";
 import { emitEvent } from "../kafka/producer";
 
 const REFRESH_COOKIE_OPTIONS = {
@@ -133,10 +133,10 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
         })
     }
 
-    await emitEvent("user.login" , {
-        email:googleUser.email
+    await emitEvent("user.login", {
+        email: googleUser.email
     })
-    
+
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         message: "User created successfully !",

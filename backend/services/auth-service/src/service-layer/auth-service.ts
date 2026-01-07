@@ -1,13 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
-import User from "../shared/src/models/User";
-import { loginType, registerType } from "../shared/src/schemas/user-schema";
-import { ApiError } from "../shared/src/utils/api-error";
+import User from "../shared/models/User";
+import { loginType, registerType } from "../shared/schemas/user-schema";
+import { ApiError } from "../shared/utils/api-error";
 
 export const authService = {
     findOrCreateGoogleUser: async (googleUser: any) => {
         let user = await User.findOne({ email: googleUser.email });
-        console.log("This is google user: " ,googleUser);
+        console.log("This is google user: ", googleUser);
         if (!user) {
             user = await User.create({
                 ...googleUser

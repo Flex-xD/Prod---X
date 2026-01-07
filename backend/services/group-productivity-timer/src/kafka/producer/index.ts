@@ -20,7 +20,7 @@ export const connectProducer = async (retries = 5) => {
             return;
         } catch (err) {
             retries--;
-            logger.error("❌ kafka connection producer failed --> [ auth-service ] ,", retries, "left");
+            logger.error("❌ kafka connection producer failed --> [ group-productivity-service ] ,", retries, "left");
             await new Promise((resolve) => setTimeout(resolve, 2000));
         }
         console.error("❌ Kafka connection failed after all retries. Exiting.");
@@ -45,7 +45,7 @@ export const emitEvent =
                     }
                 ]
             })
-            console.log(`Event emitted successfully : ${topic} & event: ${{event}} --> [ auth-service ]`);
+            console.log(`Event emitted successfully : ${topic} & event: ${{event}} --> [ group-productivity-service-service ]`);
         } catch (error) {
             logger.error("❌ Failed to emit event : ", { error });
         }

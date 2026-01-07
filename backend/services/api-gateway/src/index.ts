@@ -16,16 +16,20 @@ app.use(cors({
     credentials:true ,
     methods:["GET" , "POST" , "PUT" , "DELETE" , "PATCH"]
 }));
+
 app.use(express.json());
 // Use morgan and helmet lateron , first just build the basic structure
 
 
 const services = {
     // Later on add the paths to the env file
-    "/tasks": "http://localhost:3000/api/v1",
+    "/tasks": "http://localhost:4000/api/v1",
     "/auth": "http://localhost:5000/api/v1",
+    "/group-productivity-timer":"http://localhost:9000/api/v1"
 } as Record<string, string>;
 
+
+// * Find a way to implement validate middleware in the API-GATEWAY along with the suitable types for different API's  (keep scalability in mind)
 app.all(/.*/, async (req: Request, res: Response) => {
     const urlPath = req.path;
     logger.info(`Request received ✅ at API-GATEWAY for path: ${urlPath}`);

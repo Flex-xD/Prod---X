@@ -9,11 +9,12 @@ const consumer = kafka.consumer({
 export const connectConsumer = async () => {
     try {
         await consumer.connect();
-        logger.info("✅ kafka consumer is connected !");
+        logger.info("✅ kafka consumer is connected ! --> [ notification-service ]");
     } catch (error) {
         logger.error("❌ kafka consumer connection failed : " , {error});
+        process.exit(1);
     }
-    process.exit(1);
+    
 }
 
 

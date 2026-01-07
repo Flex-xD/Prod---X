@@ -1,6 +1,6 @@
 import { Producer } from "kafkajs";
 import { kafka } from "..";
-import { logger } from "../../shared/src/utils/winston-logger";
+import { logger } from "../../shared/utils/winston-logger";
 
 
 let producer: Producer | null = null;
@@ -46,7 +46,7 @@ export const emitEvent =
                     }
                 ]
             })
-            console.log(`Event emitted successfully : ${topic} & event: ${{event}} --> [ auth-service ]`);
+            console.log("Event emitted successfully :", topic, event);
         } catch (error) {
             logger.error("❌ Failed to emit event : ", { error });
         }

@@ -31,5 +31,5 @@ io.on("connection", (socket: any) => {
 
 server.listen(PORT, async () => {
     logger.info(`Group 👥 Productivity Timer Service is running on PORT: ✅ ${PORT}`);
-    // await initKafka();
+    await initKafka();
 });

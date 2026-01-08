@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import { ApiError, authMiddleware, logger, sendError, sendResponse } from "./shared";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { StatusCodes } from "http-status-codes";
 import connectDb from "./shared/config/db";
 import axios from "axios";
@@ -17,7 +18,16 @@ app.use(cors({
     methods:["GET" , "POST" , "PUT" , "DELETE" , "PATCH"]
 }));
 
+app.use(cookieParser());
 app.use(express.json());
+
+app.use((req: Request, res: Response, next) => {
+    if (req.path.startsWith("/auth")) {
+        return next(); // skip auth for auth-service
+    }
+    return authMiddleware(req as any, res, next);
+});
+
 // Use morgan and helmet lateron , first just build the basic structure
 
 
@@ -25,7 +35,8 @@ const services = {
     // Later on add the paths to the env file
     "/tasks": "http://localhost:4000/api/v1",
     "/auth": "http://localhost:5000/api/v1",
-    "/group-productivity-timer":"http://localhost:9000/api/v1"
+    "/group-productivity-timer":"http://localhost:9000/api/v1" , 
+    "/notification":"http://localhost:10000/api/v1"
 } as Record<string, string>;
 
 

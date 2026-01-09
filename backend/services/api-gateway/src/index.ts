@@ -21,15 +21,18 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
-app.use((req: Request, res: Response, next) => {
-    if (req.path.startsWith("/auth")) {
-        return next(); // skip auth for auth-service
+app.use((req, res, next) => {
+    const path = req.path.replace(/^\/api\/v1/, "");
+
+    if (path.startsWith("/auth")) {
+        return next();
     }
+
     return authMiddleware(req as any, res, next);
 });
 
-// Use morgan and helmet lateron , first just build the basic structure
 
+// Use morgan and helmet lateron , first just build the basic structure
 
 const services = {
     // Later on add the paths to the env file
@@ -42,35 +45,38 @@ const services = {
 
 // * Find a way to implement validate middleware in the API-GATEWAY along with the suitable types for different API's  (keep scalability in mind)
 app.all(/.*/, async (req: Request, res: Response) => {
-    const urlPath = req.path;
-    logger.info(`Request received ✅ at API-GATEWAY for path: ${urlPath}`);
-    const targetService = Object.keys(services).find(serviceKey => urlPath.startsWith(serviceKey));
+    const urlPath = req.path.replace(/^\/api\/1/, "");
+    logger.info(`Request received at API-GATEWAY for path: ${urlPath}`);
+
+    const targetService = Object.keys(services).find(serviceKey =>
+        urlPath.startsWith(serviceKey)
+    );
 
     if (!targetService) {
-        throw ApiError(StatusCodes.NOT_FOUND, `Service not found ❌ for the requested path : ${req.path}`);
+        throw ApiError(
+            StatusCodes.NOT_FOUND,
+            `Service not found ❌ for the requested path : ${req.path}`
+        );
     }
 
     const targetUrl = services[targetService];
     const forwardUrl = targetUrl + urlPath;
-    const fullUrl = forwardUrl + (req.url.includes("?") ? req.url.split("?")[1] ? "?" + req.url.split("?")[1] : "" : "");
 
     try {
-        logger.info(`Forwarding request to ⏩ : ${fullUrl}`);
         const response = await axios({
             method: req.method,
-            url: fullUrl,
-            data:req.body ,
-            headers: { ...req.headers },
+            url: forwardUrl,
+            data: req.body,
+            headers: {
+                authorization: req.headers.authorization,
+                "x-user-id": (req as any).userId?.toString()
+            },
             validateStatus: () => true
-        })
-        return sendResponse(res , {
-            statusCode:response.data.statusCode , 
-            success:response.data.success , 
-            message:response.data.message , 
-            data:response.data.data
-        })
+        });
+
+        return sendResponse(res, response.data);
     } catch (error) {
-        sendError(res, { error });
+        return sendError(res, { error });
     }
 });
 

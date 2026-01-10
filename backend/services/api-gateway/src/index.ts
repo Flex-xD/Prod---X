@@ -13,9 +13,9 @@ const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
 app.use(cors({
-    origin:"http://localhost:5173" ,
-    credentials:true ,
-    methods:["GET" , "POST" , "PUT" , "DELETE" , "PATCH"]
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
 }));
 
 app.use(cookieParser());
@@ -32,20 +32,21 @@ app.use((req, res, next) => {
 });
 
 
-// Use morgan and helmet lateron , first just build the basic structure
 
 const services = {
     // Later on add the paths to the env file
     "/tasks": "http://localhost:4000/api/v1",
     "/auth": "http://localhost:5000/api/v1",
-    "/group-productivity-timer":"http://localhost:9000/api/v1" , 
-    "/notification":"http://localhost:10000/api/v1"
+    "/group-productivity-timer": "http://localhost:9000/api/v1",
+    "/notification": "http://localhost:10000/api/v1"
 } as Record<string, string>;
 
 
 // * Find a way to implement validate middleware in the API-GATEWAY along with the suitable types for different API's  (keep scalability in mind)
 app.all(/.*/, async (req: Request, res: Response) => {
-    const urlPath = req.path.replace(/^\/api\/1/, "");
+    const urlPath = req.path.replace(/^\/api\/v1/, "");
+    logger.info(`Normalized path: ${urlPath}`);
+
     logger.info(`Request received at API-GATEWAY for path: ${urlPath}`);
 
     const targetService = Object.keys(services).find(serviceKey =>

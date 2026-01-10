@@ -22,7 +22,7 @@ export const notificationServices = {
         const notification = await Notification.create({ ...data });
         receivingUser.notifications.push(notification._id);
         await receivingUser.save();
-
+        
         return notification;
     }
 }

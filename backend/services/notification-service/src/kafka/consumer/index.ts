@@ -1,5 +1,7 @@
+import axios from "axios";
 import { kafka } from "..";
 import { logger } from "../../shared";
+import pLimit from "p-limit";
 
 const consumer = kafka.consumer({
     groupId:"notification-servie"
@@ -21,6 +23,7 @@ export const connectConsumer = async () => {
 // ! I will call the api for sendingNotification as soon as it the notification service's consumer listens to the desired topic from other service's producers
 
 export const handleConsumer = async (topics:string[]) => {
+    const limit = pLimit(5);
     try {
         for (const topic of topics) {
             await consumer.subscribe({topic:topic , fromBeginning:true});
@@ -30,6 +33,15 @@ export const handleConsumer = async (topics:string[]) => {
                 const key = message.key?.toString();
                 const value = message.value?.toString();
                 logger.info(`This is the KEY : ${key} , this is the value : ${value} from the topic : ${topic}`);
+                switch (topic) {
+                    case "group.timer.created" :
+                        await limit(() => axios("http://localhost:3000/api/v1/notifications/sendNotification" , {
+                            invitedUserId:[1 , 2] , 
+                            groupProductivityTimer:{}
+                        }));
+                    default :
+                        break;
+                }
             }
         })
     } catch (error) {

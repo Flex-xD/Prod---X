@@ -2,7 +2,7 @@ import express  , {Request , Response , NextFunction}from "express";
 import dotenv from "dotenv";
 import { initKafka } from "./utils/init-kafka";
 import { sendError } from "./shared";
-import notificationRouter from "./routees";
+import notificationRouter from "./routes";
 dotenv.config();
 
 const app = express();

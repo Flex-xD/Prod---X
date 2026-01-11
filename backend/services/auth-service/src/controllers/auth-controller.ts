@@ -91,6 +91,7 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
         email,
     });
 
+    console.log("This is the response of the LoginController : " , { accessToken, user });
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "User logged in successfully!",

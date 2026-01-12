@@ -54,6 +54,7 @@ export const handleConsumer = async (topics:string[]) => {
                         if (!message.value) throw ApiError(StatusCodes.BAD_REQUEST , `No message.value found : ${message.value}`);
                         
                         await limit(async () => {
+                            // ! Fix this later on , first test it weather it is sending the API request to different users or not smoothly
                         message.value.invitedUsersId.forEach(async (userId) => {
                                 await axios.post("http://localhost:10000/api/v1/notification/create-notification"  , {
                                     to:userId , 

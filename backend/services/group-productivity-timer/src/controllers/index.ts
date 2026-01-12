@@ -14,7 +14,14 @@ interface IAuthRequest extends Request {
 // ? In this controller the timer is being created for a group , now I have to also add the user inviting logic into this 
 
 export const createGroupProductivityTimer = asyncHandler(async (req: IAuthRequest, res: Response) => {
-    const { userId } = req;
+    // * Later on find the reason why req.userId is null 
+    // console.log("This is request.userId in the Group-Timer-Service : ", req.userId);
+
+    // ? May be I can remove the as string from below ???
+
+    const userId = req.headers["x-user-id"] as string;
+
+    // const { userId } = req;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
     const { title, body, deadline, specifiedTime, invitedUsersId }: TcreateGroupProductivityTimerInputForBody = req.body;
@@ -34,7 +41,7 @@ export const createGroupProductivityTimer = asyncHandler(async (req: IAuthReques
     // console.log("Invited Users 👤 : ", invitedUsers);
 
 
-    const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(userId, { title, body, deadline, specifiedTime , invitedUsersId} as TcreateGroupProductivityTimerInputForBody);
+    const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(toObjectId(userId), { title, body, deadline, specifiedTime , invitedUsersId} as TcreateGroupProductivityTimerInputForBody);
     logger.info(`Sending Response to client ✅ with userid: ${userId}`);
 
     await emitEvent("group.timer.created", {

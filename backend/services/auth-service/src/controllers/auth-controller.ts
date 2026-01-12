@@ -25,7 +25,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
     const user = await authService.registerLocalUser({ email, username, password });
 
     // Check the accessToken below wether it should be of small time or large time
-    const accessToken = signAccessToken({ sub: user._id! });
+    const accessToken = signAccessToken({ userId: user._id! });
     const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
 
@@ -68,7 +68,7 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
     const user = await authService.loginLocalUser({ email, password });
 
     // same as above or should be different ?
-    const accessToken = signAccessToken({ sub: user._id });
+    const accessToken = signAccessToken({ userId: user._id });
     const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
 

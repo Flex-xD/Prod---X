@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, response, Response } from "express";
 import dotenv from "dotenv";
 import { ApiError, authMiddleware, logger, sendError, sendResponse } from "./shared";
 import cors from "cors";
@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import { StatusCodes } from "http-status-codes";
 import connectDb from "./shared/config/db";
 import axios from "axios";
+import { NextFunction } from "http-proxy-middleware/dist/types";
+import mongoose from "mongoose";
 dotenv.config();
 
 const app = express();
@@ -28,9 +30,8 @@ app.use((req, res, next) => {
         return next();
     }
 
-    return authMiddleware(req as any, res, next);
+    return authMiddleware(req as Request, res as Response , next as NextFunction);
 });
-
 
 
 const services = {
@@ -41,9 +42,13 @@ const services = {
     "/notification": "http://localhost:10000/api/v1"
 } as Record<string, string>;
 
+interface IAuthRequest extends Request {
+    userId?: mongoose.Types.ObjectId
+}
 
 // * Find a way to implement validate middleware in the API-GATEWAY along with the suitable types for different API's  (keep scalability in mind)
-app.all(/.*/, async (req: Request, res: Response) => {
+app.all(/.*/, async (req: IAuthRequest, res: Response) => {
+    const {userId} = req;
     const urlPath = req.path.replace(/^\/api\/v1/, "");
     logger.info(`Normalized path: ${urlPath}`);
 
@@ -70,7 +75,8 @@ app.all(/.*/, async (req: Request, res: Response) => {
             data: req.body,
             headers: {
                 authorization: req.headers.authorization,
-                "x-user-id": (req as any).userId?.toString()
+                // "x-user-id": (req as any).userId?.toString() , 
+                "x-user-id": userId
             },
             validateStatus: () => true
         });

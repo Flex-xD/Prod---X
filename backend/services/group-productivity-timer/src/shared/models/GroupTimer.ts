@@ -10,6 +10,7 @@ export interface IGroupTimer extends mongoose.Document {
     deadline: Date,
     isCompleted: boolean,
     author: mongoose.Types.ObjectId
+    invitedUsersId:mongoose.Types.ObjectId[]
     participants: mongoose.Types.ObjectId[]
 }
 
@@ -37,6 +38,9 @@ const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
     author: {
         type: mongoose.Schema.Types.ObjectId
     },
+    invitedUsersId:[{
+        type:mongoose.Schema.Types.ObjectId
+    }] ,
     participants: [{
         type: mongoose.Types.ObjectId
     }],

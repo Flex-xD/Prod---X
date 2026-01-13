@@ -6,17 +6,19 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import groupTimerRouter from "./routes";
 import { initSocket } from "./socket";
+import connectDb from "./shared/config/db";
 
 dotenv.config();
 
 const app = express();
-const server = createServer(app);
+// ? const server = createServer(app);
 const PORT = process.env.PORT || 9000
 
 app.use(express.json());
 
 app.use("/api/v1/group-productivity-timer", groupTimerRouter)
-const io = initSocket(server);
+
+// ? const io = initSocket(server);
 
 // io.on("connection", (socket: any) => {
 //     console.log(`User connected 🔗: ${socket.id}`)
@@ -35,7 +37,8 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
     return sendError(res, { error: err });
 })
 
-server.listen(PORT, async () => {
+app.listen(PORT, async () => {
+    await connectDb(process.env.MONGODB_URI || "")
     logger.info(`Group 👥 Productivity Timer Service is running on PORT: ✅ ${PORT}`);
     await initKafka();
 });

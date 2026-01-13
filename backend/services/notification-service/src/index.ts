@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { initKafka } from "./utils/init-kafka";
 import { sendError } from "./shared";
 import notificationRouter from "./routes";
+import connectDb from "./shared/config/db";
 dotenv.config();
 
 const app = express();
@@ -18,6 +19,7 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
 })
 
 app.listen(PORT , async () => {
+    await connectDb(process.env.MONGODB_URI || "")
     console.info(`Notification-Service 🔔 running on PORT : ✅${PORT}`);
     await initKafka();
 })

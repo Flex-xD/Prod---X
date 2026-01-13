@@ -17,12 +17,13 @@ export const groupProductivityTimerServices = {
         // if (!user) {
         //     throw ApiError(StatusCodes.NOT_FOUND, "User not found !");
         // }
-
+        console.log("This the data that group-timer service is getting : " , data);
         const groupProductivityTimer = new GroupTimer({
             title:data.title , 
             body:data.body  ? data.body : "" , 
             deadline:data.deadline , 
-            invitedUsersId:data.invitedUsersId , 
+            invitedUsersId:data.invitedUsersId ,  
+            participants:[],
             specifiedTime:data.specifiedTime , 
             author:userId
         })

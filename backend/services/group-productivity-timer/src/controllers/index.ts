@@ -7,13 +7,13 @@ import { groupProductivityTimerServices } from "../services";
 import { TcreateGroupProductivityTimerInputForBody } from "../schemas";
 import User, { IUser } from "../shared/models/User";
 
-interface IAuthRequest extends Request {
-    userId?: mongoose.Types.ObjectId
-}
+// interface IAuthRequest extends Request {
+//     userId?: mongoose.Types.ObjectId
+// }
 
 // ? In this controller the timer is being created for a group , now I have to also add the user inviting logic into this 
 
-export const createGroupProductivityTimer = asyncHandler(async (req: IAuthRequest, res: Response) => {
+export const createGroupProductivityTimer = asyncHandler(async (req: Request, res: Response) => {
     // * Later on find the reason why req.userId is null 
     // console.log("This is request.userId in the Group-Timer-Service : ", req.userId);
 
@@ -26,6 +26,8 @@ export const createGroupProductivityTimer = asyncHandler(async (req: IAuthReques
 
     const { title, body, deadline, specifiedTime, invitedUsersId }: TcreateGroupProductivityTimerInputForBody = req.body;
 
+    console.log("InvitedUserIDs : " , invitedUsersId);
+    
     if (!title || !specifiedTime || !deadline) {
         throw ApiError(StatusCodes.BAD_REQUEST, "Title , specifiedTime and deadline are required !");
     }

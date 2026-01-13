@@ -43,11 +43,8 @@ export const handleConsumer = async (topics:string[]) => {
         }
         await consumer.run({
             eachMessage:async ({topic , message}) => {
-                const key = message.key?.toString();
                 const value = message.value?.toString();
-
-                logger.info(`This is the KEY : ${key} , this is the value : ${value} from the topic : ${topic}`);
-
+                logger.info(`This is the topic : ${topic} and value is ${value}`);
                 switch (topic) {
                     case "group.timer.created" :
 
@@ -55,7 +52,9 @@ export const handleConsumer = async (topics:string[]) => {
                         
                         await limit(async () => {
                             // ! Fix this later on , first test it weather it is sending the API request to different users or not smoothly
-                        message.value.invitedUsersId.forEach(async (userId) => {
+    
+                            // const groupProductivityTimer = value.groupProductivityTimer;
+                        message.value.groupProductivityTimer.invitedUsersId.forEach(async (userId) => {
                                 await axios.post("http://localhost:10000/api/v1/notification/create-notification"  , {
                                     to:userId , 
                                     topic:"Invitation : Group-productivity-timer" ,

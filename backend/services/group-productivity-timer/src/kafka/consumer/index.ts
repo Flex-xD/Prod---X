@@ -24,9 +24,8 @@ export const handleConsumer = async (topics: string[]) => {
         await consumer.run({
             eachMessage: async ({ topic, message }) => {
                 console.log(`Message received from topic ${topic}: ${message.value}`);
-                const key = message.key?.toString();
                 const value = message.value?.toString();
-                logger.info("This is the KEY : ", key, "and this is value : ", value, "of topic : ", topic);
+                logger.info("This is value : ", value, "of topic : ", topic);
             }
         })
     } catch (error) {

@@ -26,7 +26,7 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
 
     const { title, body, deadline, specifiedTime, invitedUsersId }: TcreateGroupProductivityTimerInputForBody = req.body;
 
-    console.log("InvitedUserIDs : " , invitedUsersId);
+    // console.log("InvitedUserIDs : " , invitedUsersId);
     
     if (!title || !specifiedTime || !deadline) {
         throw ApiError(StatusCodes.BAD_REQUEST, "Title , specifiedTime and deadline are required !");
@@ -45,12 +45,6 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
 
     const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(toObjectId(userId), { title, body, deadline, specifiedTime , invitedUsersId} as TcreateGroupProductivityTimerInputForBody);
     logger.info(`Sending Response to client ✅ with userid: ${userId}`);
-
-    await emitEvent("group.timer.created", {
-        userId: userId,
-        groupProductivityTimer , 
-        invitedUsersId
-    })
 
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,

@@ -3,6 +3,7 @@ import { ApiError, getUser } from "../shared";
 import mongoose from "mongoose";
 import { TcreateGroupProductivityTimerInputForBody } from "../schemas";
 import GroupTimer from "../shared/models/GroupTimer";
+import { emitEvent } from "../kafka/producer";
 // import { getSocket } from "../socket";
 // import User from "../shared/models/User";
 
@@ -17,15 +18,22 @@ export const groupProductivityTimerServices = {
         // if (!user) {
         //     throw ApiError(StatusCodes.NOT_FOUND, "User not found !");
         // }
-        console.log("This the data that group-timer service is getting : " , data);
+
         const groupProductivityTimer = new GroupTimer({
-            title:data.title , 
-            body:data.body  ? data.body : "" , 
-            deadline:data.deadline , 
-            invitedUsersId:data.invitedUsersId ,  
-            participants:[],
-            specifiedTime:data.specifiedTime , 
-            author:userId
+            title: data.title,
+            body: data.body ? data.body : "",
+            deadline: data.deadline,
+            invitedUsersId: data.invitedUsersId,
+            participants: [],
+            specifiedTime: data.specifiedTime,
+            author: userId , 
+        })
+
+        console.log("This the data that group-timer service is getting : ", data.invitedUsersId);
+        
+        await emitEvent("group.timer.created", {
+            userId ,
+            invitedUsersId:data.invitedUsersId
         })
 
         await groupProductivityTimer.save();

@@ -12,6 +12,7 @@ interface IAuthRequest extends Request {
 // ? I can also use session in it but let's focus on the MVP first
 
 export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
+    // console.info("This is the req.headers of notification-service : " , req.headers);
     const userId = req.headers["x-user-id"] as string;
     // const { userId } = req;
     if (!userId) {

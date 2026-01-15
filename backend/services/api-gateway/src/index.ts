@@ -68,6 +68,8 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
     const targetUrl = services[targetService];
     const forwardUrl = targetUrl + urlPath;
 
+    // ! there is this problem where the api-gateway is not able to recognize if it is a valid api end-point even if it matches the target service
+    
     try {
         const response = await axios({
             method: req.method,

@@ -3,7 +3,7 @@ import { kafka } from "..";
 import { ApiError, logger } from "../../shared";
 import pLimit from "p-limit";
 import { StatusCodes } from "http-status-codes";
-import { any } from "zod";
+import { any, map } from "zod";
 import { error } from "winston";
 
 const consumer = kafka.consumer({
@@ -56,34 +56,45 @@ export const handleConsumer = async (topics: string[]) => {
 
                         await limit(async () => {
                             // ! Fix this later on , first test it weather it is sending the API request to different users or not smoothly
-                            console.log("JWT_VALUE" , process.env.NOTIFICATION_SERVICE_TOKEN);
+                            console.log("JWT_VALUE", process.env.NOTIFICATION_SERVICE_TOKEN);
                             // const groupProductivityTimer = value.groupProductivityTimer;
-                            value.invitedUsersId.forEach(async (invitedUserId: string) => {
+                            for (const invitedUserId of value.invitedUsersId) {
                                 try {
-                                    await axios.post("http://localhost:3000/api/v1/notification/create-notification", {
-                                        to: invitedUserId,
-                                        from: value.userId,
-                                        topic: "Invitation : Group-productivity-timer",
-                                        message: "You have been invited to a group-productivity-timer",
-                                        notificationType: "group-timer-request"
-                                    } , {
-                                        headers:{
-                                            "Content-Type":"application/json" , 
-                                            "Authorization":`Bearer ${process.env.NOTIFICATION_SERVICE_TOKEN}`
+                                    const response = await axios.post(
+                                        "http://localhost:3000/api/v1/notification/send-notification",
+                                        {
+                                            to: invitedUserId,
+                                            from: value.userId,
+                                            topic: "Invitation : Group-productivity-timer",
+                                            message: "You have been invited to a group-productivity-timer",
+                                            notificationType: "group-timer-request"
+                                        },
+                                        {
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                                Authorization: `Bearer ${process.env.NOTIFICATION_SERVICE_TOKEN}`,
+                                            }
                                         }
-                                    })
-                                } catch (error:any) {
-                                    throw ApiError(StatusCodes.BAD_REQUEST , error);
+                                    );
+
+                                    logger.info("Notification sent", response.data);
+                                } catch (err) {
+                                    logger.error("Notification API failed", err);
                                 }
-                            });
+                            }
+
                         })
                     default:
                         break;
                 }
             }
         })
-    } catch (error) {
-        logger.error(`Error in the kafka consumer of the Notificatino-service !`);
+    } catch (error: any) {
+        logger.error("Axios failed", {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message,
+        });
     }
 }
 

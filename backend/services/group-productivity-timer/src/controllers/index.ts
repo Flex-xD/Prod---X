@@ -5,7 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import { emitEvent } from "../kafka/producer";
 import { groupProductivityTimerServices } from "../services";
 import { TcreateGroupProductivityTimerInputForBody } from "../schemas";
-import User, { IUser } from "../shared/models/User";
+// import User, { IUser } from "../shared/models/User";
 
 // interface IAuthRequest extends Request {
 //     userId?: mongoose.Types.ObjectId

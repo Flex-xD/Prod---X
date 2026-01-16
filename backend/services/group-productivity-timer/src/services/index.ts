@@ -26,14 +26,15 @@ export const groupProductivityTimerServices = {
             invitedUsersId: data.invitedUsersId,
             participants: [],
             specifiedTime: data.specifiedTime,
-            author: userId , 
+            author: { userId , username:user.username} , 
         })
 
         console.log("This the data that group-timer service is getting : ", data.invitedUsersId);
         
         await emitEvent("group.timer.created", {
             userId ,
-            invitedUsersId:data.invitedUsersId
+            invitedUsersId:data.invitedUsersId , 
+            groupProductivityTimer
         })
 
         await groupProductivityTimer.save();

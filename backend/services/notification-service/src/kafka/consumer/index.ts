@@ -37,6 +37,18 @@ type TInvitationTopicAndMessage = {
     }
 }
 
+
+// * TYPE FOR THE GroupProductivityTimer via value
+type TgroupProductivityTimerForConsumer = {
+    title: string,
+    body: string,
+    deadline: Date,
+    invitedUsersId: string[],
+    participants: string[],
+    specifiedTime: number,
+    author: { userId: string, username: string }
+}
+
 export const handleConsumer = async (topics: string[]) => {
     const limit = pLimit(5);
     try {
@@ -49,15 +61,12 @@ export const handleConsumer = async (topics: string[]) => {
 
                 switch (topic) {
                     case "group.timer.created":
-                        const value: { userId: string, invitedUsersId: string[] } | null = JSON.parse(message.value?.toString() || "");
+                        const value: { userId: string, invitedUsersId: string[], groupProductivityTimer: TgroupProductivityTimerForConsumer } | null = JSON.parse(message.value?.toString() || "");
                         console.log(value);
 
                         if (!value) throw ApiError(StatusCodes.BAD_REQUEST, `No message.value found : ${message.value}`);
 
                         await limit(async () => {
-                            // ! Fix this later on , first test it weather it is sending the API request to different users or not smoothly
-                            console.log("JWT_VALUE", process.env.NOTIFICATION_SERVICE_TOKEN);
-                            // const groupProductivityTimer = value.groupProductivityTimer;
                             for (const invitedUserId of value.invitedUsersId) {
                                 try {
                                     const response = await axios.post(
@@ -65,8 +74,8 @@ export const handleConsumer = async (topics: string[]) => {
                                         {
                                             to: invitedUserId,
                                             from: value.userId,
-                                            topic: "Invitation : Group-productivity-timer",
-                                            message: "You have been invited to a group-productivity-timer",
+                                            topic: `Invitation for Group-productivity-timer  :${value.groupProductivityTimer.title}`,
+                                            message: `You have been invited to a group-productivity-timer by ${value.groupProductivityTimer.author.username}`,
                                             notificationType: "group-timer-request"
                                         },
                                         {
@@ -83,7 +92,10 @@ export const handleConsumer = async (topics: string[]) => {
                                 }
                             }
 
-                        })
+                        }) 
+
+
+
                     default:
                         break;
                 }

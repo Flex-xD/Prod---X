@@ -36,7 +36,13 @@ const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
         default: false,
     },
     author: {
-        type: mongoose.Schema.Types.ObjectId
+        userId:{
+            type:mongoose.Types.ObjectId 
+        } , 
+        username:{
+            type:String ,
+        }
+        // ? I can late on add avatar 
     },
     invitedUsersId:[{
         type:mongoose.Schema.Types.ObjectId

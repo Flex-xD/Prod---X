@@ -49,6 +49,9 @@ type TgroupProductivityTimerForConsumer = {
     author: { userId: string, username: string }
 }
 
+
+// ! Update this consumer code that when the event group.timer.created event is emitted ? /api/v1/create-notification will be called and which will further emit notification.created , then on listening to this event will call /api/v1/send-notification .
+
 export const handleConsumer = async (topics: string[]) => {
     const limit = pLimit(5);
     try {
@@ -70,7 +73,7 @@ export const handleConsumer = async (topics: string[]) => {
                             for (const invitedUserId of value.invitedUsersId) {
                                 try {
                                     const response = await axios.post(
-                                        "http://localhost:3000/api/v1/notification/send-notification",
+                                        "http://localhost:3000/api/v1/notification/create-notification",
                                         {
                                             to: invitedUserId,
                                             from: value.userId,
@@ -92,10 +95,10 @@ export const handleConsumer = async (topics: string[]) => {
                                 }
                             }
 
-                        }) 
-
-
-
+                        })  
+                        // ? I think I may have to use if-else statements here
+                    case "notification.created" :
+                    
                     default:
                         break;
                 }

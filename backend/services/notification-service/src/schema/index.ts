@@ -1,5 +1,5 @@
 import mongoose, { Types } from "mongoose";
-import { z } from "zod";
+import { string, z } from "zod";
 
 const zObjectId = z
     .string()
@@ -12,7 +12,7 @@ const createNotificationSchema = z.object({
     topic: z.string(),
     message: z.string(),
     from: zObjectId,
-    to: zObjectId
+    to: zObjectId.array()
 })
 
 
@@ -22,14 +22,14 @@ export type TypeCreateNotification = {
     topic: string,
     message: string,
     from: mongoose.Types.ObjectId,
-    to: mongoose.Types.ObjectId
+    to: mongoose.Types.ObjectId[]
 }
 
 const createNotificationSchemaForBody = z.object({
     notificationType: z.enum(["group-timer-request", "daily-quote", "productivity-hack"]),
     topic: z.string(),
     message: z.string(),
-    to: z.string()
+    to: z.string().array()
 })
 
 

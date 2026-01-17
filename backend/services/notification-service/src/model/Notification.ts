@@ -7,7 +7,7 @@ export interface INotification extends mongoose.Document {
     message: string,
     // I have removed the optional for now on from both the field below
     from: mongoose.Types.ObjectId,
-    to: mongoose.Types.ObjectId , 
+    to: mongoose.Types.ObjectId[] , 
     invitation : {
         timerName:string, 
     }
@@ -33,11 +33,11 @@ const notificationSchema = new mongoose.Schema<INotification>({
         type: mongoose.Types.ObjectId,
         ref: "User"
     },
-    to: {
+    to:[ {
         type: mongoose.Types.ObjectId,
         ref: "User"
-    }
-});
+    }]
+})
 
 const Notification : Model<INotification> = mongoose.model<INotification>("Notification" , notificationSchema);
 export default Notification;

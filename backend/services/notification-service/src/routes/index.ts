@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { sendNotification } from "../controller";
+import { createNotification, sendNotification } from "../controller";
 
 const notificationRouter = Router();
 
+notificationRouter.post("/create-notification", createNotification);
 notificationRouter.post("/send-notification", sendNotification);
 
 export default notificationRouter;

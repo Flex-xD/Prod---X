@@ -94,7 +94,6 @@ export const handleConsumer = async (topics: string[]) => {
                                     logger.error("Notification API failed", err);
                                 }
                             }
-
                         })  
                         // ? I think I may have to use if-else statements here
                     case "notification.created" :

@@ -22,7 +22,7 @@ export const notificationServices = {
         return notification;
     },
     sendNotification: async (invitedUsersId: string[]) => {
-        
+        const users  = await User.find({_id:{$in:invitedUsersId}});
         
     }
 }

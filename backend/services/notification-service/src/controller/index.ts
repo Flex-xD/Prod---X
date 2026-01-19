@@ -26,7 +26,6 @@ export const createNotification = asyncHandler(async (req: IAuthRequest, res: Re
     const { topic, message, to, notificationType } = req.body;
     const notification = await notificationServices.createNotification({ topic, message, to, notificationType, from: toObjectId(userId) });
 
-
     // ? Emitting the notification.created event
     await emitEvent("notification.created", {
         notification,
@@ -39,21 +38,22 @@ export const createNotification = asyncHandler(async (req: IAuthRequest, res: Re
         success: true,
         message: "Notification created Successfully !",
         data: notification
-    }
-    )
-})
+    })
 
+})
 
 export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
     if (!userId) {
         throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
     }
-    const user = await getUser(toObjectId(userId));
-    const {invitedUsersId} = req.body;
     
+    const user = await getUser(toObjectId(userId));
+    const {NotificationReceivingUserId , notificationId} = req.body;
+
     // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
 
+    const notification:TypeCreateNotification  = await notificationServices.sendNotification(NotificationReceivingUserId , notificationId);
 
     // ? Emitting the notification.created event
     await emitEvent("notification.send", {
@@ -63,9 +63,10 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         success: true,
-        message: "Notification created Successfully !",
+        // ? Try to get something better to show to whom the notifications has been sent !
+        message: `Notification sent to the user ${NotificationReceivingUserId} : ${notification.topic}`,
         // ? update the data below
-        data: ""
+        data: `Notification ID : ${notificationId}`
     }
     )
 })

@@ -3,6 +3,7 @@ import Notification from "../model/Notification";
 import { TypeCreateNotification } from "../schema";
 import { ApiError, getUser } from "../shared";
 import User from "../shared/models/User";
+import mongoose, { ObjectId } from "mongoose";
 
 
 // ! AS OF NOW , I AM CURRENLTY MAKING THIS SERVICE SUITABLE FOR SENDING INVITATION OF THE GROUP-PRODUCTIVITY-TIMER FROM THE ADMIN TO OTHER USERS INVITED AND WILL ADD OR MAKE IT MORE PRONE FOR OTHER THINGS
@@ -14,6 +15,7 @@ import User from "../shared/models/User";
 
 export const notificationServices = {
     // The service layer exist so your business logic can survice without https
+    // * CREATE NOTIFICATION
     createNotification: async (data: TypeCreateNotification) => {
         const { notificationType, topic, message, from, to } = data;
 
@@ -21,8 +23,19 @@ export const notificationServices = {
 
         return notification;
     },
-    sendNotification: async (invitedUsersId: string[]) => {
-        const users  = await User.find({_id:{$in:invitedUsersId}});
-        
+
+    // * SEND NOTIFICATION
+    sendNotification: async (notificationReceivingUserId: mongoose.Types.ObjectId, notificationId: mongoose.Types.ObjectId) => {
+        const notificationReceivingUser = await getUser(notificationReceivingUserId);
+        // await notificationReceivingUser.notifications.push()
+        // ? May be later on I can use select to get specified fields for the notification 
+        const notification = await Notification.findById(notificationId)
+        if (!notification) {
+            throw ApiError(StatusCodes.NOT_FOUND , "Notification  to be sent not found !");
+        }
+        // ? I am actually sending one notification at a time, rather than sending to multiple users at once by calling this api once
+        notificationReceivingUser.notifications.push(notificationId);
+        await notificationReceivingUser.save()
+        return notification;
     }
 }

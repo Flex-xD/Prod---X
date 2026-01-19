@@ -95,9 +95,10 @@ export const handleConsumer = async (topics: string[]) => {
                                 }
                             }
                         })  
+                        break;
                         // ? I think I may have to use if-else statements here
                     case "notification.created" :
-                    
+                 
                     default:
                         break;
                 }

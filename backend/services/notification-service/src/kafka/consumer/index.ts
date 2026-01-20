@@ -39,7 +39,7 @@ type TInvitationTopicAndMessage = {
 
 
 // * TYPE FOR THE GroupProductivityTimer via value
-type TgroupProductivityTimerForConsumer = {
+export type TgroupProductivityTimerForConsumer = {
     title: string,
     body: string,
     deadline: Date,
@@ -94,11 +94,11 @@ export const handleConsumer = async (topics: string[]) => {
                                     logger.error("Notification API failed", err);
                                 }
                             }
-                        })  
+                        })
                         break;
-                        // ? I think I may have to use if-else statements here
-                    case "notification.created" :
-                 
+                    // ? I think I may have to use if-else statements here
+                    case "notification.created":
+
                     default:
                         break;
                 }

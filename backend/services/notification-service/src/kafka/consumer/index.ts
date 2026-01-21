@@ -1,10 +1,11 @@
 import axios from "axios";
 import { kafka } from "..";
-import { ApiError, logger } from "../../shared";
+import { ApiError, logger, sendResponse } from "../../shared";
 import pLimit from "p-limit";
 import { StatusCodes } from "http-status-codes";
-import { any, map } from "zod";
+import { any, map, success } from "zod";
 import { error } from "winston";
+import { handlers } from "./handlers";
 
 const consumer = kafka.consumer({
     groupId: "notification-servie"
@@ -60,48 +61,18 @@ export const handleConsumer = async (topics: string[]) => {
         }
         await consumer.run({
             eachMessage: async ({ topic, message }) => {
-                logger.info(`This is the topic : ${topic} and value is ${message.value}`);
-
-                switch (topic) {
-                    case "group.timer.created":
-                        const value: { userId: string, invitedUsersId: string[], groupProductivityTimer: TgroupProductivityTimerForConsumer } | null = JSON.parse(message.value?.toString() || "");
-                        console.log(value);
-
-                        if (!value) throw ApiError(StatusCodes.BAD_REQUEST, `No message.value found : ${message.value}`);
-
-                        await limit(async () => {
-                            for (const invitedUserId of value.invitedUsersId) {
-                                try {
-                                    const response = await axios.post(
-                                        "http://localhost:3000/api/v1/notification/create-notification",
-                                        {
-                                            to: invitedUserId,
-                                            from: value.userId,
-                                            topic: `Invitation for Group-productivity-timer  :${value.groupProductivityTimer.title}`,
-                                            message: `You have been invited to a group-productivity-timer by ${value.groupProductivityTimer.author.username}`,
-                                            notificationType: "group-timer-request"
-                                        },
-                                        {
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                                Authorization: `Bearer ${process.env.NOTIFICATION_SERVICE_TOKEN}`,
-                                            }
-                                        }
-                                    );
-
-                                    logger.info("Notification sent", response.data);
-                                } catch (err) {
-                                    logger.error("Notification API failed", err);
-                                }
-                            }
-                        })
-                        break;
-                    // ? I think I may have to use if-else statements here
-                    case "notification.created":
-
-                    default:
-                        break;
+                if (!topic || !message) {
+                    return;
                 }
+                const handler = handlers[topic as keyof typeof handlers];
+                if (!handler) {
+                    // ? should I return a response or throw a Error here 
+                    throw ApiError(StatusCodes.CONFLICT , "Topic didn't match handlers of notification-service consumer !");
+                }
+                // ? Don't forget to remove "!" from below , it's unsafe practice
+                const parsedValue = JSON.parse(message.value!.toString());
+                await handler(parsedValue);
+            
             }
         })
     } catch (error: any) {

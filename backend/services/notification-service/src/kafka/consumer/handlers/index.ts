@@ -16,10 +16,32 @@ type TEventNotificationCreated = {
     notificationId: mongoose.Types.ObjectId
 }
 
-const handler = {
+export const handlers = {
     // ? This event is for initiating 
     "group.timer.created": async ({ userId, invitedUsersId, groupProductivityTimer
     }: TEventGroupTimerCreated) => {
+        try {
+            const response = await axios.post(
+                "http://localhost:3000/api/v1/notification/create-notification",
+                {
+                    to:invitedUsersId ,
+                    from: userId,
+                    topic: `Invitation for Group-productivity-timer  :${groupProductivityTimer.title}`,
+                    message: `You have been invited to a group-productivity-timer by ${groupProductivityTimer.author.username}`,
+                    notificationType: "group-timer-request"
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${process.env.NOTIFICATION_SERVICE_TOKEN}`,
+                    }
+                }
+            );
+
+            logger.info("Notification sent", response.data);
+        } catch (err) {
+            logger.error("Notification API failed", err);
+        }
     },
 
     // ? This event is for triggering the send-notification API
@@ -29,7 +51,7 @@ const handler = {
         for (const notificationReceivingUserId of notificationReceivingUsersId) {
             await limit(async () => {
                 try {
-                    const response = await axios.post("http://localhost:3000/api/v1/send-notification", {
+                    const response = await axios.post("http://localhost:3000/api/v1/notification/send-notification", {
                         notificationReceivingUserId,
                         notificationId
                     }, {

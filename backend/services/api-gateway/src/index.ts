@@ -39,7 +39,7 @@ const services = {
     "/tasks": "http://localhost:4000/api/v1",
     "/auth": "http://localhost:5000/api/v1",
     "/group-productivity-timer": "http://localhost:9000/api/v1",
-    "/notification": "http://localhost:10000/api/v1"
+    "/notification": "http://localhost:10000/api/v1" , 
 } as Record<string, string>;
 
 interface IAuthRequest extends Request {

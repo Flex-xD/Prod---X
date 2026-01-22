@@ -17,7 +17,7 @@ type TEventNotificationCreated = {
 }
 
 export const handlers = {
-    // ? This event is for initiating 
+    // ? This event is for initiating the create-notification API
     "group.timer.created": async ({ userId, invitedUsersId, groupProductivityTimer
     }: TEventGroupTimerCreated) => {
         try {
@@ -39,8 +39,8 @@ export const handlers = {
             );
 
             logger.info("Notification sent", response.data);
-        } catch (err) {
-            logger.error("Notification API failed", err);
+        } catch (err:any) {
+            logger.error("Notification API failed", err.response?.data , "with status code : " , err.response?.status);
         }
     },
 

@@ -48,7 +48,7 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
         throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
     }
     
-    const user = await getUser(toObjectId(userId));
+    // const user = await getUser(toObjectId(userId));
     const {NotificationReceivingUserId , notificationId} = req.body;
 
     // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)

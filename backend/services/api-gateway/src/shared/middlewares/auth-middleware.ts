@@ -28,7 +28,6 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
         // console.log(`This is token : ${token}`);
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {userId:mongoose.Types.ObjectId}
-        console.log("This is decoded : " , decoded.userId);
         if (!decoded.userId) {
             return sendResponse(res , {
                 statusCode:StatusCodes.CONFLICT , 

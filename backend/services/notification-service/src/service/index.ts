@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import Notification from "../model/Notification";
 import { TypeCreateNotification } from "../schema";
-import { ApiError, getUser } from "../shared";
+import { ApiError, getUser, logger } from "../shared";
 import User from "../shared/models/User";
 import mongoose, { ObjectId } from "mongoose";
 
@@ -29,6 +29,7 @@ export const notificationServices = {
         const notificationReceivingUser = await getUser(notificationReceivingUserId);
         // await notificationReceivingUser.notifications.push()
         // ? May be later on I can use select to get specified fields for the notification 
+        logger.info(`Notification-service accessed !`);
         const notification = await Notification.findById(notificationId)
         if (!notification) {
             throw ApiError(StatusCodes.NOT_FOUND , "Notification  to be sent not found !");

@@ -21,10 +21,11 @@ export const handlers = {
     "group.timer.created": async ({ userId, invitedUsersId, groupProductivityTimer
     }: TEventGroupTimerCreated) => {
         try {
+            logger.info("Sending API request to : /create-notification")
             const response = await axios.post(
                 "http://localhost:3000/api/v1/notification/create-notification",
                 {
-                    to:invitedUsersId ,
+                    to: invitedUsersId,
                     from: userId,
                     topic: `Invitation for Group-productivity-timer  :${groupProductivityTimer.title}`,
                     message: `You have been invited to a group-productivity-timer by ${groupProductivityTimer.author.username}`,
@@ -38,19 +39,22 @@ export const handlers = {
                 }
             );
 
-            logger.info("Notification sent", response.data);
-        } catch (err:any) {
-            logger.error("Notification API failed", err.response?.data , "with status code : " , err.response?.status);
+        } catch (err: any) {
+            // throw ApiError()
+            logger.error("Notification API failed", err.response );
         }
     },
 
     // ? This event is for triggering the send-notification API
 
     "notification.created": async ({ notificationReceivingUsersId, notificationId }: TEventNotificationCreated) => {
+        logger.info("Sending API request to : /send-notification")
         const limit = pLimit(5);
         for (const notificationReceivingUserId of notificationReceivingUsersId) {
             await limit(async () => {
                 try {
+                    logger.info(`Sending API request to : /send-notification/${notificationReceivingUserId}`)
+
                     const response = await axios.post("http://localhost:3000/api/v1/notification/send-notification", {
                         notificationReceivingUserId,
                         notificationId

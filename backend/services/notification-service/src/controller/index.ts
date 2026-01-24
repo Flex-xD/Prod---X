@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiError, asyncHandler, getUser, sendResponse, toObjectId } from "../shared";
+import { ApiError, asyncHandler, getUser, logger, sendResponse, toObjectId } from "../shared";
 import mongoose from "mongoose";
 import { notificationServices } from "../service";
 import { StatusCodes } from "http-status-codes";
 import { emitEvent } from "../kafka/producer";
-import { TCreateNotificationSchemaForBody, TypeCreateNotification } from "../schema";
+import { TypeCreateNotification } from "../schema";
 
 interface IAuthRequest extends Request {
     userId?: mongoose.Types.ObjectId
@@ -43,6 +43,7 @@ export const createNotification = asyncHandler(async (req: IAuthRequest, res: Re
 })
 
 export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
+    logger.info(`Sending notification...`)
     const userId = req.headers["x-user-id"] as string;
     if (!userId) {
         throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
@@ -52,7 +53,7 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
     const {NotificationReceivingUserId , notificationId} = req.body;
 
     // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
-
+    logger.info(`Forwaring the data to the notification-servive...`)
     const notification:TypeCreateNotification  = await notificationServices.sendNotification(NotificationReceivingUserId , notificationId);
 
     // ? Emitting the notification.created event

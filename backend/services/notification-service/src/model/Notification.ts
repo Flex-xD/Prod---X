@@ -37,6 +37,8 @@ const notificationSchema = new mongoose.Schema<INotification>({
         type: mongoose.Types.ObjectId,
         ref: "User"
     }]
+} , {
+    timestamps:true
 })
 
 const Notification : Model<INotification> = mongoose.model<INotification>("Notification" , notificationSchema);

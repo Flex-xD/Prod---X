@@ -8,7 +8,7 @@ import { error } from "winston";
 import { handlers } from "./handlers";
 
 const consumer = kafka.consumer({
-    groupId: "notification-servie"
+    groupId: "notification-service"
 });
 
 
@@ -65,6 +65,7 @@ export const handleConsumer = async (topics: string[]) => {
                     return;
                 }
                 const handler = handlers[topic as keyof typeof handlers];
+                logger.info(`This is the topic : ${topic}`)
                 if (!handler) {
                     // ? should I return a response or throw a Error here 
                     throw ApiError(StatusCodes.CONFLICT , "Topic didn't match handlers of notification-service consumer !");

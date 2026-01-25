@@ -14,6 +14,7 @@ interface IAuthRequest extends Request {
 
 export const createNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
     // console.info("This is the req.headers of notification-service : " , req.headers);
+    console.info("Creating notification . . .")
     const userId = req.headers["x-user-id"] as string;
     // const { userId } = req;
     if (!userId) {

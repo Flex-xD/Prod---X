@@ -8,17 +8,19 @@ import { StatusCodes } from "http-status-codes";
 type TEventGroupTimerCreated = {
     userId: string,
     invitedUsersId: string[],
-    groupProductivityTimer: TgroupProductivityTimerForConsumer
+    groupProductivityTimer: TgroupProductivityTimerForConsumer ,
+    token:string
 }
 
 type TEventNotificationCreated = {
     notificationReceivingUsersId: mongoose.Types.ObjectId[],
-    notificationId: mongoose.Types.ObjectId
+    notificationId: mongoose.Types.ObjectId , 
+    token:string
 }
 
 export const handlers = {
     // ? This event is for initiating the create-notification API
-    "group.timer.created": async ({ userId, invitedUsersId, groupProductivityTimer
+    "group.timer.created": async ({ userId, invitedUsersId, groupProductivityTimer , token
     }: TEventGroupTimerCreated) => {
         try {
             logger.info("Sending API request to : /create-notification")
@@ -34,20 +36,20 @@ export const handlers = {
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${process.env.NOTIFICATION_SERVICE_TOKEN}`,
+                        Authorization: `Bearer ${token}`,
                     }
                 }
             );
 
         } catch (err: any) {
-            // throw ApiError()
+            throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR , `Error while sending the request to the /create-notification API : ${err}`)
             logger.error("Notification API failed", err.response );
         }
     },
 
     // ? This event is for triggering the send-notification API
 
-    "notification.created": async ({ notificationReceivingUsersId, notificationId }: TEventNotificationCreated) => {
+    "notification.created": async ({ notificationReceivingUsersId, notificationId  , token}: TEventNotificationCreated) => {
         logger.info("Sending API request to : /send-notification")
         const limit = pLimit(5);
         for (const notificationReceivingUserId of notificationReceivingUsersId) {
@@ -62,12 +64,12 @@ export const handlers = {
                         headers: {
                             "Content-Type": "application/json",
                             // * You have to do something with this auth logic for sending requests to verified routes !
-                            Authorization: `Bearer ${process.env.NOTIFICATION_SERVICE_TOKEN}`
+                            Authorization: `Bearer ${token}`
                         }
                     })
                     console.log(`Event : notification.created , response : ${response.data}`);
                 } catch (error) {
-                    logger.error(error);
+                    logger.error({error})
                     throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Error while sending the notification to userIds : ${notificationReceivingUsersId}`);
                 }
             })

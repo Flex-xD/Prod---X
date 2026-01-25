@@ -13,6 +13,7 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
     try {
         const headers = req.headers.authorization;
         if (!headers) {
+            console.log("Headers not present !")
             throw ApiError(StatusCodes.UNAUTHORIZED , "Unauthorized - Headers not found !");
         }
         
@@ -25,7 +26,7 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
                 success: false
             })
         }
-        // console.log(`This is token : ${token}`);
+        console.log(`This is token : ${token}`);
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {userId:mongoose.Types.ObjectId}
         if (!decoded.userId) {

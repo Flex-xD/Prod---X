@@ -17,15 +17,6 @@ export async function refresh(req: Request, res: Response) {
     })
 
     const hashed = hashToken(refreshPlain);
-    const user = await User.findOne({ "refreshTokens.hashedToken": hashed });
-    if (!user) {
-        // Token reuse detected — possible theft:
-        // Option: if token decodes and identifies user -> revoke all sessions for that user
-        // For our plain-token approach we can't decode; so take conservative approach: log + require full login
-        console.warn("Refresh token reuse or invalid token for ip:", req.ip);
-        return res.status(401).json({ error: "Invalid refresh token" });
-    }
-
     const userRefreshToken = await Token.findOne({ hashedToken: hashed });
     if (!userRefreshToken) {
         return sendResponse(res, {
@@ -34,6 +25,18 @@ export async function refresh(req: Request, res: Response) {
             message: "Could not find refresh token!"
         })
     }
+    
+    // ? If any problems then this may be the case !!!
+    const user = await User.findOne({ refreshTokens: userRefreshToken._id })
+    if (!user) {
+        // Token reuse detected — possible theft:
+        // Option: if token decodes and identifies user -> revoke all sessions for that user
+        // For our plain-token approach we can't decode; so take conservative approach: log + require full login
+        console.warn("Refresh token reuse or invalid token for ip:", req.ip);
+        return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+
     // find the specific token record
     // const tokenRecord = user.refreshTokens.find(rt => rt.hashedToken === hashed);
 

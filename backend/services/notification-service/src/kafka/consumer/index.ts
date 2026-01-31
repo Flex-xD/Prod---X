@@ -54,7 +54,7 @@ export type TgroupProductivityTimerForConsumer = {
 // ! Update this consumer code that when the event group.timer.created event is emitted ? /api/v1/create-notification will be called and which will further emit notification.created , then on listening to this event will call /api/v1/send-notification .
 
 export const handleConsumer = async (topics: string[]) => {
-    const limit = pLimit(5);
+    // const limit = pLimit(5);
     try {
         for (const topic of topics) {
             await consumer.subscribe({ topic: topic, fromBeginning: true });

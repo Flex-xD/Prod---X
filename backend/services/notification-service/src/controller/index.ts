@@ -15,6 +15,7 @@ interface IAuthRequest extends Request {
 export const createNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
     // console.info("This is the req.headers of notification-service : " , req.headers);
     console.info("Creating notification . . .")
+    const token = req.headers.authorization?.split(" ")[1];
     const userId = req.headers["x-user-id"] as string;
     // const { userId } = req;
     if (!userId) {
@@ -29,11 +30,11 @@ export const createNotification = asyncHandler(async (req: IAuthRequest, res: Re
 
     // ? Emitting the notification.created event
     await emitEvent("notification.created", {
-        notification,
-        from: user._id,
-        to
+        notificationId:notification._id,
+        notificationReceivingUsersId:to , 
+        token
     });
-
+    
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         success: true,
@@ -51,11 +52,11 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
     }
     
     // const user = await getUser(toObjectId(userId));
-    const {NotificationReceivingUserId , notificationId} = req.body;
+    const {notificationReceivingUserId , notificationId} = req.body;
 
     // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
     logger.info(`Forwaring the data to the notification-servive...`)
-    const notification:TypeCreateNotification  = await notificationServices.sendNotification(NotificationReceivingUserId , notificationId);
+    const notification:TypeCreateNotification  = await notificationServices.sendNotification(notificationReceivingUserId , notificationId);
 
     // ? Emitting the notification.created event
     await emitEvent("notification.send", {
@@ -66,7 +67,7 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
         statusCode: StatusCodes.CREATED,
         success: true,
         // ? Try to get something better to show to whom the notifications has been sent !
-        message: `Notification sent to the user ${NotificationReceivingUserId} : ${notification.topic}`,
+        message: `Notification sent to the user ${notificationReceivingUserId} : ${notification.topic}`,
         // ? update the data below
         data: `Notification ID : ${notificationId}`
     }

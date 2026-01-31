@@ -31,12 +31,6 @@ export const groupProductivityTimerServices = {
 
         console.log("This the data that group-timer service is getting : ", data.invitedUsersId);
         
-        await emitEvent("group.timer.created", {
-            userId ,
-            invitedUsersId:data.invitedUsersId , 
-            groupProductivityTimer
-        })
-
         await groupProductivityTimer.save();
         user.userGroupProductivityTimer.push(groupProductivityTimer._id);
         await user.save();

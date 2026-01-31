@@ -32,7 +32,7 @@ export const notificationServices = {
         logger.info(`Notification-service accessed !`);
         const notification = await Notification.findById(notificationId)
         if (!notification) {
-            throw ApiError(StatusCodes.NOT_FOUND , "Notification  to be sent not found !");
+            throw ApiError(StatusCodes.NOT_FOUND, "Notification  to be sent not found !");
         }
         // ? I am actually sending one notification at a time, rather than sending to multiple users at once by calling this api once
         notificationReceivingUser.notifications.push(notificationId);

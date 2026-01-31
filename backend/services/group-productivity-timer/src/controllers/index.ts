@@ -19,6 +19,7 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
 
     // ? May be I can remove the as string from below ???
 
+    const token = req.headers.authorization?.split(" ")[1];
     const userId = req.headers["x-user-id"] as string;
 
     // const { userId } = req;
@@ -45,6 +46,13 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
 
     const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(toObjectId(userId), { title, body, deadline, specifiedTime, invitedUsersId } as TcreateGroupProductivityTimerInputForBody);
     logger.info(`Sending Response to client ✅ with userid: ${userId}`);
+    
+    await emitEvent("group.timer.created", {
+        userId,
+        invitedUsersId,
+        groupProductivityTimer,
+        token
+    })
 
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,

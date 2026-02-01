@@ -8,6 +8,8 @@ import connectDb from "./shared/config/db";
 import axios from "axios";
 import { NextFunction } from "http-proxy-middleware/dist/types";
 import mongoose from "mongoose";
+import { INTERNAL_ROUTES, USER_ROUTES } from "./service-routes";
+import { internalServiceAuth } from "./shared/middlewares/internal-auth-middleware";
 dotenv.config();
 
 const app = express();
@@ -23,14 +25,22 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
-app.use((req, res, next) => {
+app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
     const path = req.path.replace(/^\/api\/v1/, "");
 
     if (path.startsWith("/auth")) {
-        return next();
+        return next(); // public
     }
 
-    return authMiddleware(req as Request, res as Response , next as NextFunction);
+    if (INTERNAL_ROUTES.some(route => path.startsWith(route))) {
+        return internalServiceAuth(req, res, next); 
+    }
+
+    if (USER_ROUTES.some(route => path.startsWith(route))) {
+        return authMiddleware(req, res, next); 
+    }
+
+    return next();
 });
 
 
@@ -39,7 +49,7 @@ const services = {
     "/tasks": "http://localhost:4000/api/v1",
     "/auth": "http://localhost:5000/api/v1",
     "/group-productivity-timer": "http://localhost:9000/api/v1",
-    "/notification": "http://localhost:10000/api/v1" , 
+    "/notification": "http://localhost:10000/api/v1",
 } as Record<string, string>;
 
 interface IAuthRequest extends Request {
@@ -48,7 +58,7 @@ interface IAuthRequest extends Request {
 
 // * Find a way to implement validate middleware in the API-GATEWAY along with the suitable types for different API's  (keep scalability in mind)
 app.all(/.*/, async (req: IAuthRequest, res: Response) => {
-    const {userId} = req;
+    const { userId } = req;
     const urlPath = req.path.replace(/^\/api\/v1/, "");
     logger.info(`Normalized path: ${urlPath}`);
 
@@ -69,7 +79,7 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
     const forwardUrl = targetUrl + urlPath;
 
     // ! there is this problem where the api-gateway is not able to recognize if it is a valid api end-point even if it matches the target service
-    
+
     try {
         const response = await axios({
             method: req.method,
@@ -78,7 +88,8 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
             headers: {
                 authorization: req.headers.authorization,
                 // "x-user-id": (req as any).userId?.toString() , 
-                "x-user-id": userId
+                "x-user-id": userId?.toString(),
+                "x-service-key": req.headers["x-service-key"]
             },
             validateStatus: () => true
         });

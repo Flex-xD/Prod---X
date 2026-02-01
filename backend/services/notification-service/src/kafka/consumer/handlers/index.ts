@@ -9,18 +9,17 @@ type TEventGroupTimerCreated = {
     userId: string,
     invitedUsersId: string[],
     groupProductivityTimer: TgroupProductivityTimerForConsumer ,
-    token:string
 }
 
 type TEventNotificationCreated = {
     notificationReceivingUsersId: mongoose.Types.ObjectId[],
     notificationId: mongoose.Types.ObjectId , 
-    token:string
+    userId:string
 }
 
 export const handlers = {
     // ? This event is for initiating the create-notification API
-    "group.timer.created": async ({ userId, invitedUsersId, groupProductivityTimer , token
+    "group.timer.created": async ({ userId, invitedUsersId, groupProductivityTimer 
     }: TEventGroupTimerCreated) => {
         try {
             logger.info("Sending API request to : /create-notification")
@@ -36,10 +35,11 @@ export const handlers = {
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
+                        "x-service-key":process.env.PRODX_SERVICE_KEY ,
                     }
                 }
             );
+            logger.info(`EVENT:group.timer.created , RESPONSE:${response.data}`);
 
         } catch (err: any) {
             throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR , `Error while sending the request to the /create-notification API : ${err}`)
@@ -49,7 +49,7 @@ export const handlers = {
 
     // ? This event is for triggering the send-notification API
 
-    "notification.created": async ({ notificationReceivingUsersId, notificationId  , token}: TEventNotificationCreated) => {
+    "notification.created": async ({ notificationReceivingUsersId, notificationId  , userId}: TEventNotificationCreated) => {
         logger.info("Sending API request to : /send-notification")
         const limit = pLimit(5);
         for (const notificationReceivingUserId of notificationReceivingUsersId) {
@@ -62,11 +62,9 @@ export const handlers = {
                         notificationId
                     }, {
                         headers: {
-                            "Content-Type": "application/json",
-                            // * You have to do something with this auth logic for sending requests to verified routes !
-                            Authorization: `Bearer ${token}`
-                        }
-                    })
+                        "Content-Type": "application/json",
+                        "x-service-key":process.env.PRODX_SERVICE_KEY ,
+                    }})
                     console.log(`Event : notification.created , response : ${response.data}`);
                 } catch (error) {
                     logger.error({error})

@@ -15,24 +15,23 @@ interface IAuthRequest extends Request {
 export const createNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
     // console.info("This is the req.headers of notification-service : " , req.headers);
     console.info("Creating notification . . .")
-    const token = req.headers.authorization?.split(" ")[1];
-    const userId = req.headers["x-user-id"] as string;
+    const { topic, message, to, notificationType , userId} = req.body;
     // const { userId } = req;
     if (!userId) {
         throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
     }
-    const user = await getUser(toObjectId(userId));
+
+    // const user = await getUser(toObjectId(userId));
 
     // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
 
-    const { topic, message, to, notificationType } = req.body;
     const notification = await notificationServices.createNotification({ topic, message, to, notificationType, from: toObjectId(userId) });
 
     // ? Emitting the notification.created event
     await emitEvent("notification.created", {
         notificationId:notification._id,
         notificationReceivingUsersId:to , 
-        token
+        userId
     });
     
     return sendResponse(res, {
@@ -46,13 +45,12 @@ export const createNotification = asyncHandler(async (req: IAuthRequest, res: Re
 
 export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
     logger.info(`Sending notification...`)
-    const userId = req.headers["x-user-id"] as string;
+    const {notificationReceivingUserId , notificationId, userId} = req.body;
     if (!userId) {
         throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
     }
     
     // const user = await getUser(toObjectId(userId));
-    const {notificationReceivingUserId , notificationId} = req.body;
 
     // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
     logger.info(`Forwaring the data to the notification-servive...`)
@@ -60,6 +58,7 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
 
     // ? Emitting the notification.created event
     await emitEvent("notification.send", {
+        notificationId, 
         from:userId
     });
 

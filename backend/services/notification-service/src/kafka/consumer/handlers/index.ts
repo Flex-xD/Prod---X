@@ -49,7 +49,7 @@ export const handlers = {
 
     // ? This event is for triggering the send-notification API
 
-    "notification.created": async ({ notificationReceivingUsersId, notificationId  , userId}: TEventNotificationCreated) => {
+    "notification.created": async ({ notificationReceivingUsersId, notificationId }: TEventNotificationCreated) => {
         logger.info("Sending API request to : /send-notification")
         const limit = pLimit(5);
         for (const notificationReceivingUserId of notificationReceivingUsersId) {

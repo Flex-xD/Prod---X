@@ -15,7 +15,7 @@ interface IAuthRequest extends Request {
 export const createNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
     // console.info("This is the req.headers of notification-service : " , req.headers);
     console.info("Creating notification . . .")
-    const { topic, message, to, notificationType , userId} = req.body;
+    const { topic, message, to, notificationType , from:userId} = req.body;
     // const { userId } = req;
     if (!userId) {
         throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
@@ -46,9 +46,9 @@ export const createNotification = asyncHandler(async (req: IAuthRequest, res: Re
 export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
     logger.info(`Sending notification...`)
     const {notificationReceivingUserId , notificationId, userId} = req.body;
-    if (!userId) {
-        throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
-    }
+    // if (!userId) {
+    //     throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
+    // }
     
     // const user = await getUser(toObjectId(userId));
 

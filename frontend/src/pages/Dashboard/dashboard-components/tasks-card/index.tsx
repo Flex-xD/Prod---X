@@ -1,20 +1,25 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, Plus } from 'lucide-react';
 
-interface Task {
+export interface ITask {
     id: number;
     title: string;
     description: string;
     done: boolean;
+    onToggleTask: (id: number) => void;
+
 }
 
-interface TasksCardProps {
-    tasks: Task[];
+export interface TasksCardProps {
+    tasks: ITask[];
     onToggleTask: (id: number) => void;
+}
+
+const addTasks = () => {
+    // add the logic of adding tasks here ! ... 
 }
 
 const TasksCard = ({ tasks, onToggleTask }: TasksCardProps) => {
@@ -33,7 +38,9 @@ const TasksCard = ({ tasks, onToggleTask }: TasksCardProps) => {
                             </CardTitle>
                             <p className="text-slate-500 text-sm mt-1">Keep the momentum going! 💪</p>
                         </div>
-                        <Button className="bg-linear-to-r from-purple-600 to-blue-600 text-white rounded-xl">
+                        <Button className="bg-linear-to-r from-purple-600 to-blue-600 text-white rounded-xl"
+                            onClick={addTasks}
+                        >
                             <Plus className="w-4 h-4 mr-2" />
                             Add Task
                         </Button>

@@ -6,6 +6,9 @@ const ENDPOINTS = {
         LOGIN: `${BASE_URL}/auth/login`,
         GOOGLE_AUTH: `${BASE_URL}/auth/google-auth` , 
         LOGOUT:`${BASE_URL}/auth/logout`
+    } , 
+    TASKS_ENDPOINTS:{
+        CREATE_TASK:"/tasks/create" , 
     }
 }
 

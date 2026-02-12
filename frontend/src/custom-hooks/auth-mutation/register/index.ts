@@ -21,8 +21,7 @@ const useRegisterMutation = () => {
             }
             console.log("User registered successfully : ", data.data.email);
             toast.success(data.message);
-            navigate("/dashboard");
-            return;
+            return navigate("/dashboard");
         },
         onError: (error: AxiosError | Error) => {
             console.log("Error while registering user : ", error);

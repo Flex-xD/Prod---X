@@ -1,0 +1,16 @@
+<< What can I do in the frontend >>
+
+1. Todo's CRUD on frontend (while making requests to the backend API's)
+2. Productivity-Timer CRUD (... API's)
+3. Group-Productivity-Timer CRUD (... API's)
+
+
+
+
+
+
+
+
+
+
+( AI is going to be one of the last things that I would be implementing . . . )

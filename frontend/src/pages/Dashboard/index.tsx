@@ -83,8 +83,12 @@ const Dashboard = () => {
 
   const currentTip = aiTips[0]; // You can rotate this with useEffect if desired
 
+  const onAddTask = () => {
+    console.log("Adding tasks to the todo list  . . .")
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">
       <DashboardHeader />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -135,7 +139,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <TasksCard tasks={tasks} onToggleTask={toggleTask} />
+            <TasksCard tasks={tasks} onToggleTask={toggleTask} onAddTask={onAddTask}/>
             <CalendarCard calendarData={calendarData} />
             <WeeklyGraphCard weeklyData={weeklyData} maxHours={maxHours} />
           </div>

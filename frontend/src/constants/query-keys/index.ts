@@ -1,5 +1,10 @@
-export const QUERY_KEYS = {
-    // Current logged-in user
+export const QUERY_KEYS = { 
+    TASKS:{
+        ALL:["tasks"] as const , 
+        USER:(userId:string) => ["tasks" , userId] as const,
+        BY_ID:(taskId:string) => ["tasks" , taskId] as const
+    }
+    , 
     PROFILE: {
         ME: ["profile", "me"] as const,
         BY_ID: (userId: string) => ["profile", userId] as const,

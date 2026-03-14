@@ -14,6 +14,8 @@ import FocusTimerCard from './dashboard-components/focus-timer-card';
 import AiTipCard from './dashboard-components/ai-tip-card';
 import LeaderboardCard from './dashboard-components/leaderboard-card';
 import MotivationalCard from './dashboard-components/motivational-card';
+import useCreateTaskMutation from '@/custom-hooks/task-mutation/create-task';
+
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([
@@ -83,9 +85,11 @@ const Dashboard = () => {
 
   const currentTip = aiTips[0]; // You can rotate this with useEffect if desired
 
-  const onAddTask = () => {
-    console.log("Adding tasks to the todo list  . . .")
-  }
+  // const onAddTask = () => {
+  //   console.log("Adding tasks to the todo list  . . .")
+  // }
+
+  const onAddTask =  useCreateTaskMutation();
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">

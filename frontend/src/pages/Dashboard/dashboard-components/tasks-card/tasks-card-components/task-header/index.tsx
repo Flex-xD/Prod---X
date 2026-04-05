@@ -5,21 +5,19 @@ import { useState } from 'react';
 import CreateTaskModal from '../create-task-modal';
 
 interface TasksHeaderProps {
-    onAddTask: (task: { id: number; title: string; description: string; done: boolean }) => void;
+    onAddTask: (task: { title: string; description: string; }) => void;
 }
 
 const TasksHeader = ({ onAddTask }: TasksHeaderProps) => {
+    
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleCreateTask = (title: string, description: string) => {
-        // Generate a temporary ID (in a real app, the backend would assign the real one)
-        const newTask = {
-            id: Date.now(), // or use a proper ID generator
+        const newTaskData = {
             title,
             description,
-            done: false,
         };
-        onAddTask(newTask);
+        onAddTask(newTaskData);
     };
 
     return (

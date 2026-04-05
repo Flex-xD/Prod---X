@@ -8,8 +8,10 @@ import type { AxiosError } from "axios"
 import { toast } from "sonner"
 
 
-const useCreateTaskMutation = () => {
-    // const queryClient = useQueryClient();
+const useCreateTaskMutation = (userId: string) => {
+    if (!userId) throw new Error("userId is required !");
+
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (taskData: ITask) => {
             const response = await apiClient.post(ENDPOINTS.TASKS_ENDPOINTS.CREATE_TASK, {
@@ -17,31 +19,47 @@ const useCreateTaskMutation = () => {
             });
             return response.data as ApiResponse<ITask>;
         },
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             if (!data?.success) {
                 toast.error(data?.message || "Task creation failed !");
                 return;
             }
             console.log("Task created successfully : ", data.data);
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS.USER(userId) });
+
             return toast.success(data.message);
-        }, 
-        onSettled:async() => {
-            // ? For now I am putting the ID from the upcoming data
-            // await queryClient.invalidateQueries({queryKey:QUERY_KEYS.TASKS.BY_ID(data?.data.id)});
-        }
-        ,
+        },
+        // onSettled: async () => {
+        //     // ? For now I am putting the ID from the upcoming data
+        // }
+        // ,
         onError: (error: AxiosError | Error) => {
-            console.log("Error while registering user : ", error);
 
-            let message = `Task creation failed !`;
+            console.log(
+                "Error while creating task:",
+                error
+            );
 
-            if ((error as AxiosError).isAxiosError && (error as AxiosError).response) {
-                const responseData = (error as AxiosError).response?.data as { message?: string };
-                message = responseData?.message || message;
+            let message =
+                "Task creation failed!";
+
+            if (
+                (error as AxiosError).isAxiosError &&
+                (error as AxiosError).response
+            ) {
+
+                const responseData =
+                    (error as AxiosError)
+                        .response?.data as {
+                            message?: string;
+                        };
+
+                message =
+                    responseData?.message ||
+                    message;
             }
 
             toast.error(message);
-            return;
         }
     })
 }

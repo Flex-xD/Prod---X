@@ -9,7 +9,7 @@ import { ApiError, asyncHandler, emitEvent, getUser, IAuthRequest, sendResponse,
 export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) => {
     const { userId } = req;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
-    const { title, description }: CreateTaskInput = req.body;
+    const { title, description }: CreateTaskInput = req.body.taskData;
 
     if (!title || !description) {
         throw ApiError(StatusCodes.BAD_REQUEST , "Title and Description are required !");

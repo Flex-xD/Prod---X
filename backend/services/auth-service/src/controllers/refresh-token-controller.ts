@@ -4,8 +4,8 @@ import { signAccessToken } from "../utils/generate-token";
 import { StatusCodes } from "http-status-codes";
 import uuidv4 from "uuidv4";
 import { sendResponse } from "../shared/utils/response-utils";
-import User from "../shared/models/User";
-import Token from "../shared/models/Token";
+import User from "../shared/utils/models/User";
+import Token from "../shared/utils/models/Token";
 
 
 export async function refresh(req: Request, res: Response) {
@@ -25,7 +25,7 @@ export async function refresh(req: Request, res: Response) {
             message: "Could not find refresh token!"
         })
     }
-    
+
     // ? If any problems then this may be the case !!!
     const user = await User.findOne({ refreshTokens: userRefreshToken._id })
     if (!user) {

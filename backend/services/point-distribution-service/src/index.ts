@@ -1,0 +1,22 @@
+import express  , {Request , Response , NextFunction}from "express";
+import dotenv from "dotenv";
+import { sendError } from "./shared";
+import connectDb from "./shared/config/db";
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT  || 10000
+
+app.use(express.json());
+
+
+// app.use("/api/v1/notification" , notificationRouter);
+
+app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+    return sendError(res, { error: err });
+})
+
+app.listen(PORT , async () => {
+    await connectDb(process.env.MONGODB_URI || "")
+    console.info(`Notification-Service 🔔 running on PORT : ✅ ${PORT}`);
+})

@@ -8,6 +8,7 @@ const TasksCard = ({
     tasks,
     onToggleTask,
     onAddTask,
+    createTaskPending
 }: TasksCardProps) => {
 
 
@@ -24,7 +25,7 @@ const TasksCard = ({
                 <CardContent className="space-y-3">
                     <TaskList
                         tasks={tasks}
-                        onToggleTask={onToggleTask}
+                        onToggleTask={onToggleTask} 
                     />
                 </CardContent>
             </Card>

@@ -15,20 +15,20 @@ import AiTipCard from './dashboard-components/ai-tip-card';
 import LeaderboardCard from './dashboard-components/leaderboard-card';
 import MotivationalCard from './dashboard-components/motivational-card';
 import useCreateTaskMutation from '@/custom-hooks/task-mutation/create-task';
+import { dummyTasks, leaderboard, weeklyData } from './dashboard-components/dashboard-dummy-data';
+import type { ITask } from './dashboard-components/tasks-card/tasks-card-types';
 
 
 const Dashboard = () => {
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'Complete Algorithm Assignment', description: 'Solve problem set 5-10', done: true },
-    { id: 2, title: 'Review Database Concepts', description: 'SQL joins and normalization', done: true },
-    { id: 3, title: 'Read Chapter 7 - OS', description: '', done: false },
-    { id: 4, title: 'Practice Leetcode', description: '2 medium problems', done: false },
-  ]);
+
+  // ? For task mutation 
+
+  const [tasks, setTasks] = useState(dummyTasks);
 
   const focusTime = 245; // minutes today
   const dailyGoal = 240; // 4 hours
 
-  // GitHub-style calendar data (last 12 weeks)
+  // GitHub-style calendar data 
   const generateCalendarData = (): Array<Array<{ intensity: "high" | "medium" | "low" | "none"; hours: number }>> => {
     const data = [];
     for (let week = 0; week < 12; week++) {
@@ -57,23 +57,11 @@ const Dashboard = () => {
     ));
   };
 
-  const weeklyData = [
-    { day: 'Mon', tasks: 4, hours: 3.5 },
-    { day: 'Tue', tasks: 6, hours: 4.2 },
-    { day: 'Wed', tasks: 3, hours: 2.8 },
-    { day: 'Thu', tasks: 5, hours: 4.5 },
-    { day: 'Fri', tasks: 4, hours: 3.2 },
-    { day: 'Sat', tasks: 2, hours: 2.0 },
-    { day: 'Today', tasks: 2, hours: 4.1 },
-  ];
+
 
   const maxHours = Math.max(...weeklyData.map((d) => d.hours));
 
-  const leaderboard = [
-    { rank: 1, name: 'Sarah Chen', score: 142, avatar: 'SC', isYou: false },
-    { rank: 2, name: 'You', score: 128, avatar: 'ME', isYou: true },
-    { rank: 3, name: 'Alex Kumar', score: 115, avatar: 'AK', isYou: false },
-  ];
+
 
   const aiTips = [
     "Try the Pomodoro technique: 25 min focus + 5 min break!",
@@ -85,11 +73,12 @@ const Dashboard = () => {
 
   const currentTip = aiTips[0]; // You can rotate this with useEffect if desired
 
-  // const onAddTask = () => {
-  //   console.log("Adding tasks to the todo list  . . .")
-  // }
+  let userId = "lsmfkdsnkf";
+  const { mutateAsync: createTaskMutation, isPending: createTaskPending, error: createTaskError } = useCreateTaskMutation(userId);
 
-  const onAddTask =  useCreateTaskMutation();
+  const onAddTask =  async (taskData: ITask) => {
+    await createTaskMutation(taskData);
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">
@@ -143,7 +132,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <TasksCard tasks={tasks} onToggleTask={toggleTask} onAddTask={onAddTask}/>
+            <TasksCard tasks={tasks} onToggleTask={toggleTask} onAddTask={onAddTask} createTaskPending={createTaskPending}/>
             <CalendarCard calendarData={calendarData} />
             <WeeklyGraphCard weeklyData={weeklyData} maxHours={maxHours} />
           </div>

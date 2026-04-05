@@ -17,7 +17,7 @@ export const notificationServices = {
     // The service layer exist so your business logic can survice without https
     // * CREATE NOTIFICATION
     createNotification: async (data: TypeCreateNotification) => {
-        const { notificationType, topic, message, from, to } = data;
+        // const { notificationType, topic, message, from, to } = data;
 
         const notification = await Notification.create({ ...data });
 

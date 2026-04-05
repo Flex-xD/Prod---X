@@ -9,6 +9,7 @@ interface ITask extends Document {
     createdAt: Date;
     updatedAt: Date;
     // Virtual field (populated later)
+    // ? should I even have this field below ?
     authorDetails?: {
         username: string;
         avatar?: string;

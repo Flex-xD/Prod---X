@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import User from "../../models/User";
+import User from "../models/User";
 import { ApiError } from "../api-error";
 import { Types } from "mongoose";
 

@@ -5,12 +5,17 @@
 3. Group-Productivity-Timer CRUD (... API's)
 
 
-
-
-
-
-
-
-
-
 ( AI is going to be one of the last things that I would be implementing . . . )
+
+The mains featues of thie Web-Applications are going to be :
+1. To create Productivity-Timers & Group-Productivity-Timers (with CRUD)
+2. To create Todo's (with CRUD)
+3. To Keep track of User's Productivity (something like githubs streak)
+4. AI generated tips on Productivity (everyday something new)
+5. Productivity points based on user's Productivity
+6. leaderboard board based on the Productivity of users throughout the ProdX
+
+
+>>>> CURRENTLY WORKING ON :
+1. Implementing CRUD on task and updating UI accorinding to it.
+2. Connecting Authentication backend to frontend properly

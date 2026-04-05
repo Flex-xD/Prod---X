@@ -8,18 +8,18 @@ import { StatusCodes } from "http-status-codes";
 type TEventGroupTimerCreated = {
     userId: string,
     invitedUsersId: string[],
-    groupProductivityTimer: TgroupProductivityTimerForConsumer ,
+    groupProductivityTimer: TgroupProductivityTimerForConsumer,
 }
 
 type TEventNotificationCreated = {
     notificationReceivingUsersId: mongoose.Types.ObjectId[],
-    notificationId: mongoose.Types.ObjectId , 
-    userId:string
+    notificationId: mongoose.Types.ObjectId,
+    userId: string
 }
 
 export const handlers = {
     // ? This event is for initiating the create-notification API
-    "group.timer.created": async ({ userId, invitedUsersId, groupProductivityTimer 
+    "group.timer.created": async ({ userId, invitedUsersId, groupProductivityTimer
     }: TEventGroupTimerCreated) => {
         try {
             logger.info("Sending API request to : /create-notification")
@@ -35,15 +35,15 @@ export const handlers = {
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        "x-service-key":process.env.PRODX_SERVICE_KEY ,
+                        "x-service-key": process.env.PRODX_SERVICE_KEY,
                     }
                 }
             );
             logger.info(`EVENT:group.timer.created , RESPONSE:${response.data}`);
 
         } catch (err: any) {
-            throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR , `Error while sending the request to the /create-notification API : ${err}`)
-            logger.error("Notification API failed", err.response );
+            throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Error while sending the request to the /create-notification API : ${err}`)
+            logger.error("Notification API failed", err.response);
         }
     },
 
@@ -62,12 +62,13 @@ export const handlers = {
                         notificationId
                     }, {
                         headers: {
-                        "Content-Type": "application/json",
-                        "x-service-key":process.env.PRODX_SERVICE_KEY ,
-                    }})
-                    console.log(`Event : notification.created , response : ${response.data}`);
+                            "Content-Type": "application/json",
+                            "x-service-key": process.env.PRODX_SERVICE_KEY,
+                        }
+                    })
+                    console.log(`Event : notification.created , response :`, response.data);
                 } catch (error) {
-                    logger.error({error})
+                    logger.error({ error })
                     throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Error while sending the notification to userIds : ${notificationReceivingUsersId}`);
                 }
             })

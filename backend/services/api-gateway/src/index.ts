@@ -29,7 +29,7 @@ app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
     const path = req.path.replace(/^\/api\/v1/, "");
 
     if (path.startsWith("/auth")) {
-        return next(); // public
+        return next(); 
     }
 
     if (INTERNAL_ROUTES.some(route => path.startsWith(route))) {

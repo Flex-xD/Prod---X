@@ -17,5 +17,5 @@ The mains featues of thie Web-Applications are going to be :
 
 
 >>>> CURRENTLY WORKING ON :
-1. Implementing CRUD on task and updating UI accorinding to it.
-2. Connecting Authentication backend to frontend properly
+1. Connecting Authentication backend to frontend properly
+2. Implementing CRUD on task and updating UI accorinding to it.

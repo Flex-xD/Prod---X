@@ -7,12 +7,14 @@
     "module": "ESNext",
     "types": ["vite/client"],
     "skipLibCheck": true,
+
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -20,11 +22,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    // ✅ alias setup
-    "baseUrl": "src",
+    // ✅ Updated alias setup (modern way)
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["./src/*"]
     }
   },
+
   "include": ["src"]
 }

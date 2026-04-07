@@ -20,7 +20,7 @@ const TasksCard = ({
             transition={{ duration: 0.5, delay: 0.4 }}
         >
             <Card className="rounded-3xl border-0 shadow-xl bg-white">
-                <TasksHeader onAddTask={onAddTask} />
+                <TasksHeader onAddTask={onAddTask} createTaskPending={createTaskPending}/>
 
                 <CardContent className="space-y-3">
                     <TaskList

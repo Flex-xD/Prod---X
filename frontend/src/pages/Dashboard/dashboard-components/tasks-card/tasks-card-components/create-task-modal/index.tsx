@@ -6,10 +6,11 @@ import { useState } from 'react';
 interface CreateTaskModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onCreate: (title: string, description: string) => void;
+    onCreate: (title: string, description: string) => void; 
+    createTaskPending:boolean
 }
 
-const CreateTaskModal = ({ isOpen, onClose, onCreate }: CreateTaskModalProps) => {
+const CreateTaskModal = ({ isOpen, onClose, onCreate, createTaskPending }: CreateTaskModalProps) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
 
@@ -96,6 +97,7 @@ const CreateTaskModal = ({ isOpen, onClose, onCreate }: CreateTaskModalProps) =>
                                         Cancel
                                     </Button>
                                     <Button
+                                        disabled={createTaskPending}
                                         type="submit"
                                         className="flex-1 bg-linear-to-r from-purple-600 to-blue-600 text-white rounded-xl shadow-md hover:shadow-lg transition-shadow"
                                     >

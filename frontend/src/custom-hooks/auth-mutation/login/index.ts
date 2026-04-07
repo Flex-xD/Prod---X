@@ -22,13 +22,10 @@ const useLoginMutation = () => {
                 return;
             }
             console.log("User logged in successfully : ", data.data.email);
-            toast.success(data.message);
-            await navigate("/dashboard");
-            return;
-        },
-        onSettled:async () => {
             await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
-        } ,
+            toast.success(data.message);
+            return await navigate("/dashboard");
+        },
         onError: (error: AxiosError | Error) => {
             console.log("Error while logging in user : ", error);
 

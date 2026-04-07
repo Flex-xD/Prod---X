@@ -5,10 +5,11 @@ import { useState } from 'react';
 import CreateTaskModal from '../create-task-modal';
 
 interface TasksHeaderProps {
-    onAddTask: (task: { title: string; description: string; }) => void;
+    onAddTask: (task: { title: string; description: string; }) => void; 
+    createTaskPending:boolean;
 }
 
-const TasksHeader = ({ onAddTask }: TasksHeaderProps) => {
+const TasksHeader = ({ onAddTask  , createTaskPending}: TasksHeaderProps) => {
     
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -47,6 +48,7 @@ const TasksHeader = ({ onAddTask }: TasksHeaderProps) => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onCreate={handleCreateTask}
+                createTaskPending={createTaskPending}
             />
         </>
     );

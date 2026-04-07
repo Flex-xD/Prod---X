@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { TabsContent } from '@/components/ui/tabs';
-
-import apiClient from '@/utils/Axios-client';
 import { AuthHeader } from './auth-components/Auth-Header';
 import { AuthFormCard } from './auth-components/AuthForm-Card';
 import { LoginForm } from './auth-components/LoginForm';
@@ -14,6 +12,8 @@ import { FeaturesGrid } from './auth-components/Features-Grid';
 import useGoogleAuth from '@/custom-hooks/auth-mutation/google-auth';
 import useLoginMutation from '@/custom-hooks/auth-mutation/login';
 import useRegisterMutation from '@/custom-hooks/auth-mutation/register';
+import type { IHandleLogin, IHandleRegiser } from './auth-components/Auth-Types';
+
 
 export default function AuthPage() {
     const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
@@ -34,7 +34,6 @@ export default function AuthPage() {
     if (isGoogleAuthError || isLoginAuthError || isRegisterAuthError) return <div>Something went wrong...</div>
     if (isGoogleAuthPending || isLoginAuthPending || isRegisterAuthPending) return <div>Loading...</div>
 
-
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
@@ -43,12 +42,16 @@ export default function AuthPage() {
         await handleGoogleAuth(credentialResponse.credential);
     };
 
-    const handleLogin = async () => {
+    const handleLogin = async (formData: IHandleLogin) => {
+        await handleLoginAuth(formData);
+    }
 
+    const handleRegister = async (formData: IHandleRegiser) => {
+        await handleRegisterAuth(formData);
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/30 relative overflow-hidden px-6 py-8">
+        <div className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50/30 to-blue-50/30 relative overflow-hidden px-6 py-8">
             <div className="relative z-10 max-w-7xl mx-auto">
                 <AuthHeader />
 
@@ -69,6 +72,7 @@ export default function AuthPage() {
                                             showPassword={showPassword}
                                             togglePassword={() => setShowPassword(prev => !prev)}
                                             onChange={handleInputChange}
+                                            handleLogin={handleLogin}
                                         />
                                     </TabsContent>
 
@@ -78,6 +82,7 @@ export default function AuthPage() {
                                             showPassword={showPassword}
                                             togglePassword={() => setShowPassword(prev => !prev)}
                                             onChange={handleInputChange}
+                                            handleRegister={handleRegister}
                                         />
                                     </TabsContent>
                                 </>

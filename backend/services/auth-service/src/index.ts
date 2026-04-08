@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import express, { Request, Response, NextFunction } from "express";
 import authRoutes from "./routes/auth-routes";
+import userRoutes from "./routes/user-realted-routes";
 import { sendError } from "./shared/utils/response-utils";
 import connectDb from "./shared/config/db";
 import cors from "cors";
@@ -25,6 +26,7 @@ app.use(express.json());
 
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user" , userRoutes);
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
     return sendError(res, { error: err });

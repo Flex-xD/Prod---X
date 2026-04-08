@@ -47,6 +47,9 @@ app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
 const services = {
     // Later on add the paths to the env file
     "/tasks": "http://localhost:4000/api/v1",
+
+    // ! Test this if it is working or not
+    "/user":"http://localhost:5000/api/v1" ,
     "/auth": "http://localhost:5000/api/v1",
     "/group-productivity-timer": "http://localhost:9000/api/v1",
     "/notification": "http://localhost:10000/api/v1",

@@ -9,6 +9,9 @@ const ENDPOINTS = {
     } , 
     TASKS_ENDPOINTS:{
         CREATE_TASK:"/tasks/create" , 
+    } , 
+    USER_ENDPOINTS:{
+        USER_DATA:"/user/user-data"
     }
 }
 

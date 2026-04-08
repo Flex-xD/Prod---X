@@ -9,6 +9,8 @@ import { asyncHandler } from "../shared/utils/async-handler";
 import { sendResponse } from "../shared/utils/response-utils";
 import Token from "../shared/models/Token";
 import { emitEvent } from "../kafka/producer";
+import { IAuthRequest } from "../shared/middlewares/auth-middleware";
+import { ApiError } from "../shared/utils/api-error";
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
@@ -101,7 +103,6 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
 });
 
 // ? GOOGLE AUTH CONTROLLER (Google Auth)
-// ! STILL NEEDS TESTING
 export const googleAuthController = asyncHandler(async (req: Request, res: Response) => {
     const { idToken } = req.body;
     const googleUser = await verifyGoogleAuthToken(idToken);
@@ -155,3 +156,4 @@ export const logoutController = asyncHandler(async (req: Request, res: Response)
         success: true
     })
 })
+

@@ -17,11 +17,12 @@ const useLoginMutation = () => {
             return response.data as ApiResponse<IUser>;
         },
         onSuccess: async (data) => {
+            console.log(data);
             if (!data?.success) {
                 toast.error(data?.message || "User login failed");
                 return;
             }
-            console.log("User logged in successfully : ", data.data.email);
+            console.log("User logged in successfully : ", data.data);
             await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
             toast.success(data.message);
             return await navigate("/dashboard");

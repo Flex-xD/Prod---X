@@ -21,7 +21,7 @@ const useGoogleAuth = () => {
                 toast.error(data?.message || "User login failed");
                 return;
             }
-            console.log("User logged in successfully : ", data.data.email);
+            console.log("User logged in successfully : ", data.data);
             toast.success(data.message);
             await navigate("/dashboard");
             return;

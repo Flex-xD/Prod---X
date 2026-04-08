@@ -3,7 +3,7 @@ import { verifyGoogleAuthToken } from "../utils/googleAuthVerifier";
 import { authService } from "../service-layer/auth-service";
 import { StatusCodes } from "http-status-codes";
 import { signAccessToken, signRefreshToken } from "../utils/generate-token";
-import { uuidv4 } from "zod";
+import uuidv4 from "zod";
 import { hashToken } from "../utils/hash";
 import { asyncHandler } from "../shared/utils/async-handler";
 import { sendResponse } from "../shared/utils/response-utils";
@@ -26,7 +26,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
 
     // Check the accessToken below wether it should be of small time or large time
     const accessToken = signAccessToken({ userId: user._id! });
-    const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
+    const refreshPlain = `${crypto.randomUUID()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
 
     // ? Think about slidingExpiry (I think it should be shorter than absolute expiry)
@@ -69,7 +69,7 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
 
     // same as above or should be different ?
     const accessToken = signAccessToken({ userId: user._id });
-    const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
+    const refreshPlain = `${crypto.randomUUID()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
 
     const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -91,7 +91,7 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
         email,
     });
 
-    console.log("This is the response of the LoginController : " , { accessToken, user });
+    console.log("This is the response of the LoginController : ", { accessToken, user });
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "User logged in successfully!",
@@ -108,7 +108,7 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
 
     const user = await authService.findOrCreateGoogleUser(googleUser);
     const accessToken = signRefreshToken({ sub: user._id!.toString() });
-    const refreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
+    const refreshPlain = `${crypto.randomUUID()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
 
     // ? Think about slidingExpiry 

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Mail, Lock, User, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Sparkles, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { IHandleRegiser } from '../Auth-Types';
 
@@ -11,16 +11,17 @@ type RegisterFormProps = {
     togglePassword: () => void;
     onChange: (field: string, value: string) => void;
     handleRegister: (FormData: IHandleRegiser) => void;
+    isRegisterAuthPending: boolean
 };
 
-export const RegisterForm = ({ formData, showPassword, togglePassword, onChange, handleRegister }: RegisterFormProps) => (
+export const RegisterForm = ({ formData, showPassword, togglePassword, onChange, handleRegister, isRegisterAuthPending }: RegisterFormProps) => (
     <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         className="space-y-4 mt-6"
     >
-        <form action=""
+        <form className='space-y-4'
             onSubmit={(e) => {
                 e.preventDefault();
                 // ? You should remove confirmPassword and add check statements for the credentials are properly filled or not
@@ -93,9 +94,9 @@ export const RegisterForm = ({ formData, showPassword, togglePassword, onChange,
                 />
             </div>
 
-            <Button type='submit' className="w-full rounded-xl h-12 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold">
+            <Button disabled={isRegisterAuthPending} type='submit' className="w-full rounded-xl h-12 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold">
                 Start Your Journey
-                <Sparkles className="w-4 h-4 ml-2" />
+                {isRegisterAuthPending ? <Loader className="w-4 h-4 ml-2" /> : <Sparkles className="w-4 h-4 ml-2" />}
             </Button>
         </form>
     </motion.div>

@@ -32,6 +32,7 @@ export const authService = {
 
     loginLocalUser: async (body: loginType) => {
         const user = await User.findOne({ email: body.email, provider: "local" });
+        console.log(body.email);
         if (!user) {
             throw ApiError(StatusCodes.NOT_FOUND, "User not found ! Invalid email or password !");
         }

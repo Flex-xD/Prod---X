@@ -19,7 +19,7 @@ const useRegisterMutation = () => {
                 toast.error(data?.message || "User registeration failed");
                 return;
             }
-            console.log("User registered successfully : ", data.data.email);
+            console.log("User registered successfully : ", data.data);
             toast.success(data.message);
             return navigate("/dashboard");
         },

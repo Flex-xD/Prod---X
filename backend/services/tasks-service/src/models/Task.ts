@@ -11,6 +11,7 @@ interface ITask extends Document {
     // Virtual field (populated later)
     // ? should I even have this field below ?
     authorDetails?: {
+        _id:Types.ObjectId ,
         username: string;
         avatar?: string;
     };

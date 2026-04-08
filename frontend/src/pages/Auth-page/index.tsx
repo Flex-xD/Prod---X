@@ -32,7 +32,7 @@ export default function AuthPage() {
 
     // ? Add actual pending and error components
     if (isGoogleAuthError || isLoginAuthError || isRegisterAuthError) return <div>Something went wrong...</div>
-    if (isGoogleAuthPending || isLoginAuthPending || isRegisterAuthPending) return <div>Loading...</div>
+    // if (isGoogleAuthPending || isLoginAuthPending || isRegisterAuthPending) return <div>Loading...</div>
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -73,6 +73,7 @@ export default function AuthPage() {
                                             togglePassword={() => setShowPassword(prev => !prev)}
                                             onChange={handleInputChange}
                                             handleLogin={handleLogin}
+                                            isLoginAuthPending={isLoginAuthPending}
                                         />
                                     </TabsContent>
 
@@ -83,6 +84,7 @@ export default function AuthPage() {
                                             togglePassword={() => setShowPassword(prev => !prev)}
                                             onChange={handleInputChange}
                                             handleRegister={handleRegister}
+                                            isRegisterAuthPending={isRegisterAuthPending}
                                         />
                                     </TabsContent>
                                 </>

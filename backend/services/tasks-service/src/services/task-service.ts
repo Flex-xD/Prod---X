@@ -21,7 +21,7 @@ const taskService = {
             user.save(),
             // ? See here if authorDetails is correct or not
             task.populate("authorDetials", "_id username avatar")
-        ])
+        ]);
 
         return task;
     },

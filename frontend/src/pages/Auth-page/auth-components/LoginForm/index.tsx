@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { IHandleLogin } from '../Auth-Types';
 
@@ -10,24 +10,26 @@ type LoginFormProps = {
     showPassword: boolean;
     togglePassword: () => void;
     onChange: (field: string, value: string) => void;
+    isLoginAuthPending: boolean;
     handleLogin: (formData: IHandleLogin) => void;
 };
 
-export const LoginForm = ({ formData, showPassword, togglePassword, onChange , handleLogin}: LoginFormProps) => (
+export const LoginForm = ({ formData, showPassword, togglePassword, onChange, handleLogin, isLoginAuthPending }: LoginFormProps) => (
     <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         className="space-y-4 mt-6"
     >
-        <form 
-        onSubmit={(e) => {
-            e.preventDefault();
-            handleLogin({
-                email:formData.email , 
-                password:formData.password
-            })
-        }}
+        <form
+            className='space-y-4'
+            onSubmit={(e) => {
+                e.preventDefault();
+                handleLogin({
+                    email: formData.email,
+                    password: formData.password
+                })
+            }}
         >
             <div className="space-y-2">
                 <Label htmlFor="login-email">Email</Label>
@@ -66,9 +68,9 @@ export const LoginForm = ({ formData, showPassword, togglePassword, onChange , h
                 </div>
             </div>
 
-            <Button type='submit' className="w-full rounded-xl h-12 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold">
+            <Button disabled={isLoginAuthPending} type='submit' className="w-full rounded-xl h-12 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold">
                 Sign In
-                <ArrowRight className="w-4 h-4 ml-2" />
+                {isLoginAuthPending ? <Loader className="w-4 h-4 ml-2" /> : <ArrowRight className="w-4 h-4 ml-2" />}
             </Button>
         </form>
     </motion.div>

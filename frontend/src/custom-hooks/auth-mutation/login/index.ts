@@ -1,5 +1,6 @@
 import ENDPOINTS from "@/constants/api-endpoints";
 import { QUERY_KEYS } from "@/constants/query-keys";
+import { userAppStore } from "@/store";
 import type { ApiResponse } from "@/types/api-response";
 import type { IUser } from "@/types/user";
 import apiClient from "@/utils/Axios-client";
@@ -25,7 +26,7 @@ const useLoginMutation = () => {
             console.log("User logged in successfully : ", data.data);
             await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
             toast.success(data.message);
-            return await navigate("/dashboard");
+            return await navigate("/dashboard" , {replace:true});
         },
         onError: (error: AxiosError | Error) => {
             console.log("Error while logging in user : ", error);

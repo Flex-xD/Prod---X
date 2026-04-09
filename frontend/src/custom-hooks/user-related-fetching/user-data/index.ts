@@ -9,12 +9,8 @@ export const useUserData = () => {
     return useQuery({
         queryKey: QUERY_KEYS.PROFILE.ME,
         queryFn: async () => {
-            // ? I have to make a API for this endpoint 
             const response = await apiClient.post(ENDPOINTS.USER_ENDPOINTS.USER_DATA);
-            if (response.data.data) {
-                // ? Set isAuthenticated true here after setting up the zookeeper
-            }
-                console.log('User data fetched : ', response.data);
+            console.log('User data fetched : ', response.data);
             return response.data as ApiResponse<IUser>;
         },
         staleTime: 5 * 60 * 1000,

@@ -1,5 +1,6 @@
 import ENDPOINTS from "@/constants/api-endpoints";
 import { QUERY_KEYS } from "@/constants/query-keys";
+import { userAppStore } from "@/store";
 import type { ApiResponse } from "@/types/api-response";
 import type { IUser } from "@/types/user";
 import apiClient from "@/utils/Axios-client";
@@ -12,8 +13,8 @@ const useGoogleAuth = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     return useMutation({
-        mutationFn: async (idToken:any) => {
-            const response = await apiClient.post(ENDPOINTS.AUTH_ENDPOINTS.GOOGLE_AUTH , {idToken});
+        mutationFn: async (idToken: any) => {
+            const response = await apiClient.post(ENDPOINTS.AUTH_ENDPOINTS.GOOGLE_AUTH, { idToken });
             return response.data as ApiResponse<IUser>;
         },
         onSuccess: async (data) => {

@@ -4,9 +4,8 @@ import { signAccessToken } from "../utils/generate-token";
 import { StatusCodes } from "http-status-codes";
 import uuidv4 from "uuidv4";
 import { sendResponse } from "../shared/utils/response-utils";
-import User from "../shared/utils/models/User";
-import Token from "../shared/utils/models/Token";
-
+import Token from "../shared/models/Token";
+import User from "../shared/models/User";
 
 export async function refresh(req: Request, res: Response) {
     const refreshPlain = req.cookies?.refreshToken;
@@ -59,7 +58,6 @@ export async function refresh(req: Request, res: Response) {
         })
     }
 
-    // ? Check wether this line provides any value or not
     user.refreshTokens = user.refreshTokens.filter(rt => rt !== userRefreshToken._id);
 
     const newAccessToken = signAccessToken({ sub: user._id });
@@ -94,3 +92,5 @@ export async function refresh(req: Request, res: Response) {
         data: { accessToken: newAccessToken }
     })
 }
+
+

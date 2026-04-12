@@ -9,11 +9,7 @@ export const useUserData = () => {
     return useQuery({
         queryKey: QUERY_KEYS.PROFILE.ME,
         queryFn: async () => {
-            const response = await apiClient.post(ENDPOINTS.USER_ENDPOINTS.USER_DATA , {
-                Headers:{
-                    authorization:`Bearer ` , 
-                }
-            });
+            const response = await apiClient.get(ENDPOINTS.USER_ENDPOINTS.USER_DATA);
             console.log('User data fetched : ', response.data);
             return response.data as ApiResponse<IUser>;
         },

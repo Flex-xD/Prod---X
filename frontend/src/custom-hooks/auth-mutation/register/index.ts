@@ -1,7 +1,7 @@
 import ENDPOINTS from "@/constants/api-endpoints";
 import { userAppStore } from "@/store";
 import type { ApiResponse } from "@/types/api-response";
-import type { IUser } from "@/types/user";
+import type { ILoginResponseData, IUser } from "@/types/user";
 import apiClient from "@/utils/Axios-client";
 import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
@@ -10,16 +10,19 @@ import { toast } from "sonner";
 
 const useRegisterMutation = () => {
     const navigate = useNavigate();
+    const { setIsAuthenticated, setAccessToken } = userAppStore.getState();
     return useMutation({
         mutationFn: async (formdata: { email: string, username: string, password: string }) => {
             const response = await apiClient.post(ENDPOINTS.AUTH_ENDPOINTS.REGISTER, formdata);
-            return response.data as ApiResponse<IUser>;
+            return response.data as ApiResponse<ILoginResponseData>;
         },
         onSuccess: (data) => {
             if (!data?.success) {
                 toast.error(data?.message || "User registeration failed");
                 return;
             }
+            setIsAuthenticated(true);
+            setAccessToken(data.data.accessToken);
             console.log("User registered successfully : ", data.data);
             toast.success(data.message);
             return navigate("/dashboard");

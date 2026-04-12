@@ -11,7 +11,8 @@ export interface IAuthRequest extends Request {
 
 export const authMiddleware = async (req: IAuthRequest, res: Response, next: NextFunction) => {
     try {
-        const token = req.cookies.token;
+        const {token} = req.cookies;
+        console.log("This is token : " , token , "and this is req.cookies : " , req.cookies);
         if (!token) {
             return sendResponse(res, {
                 statusCode: StatusCodes.NOT_FOUND,

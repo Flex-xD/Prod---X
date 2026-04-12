@@ -2,7 +2,7 @@ import ENDPOINTS from "@/constants/api-endpoints";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { userAppStore } from "@/store";
 import type { ApiResponse } from "@/types/api-response";
-import type { IUser } from "@/types/user";
+import type { ILoginResponseData, IUser } from "@/types/user";
 import apiClient from "@/utils/Axios-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
@@ -12,10 +12,11 @@ import { toast } from "sonner";
 const useLoginMutation = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+    const { setIsAuthenticated, setAccessToken } = userAppStore.getState();
     return useMutation({
         mutationFn: async (formdata: { email: string, password: string }) => {
             const response = await apiClient.post(ENDPOINTS.AUTH_ENDPOINTS.LOGIN, formdata);
-            return response.data as ApiResponse<IUser>;
+            return response.data as ApiResponse<ILoginResponseData>;
         },
         onSuccess: async (data) => {
             console.log(data);
@@ -23,10 +24,12 @@ const useLoginMutation = () => {
                 toast.error(data?.message || "User login failed");
                 return;
             }
+            setIsAuthenticated(true);
+            setAccessToken(data.data.accessToken);
             console.log("User logged in successfully : ", data.data);
             await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
             toast.success(data.message);
-            return await navigate("/dashboard" , {replace:true});
+            return await navigate("/dashboard", { replace: true });
         },
         onError: (error: AxiosError | Error) => {
             console.log("Error while logging in user : ", error);

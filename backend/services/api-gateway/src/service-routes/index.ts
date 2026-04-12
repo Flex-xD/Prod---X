@@ -1,4 +1,5 @@
 export const USER_ROUTES = [
+    "/user" ,
     "/tasks",
     "/group-productivity-timer",
 ];

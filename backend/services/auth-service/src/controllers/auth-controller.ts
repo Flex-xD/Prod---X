@@ -97,7 +97,7 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "User logged in successfully!",
-        data: { accessToken, user },
+        data: { refreshPlain, accessToken, user },
         success: true
     })
 });

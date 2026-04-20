@@ -9,11 +9,13 @@ import User from "../shared/models/User";
 
 export async function refresh(req: Request, res: Response) {
     const refreshPlain = req.cookies?.refreshToken;
+    console.log("Refesh plain checked !")
     if (!refreshPlain) return sendResponse(res, {
         statusCode: StatusCodes.UNAUTHORIZED,
         success: false,
         message: "No refresh plain token found !"
     })
+
 
     const hashed = hashToken(refreshPlain);
     const userRefreshToken = await Token.findOne({ hashedToken: hashed });

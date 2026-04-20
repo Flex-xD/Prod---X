@@ -22,7 +22,7 @@ apiClient.interceptors.response.use(
         if (error.response.status == 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
-                const refreshResponse = await axios.post("/auth/refresh" , {} , {
+                const refreshResponse = await axios.post("/auth/access-token" , {} , {
                     withCredentials:true
                 });
                 const newAccessToken = refreshResponse.data.data.acccessToken;

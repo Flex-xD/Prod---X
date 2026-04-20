@@ -9,6 +9,7 @@ const authRoutes = Router();
 authRoutes.post("/register", validate(registerSchema), registerController);
 authRoutes.post("/login", validate(loginSchema), loginController);
 authRoutes.post("/google-auth", googleAuthController);
-authRoutes.post("/refresh" , refresh);
+authRoutes.get("/access-token" , refresh);
+
 
 export default authRoutes;

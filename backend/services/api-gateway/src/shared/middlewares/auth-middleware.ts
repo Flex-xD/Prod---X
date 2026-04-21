@@ -18,11 +18,6 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
             throw ApiError(StatusCodes.UNAUTHORIZED , "Unauthorized - Headers not found !");
         }
 
-        // if (headers["x-service-key"]) {
-        //     return next();
-        // }
-
-        
         const token = headers.split(" ")[1];
         // const token = req.cookies.token;
         if (!token) {

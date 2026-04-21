@@ -2,20 +2,19 @@ import { Request, Response } from "express";
 import { hashToken } from "../utils/hash";
 import { signAccessToken } from "../utils/generate-token";
 import { StatusCodes } from "http-status-codes";
-import uuidv4 from "uuidv4";
+import { v4 as uuidv4 } from "uuid";
 import { sendResponse } from "../shared/utils/response-utils";
 import Token from "../shared/models/Token";
 import User from "../shared/models/User";
+import { ApiError } from "../shared/utils/api-error";
 
 export async function refresh(req: Request, res: Response) {
     const refreshPlain = req.cookies?.refreshToken;
-    console.log("Refesh plain checked !")
-    if (!refreshPlain) return sendResponse(res, {
-        statusCode: StatusCodes.UNAUTHORIZED,
-        success: false,
-        message: "No refresh plain token found !"
-    })
-
+    console.log("Cookies object:", req.cookies);
+    console.log("Raw cookie header:", req.headers.cookie);
+    if (!refreshPlain) {
+        throw ApiError(StatusCodes.UNAUTHORIZED, "Refresh Plain not found !");
+    }
 
     const hashed = hashToken(refreshPlain);
     const userRefreshToken = await Token.findOne({ hashedToken: hashed });
@@ -63,7 +62,7 @@ export async function refresh(req: Request, res: Response) {
     user.refreshTokens = user.refreshTokens.filter(rt => rt !== userRefreshToken._id);
 
     const newAccessToken = signAccessToken({ sub: user._id });
-    const newRefreshPlain = `${uuidv4}.${crypto.randomUUID()}`;
+    const newRefreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
     const newHashed = hashToken(newRefreshPlain);
 
     const newSlidingExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);

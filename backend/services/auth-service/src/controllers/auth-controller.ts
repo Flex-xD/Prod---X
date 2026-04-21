@@ -9,14 +9,12 @@ import { asyncHandler } from "../shared/utils/async-handler";
 import { sendResponse } from "../shared/utils/response-utils";
 import Token from "../shared/models/Token";
 import { emitEvent } from "../kafka/producer";
-import { IAuthRequest } from "../shared/middlewares/auth-middleware";
-import { ApiError } from "../shared/utils/api-error";
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
-    path: "/auth/refresh",
+    path: "/api/v1/auth/refresh",
     maxAge: 30 * 24 * 60 * 60 * 1000
 };
 

@@ -47,8 +47,6 @@ app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
 const services = {
     // Later on add the paths to the env file
     "/tasks": "http://localhost:4000/api/v1",
-
-    // ! Test this if it is working or not
     "/user":"http://localhost:5000/api/v1" ,
     "/auth": "http://localhost:5000/api/v1",
     "/group-productivity-timer": "http://localhost:9000/api/v1",
@@ -59,7 +57,6 @@ interface IAuthRequest extends Request {
     userId?: mongoose.Types.ObjectId
 }
 
-// * Find a way to implement validate middleware in the API-GATEWAY along with the suitable types for different API's  (keep scalability in mind)
 app.all(/.*/, async (req: IAuthRequest, res: Response) => {
     const { userId } = req;
     const urlPath = req.path.replace(/^\/api\/v1/, "");
@@ -92,7 +89,8 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
                 authorization: req.headers.authorization,
                 // "x-user-id": (req as any).userId?.toString() , 
                 "x-user-id": userId?.toString(),
-                "x-service-key": req.headers["x-service-key"]
+                "x-service-key": req.headers["x-service-key"] , 
+                cookie:req.headers.cookie
             },
             validateStatus: () => true
         });

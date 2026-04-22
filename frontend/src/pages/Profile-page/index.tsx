@@ -5,6 +5,7 @@ import ProfileHero from './profilepage-components/profile-hero';
 import CollectionsRow from './profilepage-components/collections-row';
 import PointsCard from './profilepage-components/points-card';
 import ActivityCalendar from './profilepage-components/activity-calendar';
+import { useUserData } from '@/custom-hooks/user-related-fetching/user-data';
 
 const DUMMY_USER = {
     username: 'alex_prodx',
@@ -19,6 +20,8 @@ const DUMMY_USER = {
 const calendarData = generateYearCalendarData();
 
 const ProfilePage = () => {
+    const {data:userProfileData , isPending:userProfileDataPending} = useUserData();
+    console.log("This is the user-data : ", userProfileData ,"and isPending : ", userProfileDataPending);
     const [user, setUser] = useState(DUMMY_USER);
 
     const handleProfileSave = (payload: IProfileEditPayload) => {

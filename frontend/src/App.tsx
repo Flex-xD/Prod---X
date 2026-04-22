@@ -26,7 +26,9 @@ function App() {
   }, [data, setIsAuthenticated]);
 
   if (isPending) {
-    return <Loader/>;
+    return <div className="h-screen w-screen flex justify-center items-center">
+      <Loader/>
+    </div>;
   }
 
   // Now I have to test it , weather useUserData API is acting accordingly for the source of truth of the user's authentication

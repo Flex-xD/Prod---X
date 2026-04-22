@@ -8,10 +8,10 @@ const ENDPOINTS = {
         LOGOUT:`${BASE_URL}/auth/logout`
     } , 
     TASKS_ENDPOINTS:{
-        CREATE_TASK:"/tasks/create" , 
+        CREATE_TASK:`${BASE_URL}/tasks/create`, 
     } , 
     USER_ENDPOINTS:{
-        USER_DATA:"/user/user-data"
+        USER_DATA:`${BASE_URL}/user/user-data`
     }
 }
 

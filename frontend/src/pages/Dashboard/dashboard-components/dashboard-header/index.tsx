@@ -1,5 +1,6 @@
 import { Calendar, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const DashboardHeader = () => {
     return (
@@ -22,7 +23,7 @@ const DashboardHeader = () => {
                         Nov 1, 2025
                     </Button>
                     <div className="w-10 h-10 bg-linear-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
-                        AK
+                        <Link to={"/profile"}>AK</Link>
                     </div>
                 </div>
             </div>

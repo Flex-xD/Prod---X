@@ -8,11 +8,14 @@ import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import { ProtectedRoutes } from "./custom-components/protected-routes";
 import { PublicRoutes } from "./custom-components/public-routes";
+import ProfilePage from "./pages/Profile-page";
 
 function App() {
+  console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
   const setIsAuthenticated = userAppStore((state) => state.setIsAuthenticated);
-  const { data, isPending, isError } = useUserData();
-
+  const { data, isPending , isError} = useUserData();
+  console.log("This is App.tsx : " , "data :" , data , "ispending : " , isPending , "isError : " , isError);
+  
   useEffect(() => {
     if (data?.success) {
       setIsAuthenticated(true);
@@ -20,10 +23,10 @@ function App() {
     if (isError) {
       setIsAuthenticated(false);
     }
-  }, [data, isPending, setIsAuthenticated]);
+  }, [data, setIsAuthenticated]);
 
   if (isPending) {
-    return <Loader></Loader>;
+    return <Loader/>;
   }
 
   // Now I have to test it , weather useUserData API is acting accordingly for the source of truth of the user's authentication
@@ -48,6 +51,14 @@ function App() {
           element={
             <ProtectedRoutes>
               <ProdXDashboard />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoutes>
+              <ProfilePage />
             </ProtectedRoutes>
           }
         />

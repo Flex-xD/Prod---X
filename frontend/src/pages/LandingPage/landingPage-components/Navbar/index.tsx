@@ -2,7 +2,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@/components/ui/navigation-menu';
 import { Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Navigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function LandingNavbar() {
     const { scrollY } = useScroll();

@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 
 export const ProtectedRoutes = ({ children }: { children: ReactNode }) => {
-    const isAuthenticated = userAppStore((state) => state.isAuthenticated);
+    const accessToken = userAppStore((state) => state.accessToken);
+    const isAuthenticated = !!accessToken;
 
     if (!isAuthenticated) {
         return (

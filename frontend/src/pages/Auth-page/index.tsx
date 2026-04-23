@@ -13,6 +13,7 @@ import useGoogleAuth from '@/custom-hooks/auth-mutation/google-auth';
 import useLoginMutation from '@/custom-hooks/auth-mutation/login';
 import useRegisterMutation from '@/custom-hooks/auth-mutation/register';
 import type { IHandleLogin, IHandleRegiser } from './auth-components/Auth-Types';
+import { useLogoutMutation } from '@/custom-hooks/auth-mutation/logout';
 
 
 export default function AuthPage() {

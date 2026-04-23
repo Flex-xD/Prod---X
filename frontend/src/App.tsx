@@ -38,7 +38,9 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={<ProdXLandingPage />}
+          element={<PublicRoutes>
+            <ProdXLandingPage />
+          </PublicRoutes>}
         />
         <Route
           path="/auth"

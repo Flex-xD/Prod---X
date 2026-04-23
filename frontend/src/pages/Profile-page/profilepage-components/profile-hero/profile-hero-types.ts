@@ -5,6 +5,8 @@ export interface IProfileHeroProps {
     friendsCount: number;
     productivityPoints: number;
     onSave: (data: IProfileEditPayload) => void;
+    onLogout: () => void;
+    isLogoutPending:boolean
 }
 
 export interface IProfileEditPayload {

@@ -8,10 +8,12 @@ export const PublicRoutes = ({
     children: ReactNode
 }) => {
 
-    const isAuthenticated =
+    const accessToken =
         userAppStore(
-            (state) => state.isAuthenticated
+            (state) => state.accessToken
         );
+    const isAuthenticated =
+        !!accessToken;
 
     if (isAuthenticated) {
         return (

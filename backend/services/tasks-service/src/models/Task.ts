@@ -5,7 +5,7 @@ interface ITask extends Document {
     title: string;
     description?: string;
     author: Types.ObjectId;        
-    status: "pending" | "in-progress" | "completed";
+    status: "pending" | "in-progress" | "done";
     createdAt: Date;
     updatedAt: Date;
     // Virtual field (populated later)
@@ -38,7 +38,7 @@ const taskSchema = new Schema<ITask>(
         },
         status: {
             type: String,
-            enum: ["pending", "in-progress", "completed"] as const,
+            enum: ["pending", "in-progress", "done"] as const,
             default: "pending",
         },
     },

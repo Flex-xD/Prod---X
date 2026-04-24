@@ -6,7 +6,6 @@ const consumer = kafka.consumer({
 });
 
 
-
 export const connectConsumer = async () => {
     try {
         await consumer.connect();

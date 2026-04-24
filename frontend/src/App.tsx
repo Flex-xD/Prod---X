@@ -13,12 +13,14 @@ import ProfilePage from "./pages/Profile-page";
 function App() {
   console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
   const setIsAuthenticated = userAppStore((state) => state.setIsAuthenticated);
+  const setUserId = userAppStore((state) => state.setUserId);
   const { data, isPending , isError} = useUserData();
-  console.log("This is App.tsx : " , "data :" , data , "ispending : " , isPending , "isError : " , isError);
   
+  console.log("This is App.tsx : " , "data :" , data , "ispending : " , isPending , "isError : " , isError);
   useEffect(() => {
     if (data?.success) {
       setIsAuthenticated(true);
+      setUserId(data.data._id);
     }
     if (isError) {
       setIsAuthenticated(false);

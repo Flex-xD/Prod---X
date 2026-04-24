@@ -19,15 +19,13 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
         }
 
         const token = headers.split(" ")[1];
-        // const token = req.cookies.token;
         if (!token) {
             return sendResponse(res, {
-                statusCode: StatusCodes.NOT_FOUND,
+                statusCode: StatusCodes.UNAUTHORIZED,
                 message: "JWT Token not found !",
                 success: false
             })
         }
-        console.log(`This is token : ${token}`);
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {userId:mongoose.Types.ObjectId}
         if (!decoded.userId) {

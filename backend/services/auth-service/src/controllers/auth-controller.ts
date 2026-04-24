@@ -148,9 +148,11 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
 export const logoutController = asyncHandler(async (req: Request, res: Response) => {
     res.clearCookie("refreshToken", REFRESH_COOKIE_OPTIONS);
     // ? See what to do with the refresh tokens in db , whether to delete them or keep them for history
+    console.log("Logout done !")
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "Logged out successfully !",
+        data:null ,
         success: true
     })
 })

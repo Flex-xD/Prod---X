@@ -22,10 +22,12 @@ apiClient.interceptors.response.use(
         if (error.response.status == 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
+                console.log("GETTING THE ACCESS TOKEN !")
                 const refreshResponse = await axios.post("/auth/access-token" , {} , {
                     withCredentials:true
                 });
                 const newAccessToken = refreshResponse.data.data.acccessToken;
+                console.log("THE NEW ACCESS TOKEN : ," , newAccessToken);
                 userAppStore.getState().setAccessToken(newAccessToken);
                 originalRequest.headers.authorization = `Bearer ${newAccessToken}`; 
                 return apiClient(originalRequest);

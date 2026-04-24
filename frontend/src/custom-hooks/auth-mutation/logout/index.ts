@@ -1,13 +1,15 @@
 import ENDPOINTS from "@/constants/api-endpoints"
+import { QUERY_KEYS } from "@/constants/query-keys"
 import { userAppStore } from "@/store"
 import type { ApiResponse } from "@/types/api-response"
 import apiClient from "@/utils/Axios-client"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { AxiosError, HttpStatusCode } from "axios"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 export const useLogoutMutation = () => {
+    const queryClient = useQueryClient();
     const setIsAuthenticated =
         userAppStore(
             (state) => state.setIsAuthenticated
@@ -37,6 +39,8 @@ export const useLogoutMutation = () => {
         },
         onSuccess: async (data) => {
             await navigate("/");
+            console.log(data)
+            await queryClient.invalidateQueries({queryKey:QUERY_KEYS.PROFILE.ME});
             return toast.success(data?.message || "Logout successfully done !")
         },
         onError: (error: AxiosError | Error) => {

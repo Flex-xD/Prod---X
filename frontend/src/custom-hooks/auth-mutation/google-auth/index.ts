@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 const useGoogleAuth = () => {
     const queryClient = useQueryClient();
-    const {setAccessToken , setIsAuthenticated} = userAppStore.getState();
+    const { setAccessToken, setIsAuthenticated, setUserId } = userAppStore.getState();
     const navigate = useNavigate();
     return useMutation({
         mutationFn: async (idToken: any) => {
@@ -26,6 +26,8 @@ const useGoogleAuth = () => {
             }
             setIsAuthenticated(true);
             setAccessToken(data.data.accessToken);
+            setUserId(data.data.user._id);
+
             await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
 
             console.log("User logged in successfully : ", data.data);

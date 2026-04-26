@@ -61,7 +61,7 @@ export async function refresh(req: Request, res: Response) {
 
     user.refreshTokens = user.refreshTokens.filter(rt => rt !== userRefreshToken._id);
 
-    const newAccessToken = signAccessToken({ sub: user._id });
+    const newAccessToken = signAccessToken({ userId: user._id });
     const newRefreshPlain = `${uuidv4()}.${crypto.randomUUID()}`;
     const newHashed = hashToken(newRefreshPlain);
 

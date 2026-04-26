@@ -46,7 +46,7 @@ app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
 
 const services = {
     // Later on add the paths to the env file
-    "/tasks": "http://localhost:4000/api/v1",
+    "/task": "http://localhost:4000/api/v1",
     "/user":"http://localhost:5000/api/v1" ,
     "/auth": "http://localhost:5000/api/v1",
     "/group-productivity-timer": "http://localhost:9000/api/v1",
@@ -60,7 +60,6 @@ interface IAuthRequest extends Request {
 app.all(/.*/, async (req: IAuthRequest, res: Response) => {
     const { userId } = req;
     const urlPath = req.path.replace(/^\/api\/v1/, "");
-    logger.info(`Normalized path: ${urlPath}`);
 
     logger.info(`Request received at API-GATEWAY for path: ${urlPath}`);
 
@@ -77,6 +76,7 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
 
     const targetUrl = services[targetService];
     const forwardUrl = targetUrl + urlPath;
+    console.log("forward URL :",forwardUrl);
 
     // ! there is this problem where the api-gateway is not able to recognize if it is a valid api end-point even if it matches the target service
 
@@ -103,5 +103,5 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
 
 app.listen(PORT, async () => {
     await connectDb(MONGODB_URI || "");
-    logger.info(`API-GATEWAY ⛩️  is running on PORT:☑️  ${PORT}`);
+    logger.info(`API-GATEWAY ⛩️ is running on PORT:☑️  ${PORT}`);
 })

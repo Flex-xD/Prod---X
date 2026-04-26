@@ -9,10 +9,12 @@ const ENDPOINTS = {
     } , 
     TASKS_ENDPOINTS:{
         CREATE_TASK:`${BASE_URL}/tasks/create`, 
+        GET_TODAYS_TASKS:`${BASE_URL}/tasks/todays-tasks`
     } , 
     USER_ENDPOINTS:{
         USER_DATA:`${BASE_URL}/user/user-data`
-    }
+    } , 
+
 }
 
 export default ENDPOINTS;

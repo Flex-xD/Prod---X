@@ -12,7 +12,6 @@ export interface IAuthRequest extends Request {
 export const authMiddleware = async (req: IAuthRequest, res: Response, next: NextFunction) => {
     try {
         const headers = req.headers.authorization;
-        console.log(headers);
         if (!headers) {
             console.log("Headers not present !")
             throw ApiError(StatusCodes.UNAUTHORIZED , "Unauthorized - Headers not found !");

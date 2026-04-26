@@ -12,5 +12,4 @@ authRoutes.post("/logout" , logoutController);
 authRoutes.post("/google-auth", googleAuthController);
 authRoutes.get("/refresh" , refresh);
 
-
 export default authRoutes;

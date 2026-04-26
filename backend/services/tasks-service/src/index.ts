@@ -21,11 +21,7 @@ app.use(cors({
 
 app.use(express.json());
 
-app.use("/api/v1/tasks" , taskRoutes);
-
-(async () => {
-    await initKafka();
-})()
+app.use("/api/v1/task" , taskRoutes);
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
     return sendError(res, { error: err });
@@ -34,4 +30,5 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
 app.listen(PORT  , async () => {
     await connectDb(MONGODB_URI || "");
     logger.info(`Task-Service is running on PORT:☑️  ${PORT}`);
+    await initKafka();
 })

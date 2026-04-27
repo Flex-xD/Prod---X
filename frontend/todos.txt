@@ -17,8 +17,5 @@ The mains featues of thie Web-Applications are going to be :
 
 
 >>>> CURRENTLY WORKING ON :
-1. Connecting Authentication backend to frontend properly [done]
-  >>> Now, I have to test weather the frontend is making request to the backend after the accesstoken are expired (15 minutes one) and getting the response (basically check "/auth/refresh") 
-  >>> also find a way to persist zustand's state & also refresh on app login (using useEffect);
 
 2. Implementing CRUD on task and updating UI accorinding to it.

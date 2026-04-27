@@ -4,19 +4,30 @@ import type { ITask } from "@/pages/Dashboard/dashboard-components/tasks-card/ta
 import type { ApiResponse } from "@/types/api-response";
 import apiClient from "@/utils/Axios-client";
 import { useQuery } from "@tanstack/react-query"
-import { data } from "react-router-dom";
 import { toast } from "sonner";
+
+type getTodaysTasksApiResponse = ApiResponse<{
+    tasks:ITask[] ,
+    metaData:{
+        date:string , 
+        totalTasks:number
+    }
+}>
 
 const useGetTodaysTasks = (userId:string) => {
     return useQuery({
-        queryKey:[QUERY_KEYS.TASKS.USER(userId)] , 
+        queryKey:QUERY_KEYS.TASKS.TODAYS_TASKS(userId) , 
         queryFn:async () => {
             const response = await apiClient.get(ENDPOINTS.TASKS_ENDPOINTS.GET_TODAYS_TASKS);
-            if (!data) {
-                return toast.error("Error fetching today's tasks !");
+            if (!response.data) {
+                throw Error("Today's tasks not fetched !");
             }
-            return response.data as ApiResponse<ITask[]>
+            console.log("This is the response data of getTodaysTask : ",response.data)
+            return response.data as getTodaysTasksApiResponse;
         } , 
+        enabled:!!userId
+        // ? Add suitable refetch interval
+        // refetchInterval:
     })
 }
 

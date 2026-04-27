@@ -8,23 +8,29 @@ import type { AxiosError } from "axios"
 import { toast } from "sonner"
 
 
-const useCreateTaskMutation = (userId:string) => {
+const useCreateTaskMutation = (userId: string) => {
     const queryClient = useQueryClient();
     return useMutation({
+
         mutationFn: async (taskData: ITaskData) => {
+            if (!userId) {
+                throw Error("userID not defined in createTaskMutation !");
+            };
             const response = await apiClient.post(ENDPOINTS.TASKS_ENDPOINTS.CREATE_TASK, {
                 taskData
             });
             return response.data as ApiResponse<ITaskData>;
         },
         onSuccess: async (data) => {
+            let failedMessage;
             if (!data?.success) {
-                toast.error(data?.message || "Task creation failed !");
-                return;
+                failedMessage = data?.message || "Task creation failed !"
+                toast.error(failedMessage);
+                throw Error(failedMessage);
             }
             console.log("Task created successfully : ", data.data);
 
-            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS.USER(userId) });
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS.TODAYS_TASKS(userId) });
 
             return toast.success(data.message);
         },
@@ -55,7 +61,7 @@ const useCreateTaskMutation = (userId:string) => {
             }
 
             toast.error(message);
-        }
+        },
     })
 }
 

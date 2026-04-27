@@ -16,14 +16,23 @@ import LeaderboardCard from './dashboard-components/leaderboard-card';
 import MotivationalCard from './dashboard-components/motivational-card';
 import useCreateTaskMutation from '@/custom-hooks/task-mutation/create-task';
 import { dummyTasks, leaderboard, weeklyData } from './dashboard-components/dashboard-dummy-data';
-import type { ITask } from './dashboard-components/tasks-card/tasks-card-types';
+import type { ITaskData } from './dashboard-components/tasks-card/tasks-card-types';
+import { userAppStore } from '@/store';
+import useGetTodaysTasks from '@/custom-hooks/task-mutation/get-tasks';
 
 
 const Dashboard = () => {
-
-  // ? For task mutation 
+  const user_id = userAppStore((state) => state.user_id);
+  const safeUserId = user_id ?? "";
 
   const [tasks, setTasks] = useState(dummyTasks);
+
+  const { mutateAsync: createTaskMutation, isPending: createTaskPending } = useCreateTaskMutation(safeUserId);
+
+  // ? Use the task's pending state from below
+  const { data: todaysTask } = useGetTodaysTasks(safeUserId);
+  
+  const tasksToDisplay = todaysTask?.data.tasks ?? [];
 
   const focusTime = 245; // minutes today
   const dailyGoal = 240; // 4 hours
@@ -57,8 +66,6 @@ const Dashboard = () => {
     ));
   };
 
-
-
   const maxHours = Math.max(...weeklyData.map((d) => d.hours));
 
 
@@ -73,11 +80,9 @@ const Dashboard = () => {
 
   const currentTip = aiTips[0]; // You can rotate this with useEffect if desired
 
-  let userId = "lsmfkdsnkf";
-  const { mutateAsync: createTaskMutation, isPending: createTaskPending, error: createTaskError } = useCreateTaskMutation(userId);
 
-  const onAddTask =  async (taskData: ITask) => {
-    await createTaskMutation(taskData);
+  const onAddTask = async (taskData: ITaskData) => {
+      await createTaskMutation(taskData);
   }
 
   return (
@@ -132,7 +137,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <TasksCard tasks={tasks} onToggleTask={toggleTask} onAddTask={onAddTask} createTaskPending={createTaskPending}/>
+            <TasksCard tasks={tasksToDisplay} onToggleTask={toggleTask} onAddTask={onAddTask} createTaskPending={createTaskPending} />
             <CalendarCard calendarData={calendarData} />
             <WeeklyGraphCard weeklyData={weeklyData} maxHours={maxHours} />
           </div>

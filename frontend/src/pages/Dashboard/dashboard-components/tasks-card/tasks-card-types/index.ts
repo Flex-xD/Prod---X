@@ -21,7 +21,7 @@ export interface ITask {
 }
 
 export interface TasksCardProps {
-    tasks: ITaskData[];
+    tasks: ITask[];
     onToggleTask: (id: number) => void;
     onAddTask: (taskData: ITaskData) => void;
     createTaskPending: boolean;

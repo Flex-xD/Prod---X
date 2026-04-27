@@ -1,10 +1,11 @@
-export const QUERY_KEYS = { 
-    TASKS:{
-        ALL:["tasks"] as const , 
-        USER:(userId:string) => ["tasks" , userId] as const,
-        BY_ID:(taskId:string) => ["tasks" , taskId] as const
+export const QUERY_KEYS = {
+    TASKS: {
+        ALL: ["tasks"] as const,
+        USER: (userId: string) => ["tasks", userId] as const,
+        TODAYS_TASKS: (userId: string) => ["tasks", userId, new Date().toISOString().slice(0, 10)] as const,
+        BY_ID: (taskId: string) => ["tasks", taskId] as const
     }
-    , 
+    ,
     PROFILE: {
         ME: ["profile", "me"] as const,
         BY_ID: (userId: string) => ["profile", userId] as const,

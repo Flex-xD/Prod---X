@@ -60,10 +60,10 @@ const Dashboard = () => {
   const tasksCompleted = tasks.filter((t) => t.done).length;
   const weeklyProgress = 68; // percentage
 
-  const toggleTask = (id: number) => {
-    setTasks(tasks.map((task) =>
-      task.id === id ? { ...task, done: !task.done } : task
-    ));
+  const toggleTask = (id: string) => {
+    // setTasks(tasks.map((task) =>
+    //   task.id === id ? { ...task, done: !task.done } : task
+    // ));
   };
 
   const maxHours = Math.max(...weeklyData.map((d) => d.hours));

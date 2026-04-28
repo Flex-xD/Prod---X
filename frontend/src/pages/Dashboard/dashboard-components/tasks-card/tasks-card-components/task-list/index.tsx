@@ -3,7 +3,7 @@ import TaskItem from "../task-item";
 
 interface TaskListProps {
     tasks: ITask[];
-    onToggleTask: (id: number) => void;
+    onToggleTask: (id: string) => void;
 }
 
 const TaskList = ({ tasks, onToggleTask }: TaskListProps) => {
@@ -11,7 +11,7 @@ const TaskList = ({ tasks, onToggleTask }: TaskListProps) => {
         <>
             {tasks.map((task, index) => (
                 <TaskItem
-                    key={task.id}
+                    key={task._id}
                     task={task}
                     index={index}
                     onToggle={onToggleTask}

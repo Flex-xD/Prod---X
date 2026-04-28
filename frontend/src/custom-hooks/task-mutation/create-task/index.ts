@@ -12,12 +12,12 @@ const useCreateTaskMutation = (userId: string) => {
     const queryClient = useQueryClient();
     return useMutation({
 
-        mutationFn: async (taskData: ITaskData) => {
+        mutationFn: async ({title , description}: ITaskData) => {
             if (!userId) {
                 throw Error("userID not defined in createTaskMutation !");
             };
             const response = await apiClient.post(ENDPOINTS.TASKS_ENDPOINTS.CREATE_TASK, {
-                taskData
+                title , description
             });
             return response.data as ApiResponse<ITaskData>;
         },

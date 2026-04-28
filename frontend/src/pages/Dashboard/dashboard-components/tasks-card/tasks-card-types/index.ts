@@ -22,7 +22,7 @@ export interface ITask {
 
 export interface TasksCardProps {
     tasks: ITask[];
-    onToggleTask: (id: number) => void;
+    onToggleTask: (id: string) => void;
     onAddTask: (taskData: ITaskData) => void;
     createTaskPending: boolean;
 }

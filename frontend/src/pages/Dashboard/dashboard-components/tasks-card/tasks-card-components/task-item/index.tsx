@@ -5,7 +5,7 @@ import type { ITask } from '../../tasks-card-types';
 
 interface TaskItemProps {
     task: ITask;
-    onToggle: (id: number) => void;
+    onToggle: (id: string) => void;
     index: number;
 }
 
@@ -15,15 +15,15 @@ const TaskItem = ({ task, onToggle, index }: TaskItemProps) => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
-            onClick={() => onToggle(task.id)}
-            className={`p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${task.done
+            onClick={() => onToggle(task._id)}
+            className={`p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${task.status == "done"
                     ? 'bg-green-50 border-green-200'
                     : 'bg-slate-50 border-slate-200 hover:border-purple-300 hover:shadow-md'
                 }`}
         >
             <div className="flex items-start gap-4">
                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                    {task.done ? (
+                    {task.status == "done" ? (
                         <CheckCircle2 className="w-6 h-6 text-green-600" />
                     ) : (
                         <Circle className="w-6 h-6 text-slate-400" />
@@ -32,7 +32,7 @@ const TaskItem = ({ task, onToggle, index }: TaskItemProps) => {
 
                 <div className="flex-1">
                     <h4
-                        className={`font-semibold ${task.done
+                        className={`font-semibold ${task.status == "done"
                                 ? 'text-slate-400 line-through'
                                 : 'text-slate-900'
                             }`}
@@ -42,7 +42,7 @@ const TaskItem = ({ task, onToggle, index }: TaskItemProps) => {
 
                     {task.description && (
                         <p
-                            className={`text-sm mt-1 ${task.done ? 'text-slate-400' : 'text-slate-600'
+                            className={`text-sm mt-1 ${task.status == "done" ? 'text-slate-400' : 'text-slate-600'
                                 }`}
                         >
                             {task.description}
@@ -50,7 +50,7 @@ const TaskItem = ({ task, onToggle, index }: TaskItemProps) => {
                     )}
                 </div>
 
-                {task.done && (
+                {task.status == "done" && (
                     <Badge className="bg-green-100 text-green-700">
                         Done!
                     </Badge>

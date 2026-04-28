@@ -8,6 +8,7 @@ const apiClient = axios.create({
 // ? Now I have to test it , 
 apiClient.interceptors.request.use((config) => {
     const accessToken = userAppStore.getState().accessToken;
+    console.log("Checking for the access-token");
     if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -19,7 +20,9 @@ apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        if (error.response.status == 401 && !originalRequest._retry) {
+        console.log("Initiation of new access-token . . .")
+        console.log("Error in response interceptor :" , error.response);
+        if (error.response.status == 401  && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
                 console.log("GETTING THE ACCESS TOKEN !")
@@ -27,7 +30,9 @@ apiClient.interceptors.response.use(
                     withCredentials:true
                 });
                 const newAccessToken = refreshResponse.data.data.acccessToken;
+
                 console.log("THE NEW ACCESS TOKEN : ," , newAccessToken);
+
                 userAppStore.getState().setAccessToken(newAccessToken);
                 originalRequest.headers.authorization = `Bearer ${newAccessToken}`; 
                 return apiClient(originalRequest);

@@ -14,9 +14,11 @@ function App() {
   console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
   const setIsAuthenticated = userAppStore((state) => state.setIsAuthenticated);
   const setUserId = userAppStore((state) => state.setUserId);
+  const user_id = userAppStore((state) => state.user_id);
   const { data, isPending , isError} = useUserData();
   
   console.log("This is App.tsx : " , "data :" , data , "ispending : " , isPending , "isError : " , isError);
+  console.log("UserId in APP.tsx : ",user_id);
   useEffect(() => {
     if (data?.success) {
       setIsAuthenticated(true);

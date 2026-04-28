@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { sendError, sendResponse } from "../utils/response-utils";
-
+import { ApiError } from "../utils/api-error";
 
 export interface IAuthRequest extends Request {
     userId?:mongoose.Types.ObjectId;
@@ -11,26 +11,35 @@ export interface IAuthRequest extends Request {
 
 export const authMiddleware = async (req: IAuthRequest, res: Response, next: NextFunction) => {
     try {
-        const {token} = req.cookies;
-        console.log("This is token : " , token , "and this is req.cookies : " , req.cookies);
+        const headers = req.headers.authorization;
+        if (!headers) {
+            console.log("Headers not present !")
+            throw ApiError(StatusCodes.UNAUTHORIZED , "Unauthorized - Headers not found !");
+        }
+
+        const token = headers.split(" ")[1];
         if (!token) {
             return sendResponse(res, {
-                statusCode: StatusCodes.NOT_FOUND,
+                statusCode: StatusCodes.UNAUTHORIZED,
                 message: "JWT Token not found !",
                 success: false
             })
         }
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {userId:mongoose.Types.ObjectId}
         if (!decoded.userId) {
             return sendResponse(res , {
-                statusCode:StatusCodes.CONFLICT , 
+                statusCode:StatusCodes.UNAUTHORIZED , 
                 message:"Token not decoded !" ,
                 success:false
             })
         }
+
         req.userId = decoded.userId;
+        // console.log("req.userId is equal to : " , req.userId);
         next();
     } catch (error) {
+        console.log("Error in the Auth-Middleware : " , error);
         return sendError(res, { error });
     }
 }

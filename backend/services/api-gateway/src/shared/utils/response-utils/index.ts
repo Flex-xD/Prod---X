@@ -1,5 +1,6 @@
 import { Response } from "express"
 import { logger } from "../winston-logger";
+import { AxiosError } from "axios";
 export type sendResponseType<T> = {
     statusCode: number,
     success: boolean,
@@ -33,9 +34,7 @@ export const sendError = (res: Response, {
     error?: unknown;
 }) => {
     const errorMessage = error instanceof Error ? error.message : message;
-    console.log(error);
     logger.error("❌ Error:", errorMessage);
-
     return res.status(statusCode).json({
         statusCode,
         success: false,

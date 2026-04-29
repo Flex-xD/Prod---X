@@ -51,9 +51,7 @@ export const getTodaysTask = asyncHandler(async (req: IAuthRequest, res: Respons
         message: "User tasks fetched successfully !"
     })
 
-});
-
-
+})
 
 // Each microservice should have it's kafka instance with the same brokers across all along , with independent producers and consumers
 // Fix this

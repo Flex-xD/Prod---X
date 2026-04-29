@@ -6,7 +6,7 @@ import { sendError, sendResponse } from "../utils/response-utils";
 import { ApiError } from "../utils/api-error";
 
 export interface IAuthRequest extends Request {
-    userId?: mongoose.Types.ObjectId;
+    userId?:mongoose.Types.ObjectId;
 }
 
 export const authMiddleware = async (req: IAuthRequest, res: Response, next: NextFunction) => {
@@ -14,20 +14,24 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
         const headers = req.headers.authorization;
         if (!headers) {
             console.log("Headers not present !")
-            throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized - Headers not found !");
+            throw ApiError(StatusCodes.UNAUTHORIZED , "Unauthorized - Headers not found !");
         }
 
         const token = headers.split(" ")[1];
         if (!token) {
-            throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized - token not found !");
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: mongoose.Types.ObjectId }
-        if (!decoded.userId) {
             return sendResponse(res, {
                 statusCode: StatusCodes.UNAUTHORIZED,
-                message: "Token not decoded !",
+                message: "JWT Token not found !",
                 success: false
+            })
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {userId:mongoose.Types.ObjectId}
+        if (!decoded.userId) {
+            return sendResponse(res , {
+                statusCode:StatusCodes.CONFLICT , 
+                message:"Token not decoded !" ,
+                success:false
             })
         }
 
@@ -35,7 +39,6 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
         // console.log("req.userId is equal to : " , req.userId);
         next();
     } catch (error) {
-        console.log("WE are catching the error directly !");
         return sendError(res, { error });
     }
 }

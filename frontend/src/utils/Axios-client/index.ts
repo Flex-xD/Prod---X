@@ -16,32 +16,57 @@ apiClient.interceptors.request.use((config) => {
     return config;
 })
 
+
 apiClient.interceptors.response.use(
     (response) => response,
+
     async (error) => {
+
         const originalRequest = error.config;
-        console.log("Initiation of new access-token . . .")
-        console.log("Error in response interceptor :" , error.response);
-        if (error.response.status == 401  && !originalRequest._retry) {
+
+        console.log("Error in response interceptor:", error.response);
+
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry
+        ) {
+
             originalRequest._retry = true;
+
             try {
-                console.log("GETTING THE ACCESS TOKEN !")
-                const refreshResponse = await axios.post("/auth/access-token" , {} , {
-                    withCredentials:true
-                });
-                const newAccessToken = refreshResponse.data.data.acccessToken;
 
-                console.log("THE NEW ACCESS TOKEN : ," , newAccessToken);
+                const refreshResponse =
+                    await axios.post(
+                        "/auth/access-token",
+                        {},
+                        { withCredentials: true }
+                    );
 
-                userAppStore.getState().setAccessToken(newAccessToken);
-                originalRequest.headers.authorization = `Bearer ${newAccessToken}`; 
+                const newAccessToken =
+                    refreshResponse.data.data.accessToken;
+
+                userAppStore
+                    .getState()
+                    .setAccessToken(newAccessToken);
+
+                originalRequest.headers.Authorization =
+                    `Bearer ${newAccessToken}`;
+
                 return apiClient(originalRequest);
+
             } catch (refreshError) {
-                userAppStore.getState().clearAccessToken();
+
+                userAppStore
+                    .getState()
+                    .clearAccessToken();
+
                 window.location.href = "/auth";
+
                 return Promise.reject(refreshError);
             }
         }
-    });
 
+        return Promise.reject(error);
+    }
+);
 export default apiClient;

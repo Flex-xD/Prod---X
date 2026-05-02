@@ -37,7 +37,7 @@ export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) 
 // ? Below whenever I am getting tasks , I am getting a extra id field in the array
 export const getTodaysTask = asyncHandler(async (req: IAuthRequest, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
-    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
+    if (!userId) { throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !"); }
 
     const { tasks, metaData } = await taskService.getTodaysTasks(toObjectId(userId));
 
@@ -51,6 +51,39 @@ export const getTodaysTask = asyncHandler(async (req: IAuthRequest, res: Respons
         message: "User tasks fetched successfully !"
     })
 
+});
+
+export const markTaskDone = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) { throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !"); };
+
+    const { taskId } = req.body;
+
+    const taskToBeMarkDone = await taskService.markTaskDone(toObjectId(taskId));
+
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        data: taskToBeMarkDone,
+        success: true,
+        message: "Task's status marked done"
+    })
+})
+
+export const markTaskPending = asyncHandler(async (req: Request, res: Response) => {
+
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) { throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !"); };
+
+    const { taskId } = req.body;
+
+    const taskToBeMarkPending = await taskService.markTaskPending(toObjectId(taskId));
+
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        data: taskToBeMarkPending,
+        success: true,
+        message: "Task's status marked pending"
+    })
 })
 
 // Each microservice should have it's kafka instance with the same brokers across all along , with independent producers and consumers

@@ -51,11 +51,11 @@ const taskService = {
         }
 
         const tasks = await Task.find(filter)
-        .sort({ createdAt: -1 })
-        .populate({
-            path:"authorDetails" , 
-            select:"_id username avatar"
-        })
+            .sort({ createdAt: -1 })
+            .populate({
+                path: "authorDetails",
+                select: "_id username avatar"
+            })
 
         const totalTasks = await Task.countDocuments(filter);
         const responseData = {
@@ -68,7 +68,56 @@ const taskService = {
 
         await emitEvent("task.today.get", responseData.metaData);
         return responseData;
+    },
+
+    markTaskDone: async (taskId: Types.ObjectId) => {
+        const taskToBeMarkDone = await Task.findById(taskId);
+
+        if (!taskToBeMarkDone) {
+            throw ApiError(StatusCodes.NOT_FOUND, "Task to be mark done , not found !");
+        }
+
+        if (taskToBeMarkDone.status == 'done') {
+            throw ApiError(StatusCodes.NOT_FOUND, "Task's status is already done.");
+        }
+
+        await Task.findByIdAndUpdate(taskId, {
+            $set: {
+                status: 'done'
+            }
+        })
+
+        await emitEvent("task.status.updated", {
+            taskId
+        });
+
+        return taskToBeMarkDone;
+    },
+
+    markTaskPending: async (taskId: Types.ObjectId) => {
+        const taskToBeMarkPending = await Task.findById(taskId);
+
+        if (!taskToBeMarkPending) {
+            throw ApiError(StatusCodes.NOT_FOUND, "Task to be mark pending , not found !");
+        }
+
+        if (taskToBeMarkPending.status == 'pending') {
+            throw ApiError(StatusCodes.NOT_FOUND, "Task's status is already pending.");
+        }
+
+        await Task.findByIdAndUpdate(taskId, {
+            $set: {
+                status: 'pending'
+            }
+        })
+
+        await emitEvent("task.status.updated", {
+            taskId
+        });
+
+        return taskToBeMarkPending;
     }
+
 }
 
 export default taskService;

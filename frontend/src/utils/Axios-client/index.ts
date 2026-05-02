@@ -1,7 +1,7 @@
 import { userAppStore } from "@/store";
 import axios from "axios";
 const apiClient = axios.create({
-    baseURL: import.meta.env.BASE_URL,
+    baseURL: import.meta.env.VITE_BASE_URL,
     withCredentials: true
 })
 
@@ -16,35 +16,23 @@ apiClient.interceptors.request.use((config) => {
     return config;
 })
 
-
 apiClient.interceptors.response.use(
     (response) => response,
-
     async (error) => {
-
         const originalRequest = error.config;
-
-        console.log("Error in response interceptor:", error.response);
-
-        if (
-            error.response?.status === 401 &&
-            !originalRequest._retry
-        ) {
-
+        if (originalRequest.url?.includes("/auth/access-token")) {
+            return Promise.reject(error);
+        }
+        if ((error.response?.status === 401 && !originalRequest._retry))
+        // || error.response?.message == "jwt expired"
+        {
             originalRequest._retry = true;
-
             try {
-
-                const refreshResponse =
-                    await axios.post(
-                        "/auth/access-token",
-                        {},
-                        { withCredentials: true }
-                    );
-
+                const refreshResponse = await axios.get(
+                    `${import.meta.env.VITE_BASE_URL}/auth/access-token`,
+                    { withCredentials: true });
                 const newAccessToken =
                     refreshResponse.data.data.accessToken;
-
                 userAppStore
                     .getState()
                     .setAccessToken(newAccessToken);
@@ -60,7 +48,7 @@ apiClient.interceptors.response.use(
                     .getState()
                     .clearAccessToken();
 
-                window.location.href = "/auth";
+                    window.location.href = "/auth";
 
                 return Promise.reject(refreshError);
             }

@@ -9,7 +9,9 @@ const ENDPOINTS = {
     } , 
     TASKS_ENDPOINTS:{
         CREATE_TASK:`${BASE_URL}/task/create-task`, 
-        GET_TODAYS_TASKS:`${BASE_URL}/task/todays-tasks`
+        GET_TODAYS_TASKS:`${BASE_URL}/task/todays-tasks` , 
+        MARK_TASK_DONE:`${BASE_URL}/task/done` , 
+        MARK_TASK_PENDING:`${BASE_URL}/task/pending` , 
     } , 
     USER_ENDPOINTS:{
         USER_DATA:`${BASE_URL}/user/user-data`

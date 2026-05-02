@@ -51,7 +51,7 @@ export async function refresh(req: Request, res: Response) {
     if (new Date(userRefreshToken?.absoluteExpiresAt) < new Date()) {
         user.refreshTokens = user.refreshTokens.filter(rt => rt !== userRefreshToken._id);
         await user.save();
-        res.clearCookie("refreshToken", { path: "/auth/refresh" });
+        res.clearCookie("refreshToken", { path: "/" });
         return sendResponse(res, {
             statusCode: StatusCodes.UNAUTHORIZED,
             success: false,
@@ -82,7 +82,7 @@ export async function refresh(req: Request, res: Response) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax" as const,
-        path: "/auth/refresh",
+        path: "/",
         maxAge: 30 * 24 * 60 * 60 * 1000
     });
 
@@ -93,5 +93,6 @@ export async function refresh(req: Request, res: Response) {
         data: { accessToken: newAccessToken }
     })
 }
+
 
 

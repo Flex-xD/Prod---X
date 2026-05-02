@@ -10,6 +10,6 @@ authRoutes.post("/register", validate(registerSchema), registerController);
 authRoutes.post("/login", validate(loginSchema), loginController);
 authRoutes.post("/logout" , logoutController);
 authRoutes.post("/google-auth", googleAuthController);
-authRoutes.get("/refresh" , refresh);
+authRoutes.get("/access-token" , refresh);
 
 export default authRoutes;

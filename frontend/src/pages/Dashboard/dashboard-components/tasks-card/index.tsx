@@ -6,9 +6,10 @@ import TaskList from './tasks-card-components/task-list';
 
 const TasksCard = ({
     tasks,
-    onToggleTask,
+    handleToggleTask,
     onAddTask,
-    createTaskPending
+    createTaskPending , 
+    onToggleTaskPending
 }: TasksCardProps) => {
 
 
@@ -25,7 +26,7 @@ const TasksCard = ({
                 <CardContent className="space-y-3">
                     <TaskList
                         tasks={tasks}
-                        onToggleTask={onToggleTask} 
+                        handleToggleTask={handleToggleTask} 
                     />
                 </CardContent>
             </Card>

@@ -6,7 +6,7 @@ import { sendError, sendResponse } from "../utils/response-utils";
 import { ApiError } from "../utils/api-error";
 
 export interface IAuthRequest extends Request {
-    userId?:mongoose.Types.ObjectId;
+    userId?: mongoose.Types.ObjectId;
 }
 
 export const authMiddleware = async (req: IAuthRequest, res: Response, next: NextFunction) => {
@@ -14,7 +14,7 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
         const headers = req.headers.authorization;
         if (!headers) {
             console.log("Headers not present !")
-            throw ApiError(StatusCodes.UNAUTHORIZED , "Unauthorized - Headers not found !");
+            throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized - Headers not found !");
         }
 
         const token = headers.split(" ")[1];
@@ -26,19 +26,39 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
             })
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {userId:mongoose.Types.ObjectId}
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: mongoose.Types.ObjectId }
         if (!decoded.userId) {
-            return sendResponse(res , {
-                statusCode:StatusCodes.CONFLICT , 
-                message:"Token not decoded !" ,
-                success:false
+            return sendResponse(res, {
+                statusCode: StatusCodes.CONFLICT,
+                message: "Token not decoded !",
+                success: false
             })
         }
 
         req.userId = decoded.userId;
         // console.log("req.userId is equal to : " , req.userId);
         next();
-    } catch (error) {
-        return sendError(res, { error });
+    } catch (error: any) {
+        console.log("🔥 AUTH ERROR:", error);
+
+        if (error.name === "TokenExpiredError") {
+            return sendError(res, {
+                statusCode: 401,
+                message: "jwt expired"
+            });
+        }
+        
+
+        if (error.name === "JsonWebTokenError") {
+            return sendError(res, {
+                statusCode: 401,
+                message: "invalid token"
+            });
+        }
+
+        return sendError(res, {
+            statusCode: 500,
+            message: error.message || "Authentication failed"
+        });
     }
 }

@@ -4,18 +4,18 @@ import TaskItem from "../task-item";
 
 interface TaskListProps {
     tasks: ITask[];
-    onToggleTask: (id: string) => void;
+    handleToggleTask: (id: string , isTaskPending:boolean) => void;
 }
 
-const TaskList = ({ tasks, onToggleTask }: TaskListProps) => {
+const TaskList = ({ tasks, handleToggleTask }: TaskListProps) => {
     return (
-        <>{tasks == undefined || null ?
+        <>{tasks !== undefined || null ?
             tasks.map((task, index) => (
                 <TaskItem
                     key={task._id}
                     task={task}
                     index={index}
-                    onToggle={onToggleTask}
+                    handleToggleTask={handleToggleTask}
                 />
             )) :
             <div>

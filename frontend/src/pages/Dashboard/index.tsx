@@ -19,6 +19,7 @@ import { dummyTasks, leaderboard, weeklyData } from './dashboard-components/dash
 import type { ITaskData } from './dashboard-components/tasks-card/tasks-card-types';
 import { userAppStore } from '@/store';
 import useGetTodaysTasks from '@/custom-hooks/task-mutation/get-tasks';
+import { useToggleTaskMutation } from '@/custom-hooks/task-mutation/toggle-task';
 
 
 const Dashboard = () => {
@@ -27,7 +28,10 @@ const Dashboard = () => {
 
   const [tasks, setTasks] = useState(dummyTasks);
 
+  // * CUSTOM HOOKS
   const { mutateAsync: createTaskMutation, isPending: createTaskPending } = useCreateTaskMutation(safeUserId);
+  // * fix this error below
+  const {mutateAsync:updateTaskStatus , isPending:isUpdateTaskStatusPending} = useToggleTaskMutation();
 
   // ? Use the task's pending state from below
   const { data: todaysTask } = useGetTodaysTasks(safeUserId);
@@ -60,10 +64,8 @@ const Dashboard = () => {
   const tasksCompleted = tasks.filter((t) => t.done).length;
   const weeklyProgress = 68; // percentage
 
-  const toggleTask = (id: string) => {
-    // setTasks(tasks.map((task) =>
-    //   task.id === id ? { ...task, done: !task.done } : task
-    // ));
+  const handleToggleTask = async (taskId: string , isTaskPending:boolean) => {
+    await updateTaskStatus({taskId , isTaskPending});
   };
 
   const maxHours = Math.max(...weeklyData.map((d) => d.hours));
@@ -137,7 +139,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <TasksCard tasks={tasksToDisplay} onToggleTask={toggleTask} onAddTask={onAddTask} createTaskPending={createTaskPending} />
+            <TasksCard tasks={tasksToDisplay} handleToggleTask={handleToggleTask} onToggleTaskPending={isUpdateTaskStatusPending} onAddTask={onAddTask} createTaskPending={createTaskPending} />
             <CalendarCard calendarData={calendarData} />
             <WeeklyGraphCard weeklyData={weeklyData} maxHours={maxHours} />
           </div>

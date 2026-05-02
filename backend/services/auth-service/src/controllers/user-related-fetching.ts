@@ -16,7 +16,7 @@ export const userDataController = asyncHandler(async (req: IAuthRequest, res: Re
     const userData = await userRelatedService.userData(newUserObjectId);
 
     return sendResponse(res, {
-        statusCode: StatusCodes.CREATED,
+        statusCode: StatusCodes.OK,
         success: true,
         message: "User data fetched successfully !",
         data: userData

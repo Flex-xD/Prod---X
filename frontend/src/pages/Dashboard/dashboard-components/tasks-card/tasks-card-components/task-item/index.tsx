@@ -5,17 +5,17 @@ import type { ITask } from '../../tasks-card-types';
 
 interface TaskItemProps {
     task: ITask;
-    onToggle: (id: string) => void;
+    handleToggleTask: (id: string , isTaskPending:boolean) => void;
     index: number;
 }
 
-const TaskItem = ({ task, onToggle, index }: TaskItemProps) => {
+const TaskItem = ({ task, handleToggleTask, index }: TaskItemProps) => {
     return (
         <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
-            onClick={() => onToggle(task._id)}
+            onClick={() => handleToggleTask(task._id ,  task.status == 'pending' ? true : false)}
             className={`p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${task.status == "done"
                     ? 'bg-green-50 border-green-200'
                     : 'bg-slate-50 border-slate-200 hover:border-purple-300 hover:shadow-md'

@@ -25,19 +25,20 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
+
 app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
     const path = req.path.replace(/^\/api\/v1/, "");
 
     if (path.startsWith("/auth")) {
-        return next(); 
+        return next();
     }
 
     if (INTERNAL_ROUTES.some(route => path.startsWith(route))) {
-        return internalServiceAuth(req, res, next); 
+        return internalServiceAuth(req, res, next);
     }
 
     if (USER_ROUTES.some(route => path.startsWith(route))) {
-        return authMiddleware(req, res, next); 
+        return authMiddleware(req, res, next);
     }
 
     return next();
@@ -47,7 +48,7 @@ app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
 const services = {
     // Later on add the paths to the env file
     "/task": "http://localhost:4000/api/v1",
-    "/user":"http://localhost:5000/api/v1" ,
+    "/user": "http://localhost:5000/api/v1",
     "/auth": "http://localhost:5000/api/v1",
     "/group-productivity-timer": "http://localhost:9000/api/v1",
     "/notification": "http://localhost:10000/api/v1",
@@ -76,26 +77,43 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
 
     const targetUrl = services[targetService];
     const forwardUrl = targetUrl + urlPath;
-    console.log("forward URL :",forwardUrl);
+    console.log("forward URL :", forwardUrl);
 
     // ! there is this problem where the api-gateway is not able to recognize if it is a valid api end-point even if it matches the target service
 
     try {
+        console.log("This is req.body : " , req.body);
         const response = await axios({
             method: req.method,
             url: forwardUrl,
             data: req.body,
             headers: {
                 authorization: req.headers.authorization,
-                // "x-user-id": (req as any).userId?.toString() , 
                 "x-user-id": userId?.toString(),
-                "x-service-key": req.headers["x-service-key"] , 
-                cookie:req.headers.cookie
+                "x-service-key": req.headers["x-service-key"],
+                cookie: req.headers.cookie
             },
             validateStatus: () => true
         });
 
-        return sendResponse(res, response.data);
+        if (response.data?.data?.refreshToken) {
+            console.log("Sending cookie through api-gateway")
+            res.cookie("refreshToken", response.data.data.refreshToken, {
+                httpOnly: true,
+                secure: false,
+                sameSite: "lax",
+                path: "/",
+            });
+            console.log("Cookie sent . . . ");
+        }
+
+        console.log("🔥 DOWNSTREAM STATUS:", response.status);
+        console.log("🔥 DOWNSTREAM DATA:", response.data);
+
+        return res
+            .status(response.status)
+            .json(response.data);
+
     } catch (error) {
         return sendError(res, { error });
     }

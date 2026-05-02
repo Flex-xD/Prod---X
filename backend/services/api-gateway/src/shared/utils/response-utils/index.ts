@@ -13,15 +13,24 @@ export type sendErrorType = {
     message: string,
 }
 
-export const sendResponse = <T>(res: Response, { statusCode, success, message, data }: sendResponseType<T>) => {
-    logger.info("✅ Response Sent:", { statusCode, success ,message , data  });
-    return res.json({
-        statusCode: statusCode,
-        success: success,
-        message: message,
-        data: data
-    })
-}
+export const sendResponse = <T>(
+    res: Response,
+    { statusCode, success, message, data }: sendResponseType<T>
+) => {
+    logger.info("✅ Response Sent:", {
+        statusCode,
+        success,
+        message,
+        data,
+    });
+
+    return res.status(statusCode).json({
+        statusCode,
+        success,
+        message,
+        data,
+    });
+};
 
 export const sendError = (res: Response, {
     statusCode = 500,
@@ -35,7 +44,7 @@ export const sendError = (res: Response, {
     const errorMessage = error instanceof Error ? error.message : message;
     console.log(error);
     logger.error("❌ Error:", errorMessage);
-
+    console.log("Sending response from the sendError utiltiy . . . ")
     return res.status(statusCode).json({
         statusCode,
         success: false,

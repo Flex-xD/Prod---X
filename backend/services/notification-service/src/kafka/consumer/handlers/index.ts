@@ -29,7 +29,7 @@ export const handlers = {
                     to: invitedUsersId,
                     from: userId,
                     topic: `Invitation for Group-productivity-timer  :${groupProductivityTimer.title}`,
-                    message: `You have been invited to a group-productivity-timer by ${groupProductivityTimer.author.username}`,
+                    message: `You have been invited to a group-productivity-timer by ${groupProductivityTimer.author}`,
                     notificationType: "group-timer-request"
                 },
                 {
@@ -43,7 +43,6 @@ export const handlers = {
 
         } catch (err: any) {
             throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Error while sending the request to the /create-notification API : ${err}`)
-            logger.error("Notification API failed", err.response);
         }
     },
 
@@ -51,7 +50,7 @@ export const handlers = {
 
     "notification.created": async ({ notificationReceivingUsersId, notificationId }: TEventNotificationCreated) => {
         logger.info("Sending API request to : /send-notification")
-        const limit = pLimit(5);
+        const limit = pLimit(notificationReceivingUsersId.length);
         for (const notificationReceivingUserId of notificationReceivingUsersId) {
             await limit(async () => {
                 try {

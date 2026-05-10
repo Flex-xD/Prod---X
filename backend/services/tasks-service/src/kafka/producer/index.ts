@@ -2,10 +2,8 @@ import { Producer } from "kafkajs";
 import { kafka } from "..";
 import { logger } from "../../shared";
 
-
 let producer: Producer | null = null;
 let isConnected: boolean = false;
-
 
 // const producer = kafka.producer();
 export const connectProducer = async (retries = 5) => {
@@ -24,15 +22,15 @@ export const connectProducer = async (retries = 5) => {
             retries--;
             logger.error("❌ kafka connection producer failed --> [ task-service ] ,", retries, "left");
             await new Promise((resolve) => setTimeout(resolve, 2000));
+            console.error("❌ Kafka connection failed after all retries. Exiting.");
+            process.exit(1);
         }
-        console.error("❌ Kafka connection failed after all retries. Exiting.");
-        process.exit(1);
     }
 }
 
 
 export const emitEvent =
-// ? Here classify what the event type should be , later on
+    // ? Here classify what the event type should be , later on
     async <T extends object>(topic: string, event: T) => {
         try {
             if (!producer || !isConnected) {
@@ -63,6 +61,6 @@ async function disconnectProducer() {
     }
 }
 
-process.on("SIGTTIN" , disconnectProducer);
-process.on("SIGINT" , disconnectProducer);
+process.on("SIGTTIN", disconnectProducer);
+process.on("SIGINT", disconnectProducer);
 

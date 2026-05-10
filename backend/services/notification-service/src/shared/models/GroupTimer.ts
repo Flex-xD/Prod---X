@@ -1,4 +1,4 @@
-import mongoose, { Model } from "mongoose";
+import mongoose, { Model, Types } from "mongoose";
 
 
 export interface IGroupTimer extends mongoose.Document {
@@ -11,6 +11,11 @@ export interface IGroupTimer extends mongoose.Document {
     isCompleted: boolean,
     author: mongoose.Types.ObjectId
     participants: mongoose.Types.ObjectId[]
+    authorDetails?: {
+        _id: Types.ObjectId,
+        username: string;
+        avatar?: string;
+    };
 }
 
 const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
@@ -42,6 +47,13 @@ const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
     }],
 }, {
     timestamps: true,
+})
+
+groupTimerSchema.virtual("authorDetails", {
+    ref: "User",
+    localField: "author",
+    foreignField: "_id",
+    justOne: true
 })
 
 const GroupTimer: Model<IGroupTimer> = mongoose.model<IGroupTimer>("GroupTimer", groupTimerSchema);

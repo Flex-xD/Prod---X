@@ -6,6 +6,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import groupTimerRouter from "./routes";
 import { initSocket } from "./socket";
+import cors from "cors";
 import connectDb from "./shared/config/db";
 
 dotenv.config();
@@ -15,8 +16,6 @@ const app = express();
 const PORT = process.env.PORT || 9000
 
 app.use(express.json());
-
-app.use("/api/v1/group-productivity-timer", groupTimerRouter)
 
 // ? const io = initSocket(server);
 
@@ -32,6 +31,14 @@ app.use("/api/v1/group-productivity-timer", groupTimerRouter)
 //     //     return techStack;
 //     // })
 // })
+
+app.use(cors({
+    origin:"http://localhost:5173" ,
+    credentials:true ,
+    methods:["GET" , "POST" , "PUT" , "DELETE" , "PATCH"]
+}));
+
+app.use("/api/v1/group-productivity-timer", groupTimerRouter)
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
     return sendError(res, { error: err });

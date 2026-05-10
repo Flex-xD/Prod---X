@@ -2,7 +2,6 @@ import { Producer } from "kafkajs";
 import { kafka } from "..";
 import { logger } from "../../shared";
 
-
 let producer: Producer | null = null;
 let isConnected: boolean = false;
 

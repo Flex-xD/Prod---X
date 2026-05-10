@@ -1,16 +1,11 @@
-import axios from "axios";
 import { kafka } from "..";
-import { ApiError, logger, sendResponse } from "../../shared";
-import pLimit from "p-limit";
+import { ApiError, logger } from "../../shared";
 import { StatusCodes } from "http-status-codes";
-import { any, map, success } from "zod";
-import { error } from "winston";
 import { handlers } from "./handlers";
 
 const consumer = kafka.consumer({
     groupId: "notification-service"
 });
-
 
 export const connectConsumer = async () => {
     try {
@@ -20,11 +15,7 @@ export const connectConsumer = async () => {
         logger.error("❌ kafka consumer connection failed : ", { error });
         process.exit(1);
     }
-
-}
-
-
-// ! I will call the api for sendingNotification as soon as it the notification service's consumer listens to the desired topic from other service's producers
+};
 
 type TInvitationTopicAndMessage = {
     topic: string,
@@ -38,7 +29,6 @@ type TInvitationTopicAndMessage = {
     }
 }
 
-
 // * TYPE FOR THE GroupProductivityTimer via value
 export type TgroupProductivityTimerForConsumer = {
     title: string,
@@ -47,14 +37,10 @@ export type TgroupProductivityTimerForConsumer = {
     invitedUsersId: string[],
     participants: string[],
     specifiedTime: number,
-    author: { userId: string, username: string }
+    author:string
 }
 
-
-// ! Update this consumer code that when the event group.timer.created event is emitted ? /api/v1/create-notification will be called and which will further emit notification.created , then on listening to this event will call /api/v1/send-notification .
-
 export const handleConsumer = async (topics: string[]) => {
-    // const limit = pLimit(5);
     try {
         for (const topic of topics) {
             await consumer.subscribe({ topic: topic, fromBeginning: true });

@@ -1,4 +1,4 @@
-import mongoose, { Model } from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
 
 
 export interface IGroupTimer extends mongoose.Document {
@@ -6,11 +6,12 @@ export interface IGroupTimer extends mongoose.Document {
     title: string,
     body: string,
     // ? see if setting the below timer to Date is good or find a way to set it to time 
-    specifiedTime: Number,
+    specifiedTime: number,
     deadline: Date,
     isCompleted: boolean,
+    status: "pending" | "done";
     author: mongoose.Types.ObjectId
-    invitedUsersId:mongoose.Types.ObjectId[]
+    invitedUsersId: mongoose.Types.ObjectId[]
     participants: mongoose.Types.ObjectId[]
 }
 
@@ -31,22 +32,20 @@ const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
         type: Date,
         required: true,
     },
-    isCompleted: {
-        type: Boolean,
-        default: false,
+    status: {
+        type: String,
+        enum: ["pending", "done"] as const,
+        default: "pending",
     },
     author: {
-        userId:{
-            type:mongoose.Types.ObjectId 
-        } , 
-        username:{
-            type:String ,
-        }
-        // ? I can late on add avatar 
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true,
     },
-    invitedUsersId:[{
-        type:mongoose.Schema.Types.ObjectId
-    }] ,
+    invitedUsersId: [{
+        type: mongoose.Schema.Types.ObjectId
+    }],
     participants: [{
         type: mongoose.Types.ObjectId
     }],

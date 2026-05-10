@@ -18,4 +18,6 @@ The mains featues of thie Web-Applications are going to be :
 
 >>>> CURRENTLY WORKING ON :
 
-2. Implementing CRUD on task and updating UI accorinding to it.
+1. Implement Productivity Timer , first create the backend then sync it properly with the frontned (CRUD)
+2. Implement Group-Productivity-Timer , first create the backend then sync it properly with the frontned (CRUD)
+3. 

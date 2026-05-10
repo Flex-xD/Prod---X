@@ -9,6 +9,7 @@ import { Loader } from "lucide-react";
 import { ProtectedRoutes } from "./custom-components/protected-routes";
 import { PublicRoutes } from "./custom-components/public-routes";
 import ProfilePage from "./pages/Profile-page";
+import TimerPage from "./pages/Productivity-timer-pages";
 
 function App() {
   console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
@@ -70,6 +71,14 @@ function App() {
           element={
             <ProtectedRoutes>
               <ProfilePage />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/timer"
+          element={
+            <ProtectedRoutes>
+              <TimerPage />
             </ProtectedRoutes>
           }
         />

@@ -29,10 +29,6 @@ const timerSchema = new mongoose.Schema<ITimer>({
         type: Date,
         required: true,
     },
-    completedTime: {
-        type: Number,
-        default: null,
-    },
     status: {
         type: String,
         enum: ["pending", "done"] as const,
@@ -43,7 +39,11 @@ const timerSchema = new mongoose.Schema<ITimer>({
         ref: "User",
         required: true,
         index: true,
-    }
+    },
+    completedTime: {
+        type: Number,
+        default: null,
+    },
 }, {
     timestamps: true,
 })

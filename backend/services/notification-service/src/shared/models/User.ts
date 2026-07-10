@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema<IUser>({
             return this.provider === "local"
         },
     },
+    // * I will be using cloudinary here for storing images in the cloud online using multer (so I have to change the avatar field based on that)
     avatar: {
         type: String,
         required: false

@@ -1,9 +1,8 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, response, Response } from "express";
 import { verifyGoogleAuthToken } from "../utils/googleAuthVerifier";
 import { authService } from "../service-layer/auth-service";
 import { StatusCodes } from "http-status-codes";
 import { signAccessToken, signRefreshToken } from "../utils/generate-token";
-import uuidv4 from "zod";
 import { hashToken } from "../utils/hash";
 import { asyncHandler } from "../shared/utils/async-handler";
 import { sendResponse } from "../shared/utils/response-utils";
@@ -17,6 +16,7 @@ const REFRESH_COOKIE_OPTIONS = {
     path: "/",
     maxAge: 30 * 24 * 60 * 60 * 1000
 };
+
 
 // ? REGISTER CONTROLLER (Local Auth)
 export const registerController = asyncHandler(async (req: Request, res: Response) => {
@@ -91,11 +91,11 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
         email,
     });
 
-    console.log("This is the response of the LoginController : ", {refreshPlain , accessToken, user });
+    console.log("This is the response of the LoginController : ", { refreshPlain, accessToken, user });
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "User logged in successfully!",
-        data: { refreshToken:refreshPlain, accessToken, user },
+        data: { refreshToken: refreshPlain, accessToken, user },
         success: true
     })
 });
@@ -106,6 +106,15 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     const googleUser = await verifyGoogleAuthToken(idToken);
 
     const user = await authService.findOrCreateGoogleUser(googleUser);
+
+    if (!user) {
+        return sendResponse(res, {
+            statusCode: 400,
+            message: "User not found !",
+            success: false
+        })
+    }
+
     const accessToken = signRefreshToken({ sub: user._id!.toString() });
     const refreshPlain = `${crypto.randomUUID()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
@@ -125,13 +134,6 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     user.refreshTokens.push(refreshToken._id);
 
     await user.save();
-    if (!user) {
-        return sendResponse(res, {
-            statusCode: 400,
-            message: "User not found !",
-            success: false
-        })
-    }
 
     await emitEvent("user.login", {
         email: googleUser.email
@@ -152,7 +154,7 @@ export const logoutController = asyncHandler(async (req: Request, res: Response)
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "Logged out successfully !",
-        data:null ,
+        data: null,
         success: true
     })
 })

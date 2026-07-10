@@ -8,7 +8,6 @@ export function signAccessToken(payload: object) {
     return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "15m" });
 }
 export function signRefreshToken(payload: object) {
-    console.log("This is access secret : ", ACCESS_SECRET, "and this is REFRESH_SECRET", REFRESH_SECRET);
     return jwt.sign(payload, REFRESH_SECRET, { expiresIn: "30d" });
 }
 
@@ -18,3 +17,4 @@ export function verifyAccessToken(token: string) {
 export function verifyRefreshToken(token: string) {
     return jwt.verify(token, REFRESH_SECRET);
 }
+

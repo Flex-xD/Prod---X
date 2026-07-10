@@ -39,6 +39,8 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
         // console.log("req.userId is equal to : " , req.userId);
         next();
     } catch (error: any) {
+
+        // * Fix the error handling below later on
         console.log("🔥 AUTH ERROR:", error);
 
         if (error.name === "TokenExpiredError") {

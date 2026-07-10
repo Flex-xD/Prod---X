@@ -9,7 +9,7 @@ import User from "../shared/models/User";
 export const groupProductivityTimerServices = {
     createGroupProductivityTimerService: async (userId: mongoose.Types.ObjectId, data: TcreateGroupProductivityTimerInputForBody) => {
 
-        const user = await getUser(userId);
+        // const user = await getUser(userId);
 
         const groupProductivityTimer = new GroupTimer({
             title: data.title,

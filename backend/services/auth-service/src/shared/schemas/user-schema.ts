@@ -2,22 +2,23 @@ import { z } from "zod";
 import refreshTokenSchema from "./refresh-token-schema";
 
 export const userSchema = z.object({
-    username:z.string().min(4 , "Username must be at least 4 characters") ,
-    email:z.email() , 
-    password:z.string().min(8 , "Password must be at least 8 characters") , 
+    username: z.string().min(4, "Username must be at least 4 characters"),
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
     // ? Fix the user todos type later
-    userTodos:z.array(z.object({})) , 
-    provider:z.string().default("local").optional() , 
-    avatar:z.string().optional() , 
-    _id:z.string() ,
-    refreshTokens:refreshTokenSchema.array()
+    userTodos: z.array(z.object({})),
+    provider: z.string().default("local").optional(),
+    avatar: z.string().optional(),
+    _id: z.string(),
+    refreshTokens: refreshTokenSchema.array()
 })
 
+// ? I can probably remove the body from inside the z.object because body dosen't come from the client side , it's a normal object with all the key-pair values
 
 export const registerSchema = z.object({
     body: z.object({
         username: z.string().min(3, "Username must be at least 3 characters"),
-        email: z.email("Invalid email format"),
+        email: z.string().email("Invalid email format"),
         password: z.string().min(8, "Password must be 8+ chars"),
     }),
 });

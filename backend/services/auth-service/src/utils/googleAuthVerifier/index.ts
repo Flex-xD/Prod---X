@@ -12,7 +12,6 @@ export const verifyGoogleAuthToken = async (idToken: string) => {
     if (!payload) {
         throw new Error("Invalid Token !")
     }
-
     return {
         email: payload.email!,
         username: payload.name!,

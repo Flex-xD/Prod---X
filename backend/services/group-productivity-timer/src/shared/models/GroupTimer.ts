@@ -8,11 +8,15 @@ export interface IGroupTimer extends mongoose.Document {
     // ? see if setting the below timer to Date is good or find a way to set it to time 
     specifiedTime: number,
     deadline: Date,
-    isCompleted: boolean,
     status: "pending" | "done";
     author: mongoose.Types.ObjectId
     invitedUsersId: mongoose.Types.ObjectId[]
     participants: mongoose.Types.ObjectId[]
+    participantsCompletedTime:
+    {
+        userId: mongoose.Types.ObjectId,
+        completedTime: number
+    }[];
 }
 
 const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
@@ -49,9 +53,15 @@ const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
     participants: [{
         type: mongoose.Types.ObjectId
     }],
+    participantsCompletedTime: [
+        {
+            participantId: mongoose.Types.ObjectId,
+            completedTime: Number
+        }
+    ]
 }, {
     timestamps: true,
-})
+});
 
 const GroupTimer: Model<IGroupTimer> = mongoose.model<IGroupTimer>("GroupTimer", groupTimerSchema);
 export default GroupTimer;

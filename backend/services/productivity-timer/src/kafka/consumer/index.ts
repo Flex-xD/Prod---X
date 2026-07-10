@@ -6,7 +6,7 @@ const consumer = kafka.consumer({
 });
 
 
-const connectConsumer = async () => {
+export const connectConsumer = async () => {
     try {
         await consumer.connect();
         logger.info("✅ kafka consumer is connected !");
@@ -16,7 +16,7 @@ const connectConsumer = async () => {
     process.exit(1);
 }
 
-const handleConsumer = async (topics:string[]) => {
+export const handleConsumer = async (topics:string[]) => {
     try {
         for (const topic of topics) {
             await consumer.subscribe({topic:topic , fromBeginning:true});

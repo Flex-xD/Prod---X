@@ -17,17 +17,17 @@ export const connectConsumer = async () => {
     }
 };
 
-type TInvitationTopicAndMessage = {
-    topic: string,
-    message: {
-        key: string,
-        value: {
-            userId: string,
-            invitedUsersId: string[],
-            groupProductivityTimer: Object,
-        }
-    }
-}
+// type TInvitationTopicAndMessage = {
+//     topic: string,
+//     message: {
+//         key: string,
+//         value: {
+//             userId: string,
+//             invitedUsersId: string[],
+//             groupProductivityTimer: Object,
+//         }
+//     }
+// }
 
 // * TYPE FOR THE GroupProductivityTimer via value
 export type TgroupProductivityTimerForConsumer = {
@@ -50,13 +50,15 @@ export const handleConsumer = async (topics: string[]) => {
                 if (!topic || !message) {
                     return;
                 }
+                // * understand what the hell this 'topic of keyof typeof does'
                 const handler = handlers[topic as keyof typeof handlers];
-                logger.info(`This is the topic : ${topic}`)
+                logger.info(`This is the topic : ${topic}`);
+                logger.info(`This is the message : ${message}`);
                 if (!handler) {
                     // ? should I return a response or throw a Error here 
                     throw ApiError(StatusCodes.CONFLICT , "Topic didn't match handlers of notification-service consumer !");
                 }
-                // ? Don't forget to remove "!" from below , it's unsafe practice
+                // ? Don't forget to remove "!" from below , it's an unsafe practice
                 const parsedValue = JSON.parse(message.value!.toString());
                 await handler(parsedValue);
             

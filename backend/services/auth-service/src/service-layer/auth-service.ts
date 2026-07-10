@@ -29,7 +29,6 @@ export const authService = {
         })
         return user;
     },
-
     loginLocalUser: async (body: loginType) => {
         const user = await User.findOne({ email: body.email, provider: "local" });
         console.log(body.email);

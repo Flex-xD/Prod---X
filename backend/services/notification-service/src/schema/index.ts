@@ -1,6 +1,7 @@
 import mongoose, { Types } from "mongoose";
 import { string, z } from "zod";
 
+// I forget what the hell this refine does
 const zObjectId = z
     .string()
     .refine((val) => Types.ObjectId.isValid(val), {
@@ -8,6 +9,7 @@ const zObjectId = z
     });
 
 const createNotificationSchema = z.object({
+    // * I can add a 'friend-request' element in the enum below (later on) 
     notificationType: z.enum(["group-timer-request", "daily-quote", "productivity-hack"]),
     topic: z.string(),
     message: z.string(),

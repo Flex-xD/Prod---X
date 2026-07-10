@@ -1,6 +1,5 @@
 import mongoose, { Model, Types } from "mongoose";
 
-
 export interface IGroupTimer extends mongoose.Document {
     _id: mongoose.Types.ObjectId,
     title: string,
@@ -16,6 +15,11 @@ export interface IGroupTimer extends mongoose.Document {
         username: string;
         avatar?: string;
     };
+    participantsCompletedTime:
+    {
+        participantId: mongoose.Types.ObjectId,
+        completedTime: number
+    }[];
 }
 
 const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
@@ -45,6 +49,12 @@ const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
     participants: [{
         type: mongoose.Types.ObjectId
     }],
+    participantsCompletedTime: [
+        {
+            participantId: mongoose.Types.ObjectId,
+            completedTime: Number
+        }
+    ]
 }, {
     timestamps: true,
 })

@@ -6,7 +6,7 @@ import { logger } from "../../shared";
 let producer: Producer | null = null;
 let isConnected: boolean = false;
 
-const connectProducer = async (retries = 5) => {
+export const connectProducer = async (retries = 5) => {
 
     while (retries > 0) {
         try {
@@ -16,7 +16,7 @@ const connectProducer = async (retries = 5) => {
 
             await producer.connect();
             isConnected = true;
-            logger.info("✅ Kafka Producer is connected ! --> [ scheduler-service ]");
+            logger.info("✅ Kafka Producer is connected ! --> [ productivity-timer ]");
             return;
         } catch (err) {
             retries--;

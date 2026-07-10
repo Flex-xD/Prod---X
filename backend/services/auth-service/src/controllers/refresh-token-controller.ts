@@ -33,6 +33,7 @@ export async function refresh(req: Request, res: Response) {
         // Option: if token decodes and identifies user -> revoke all sessions for that user
         // For our plain-token approach we can't decode; so take conservative approach: log + require full login
         console.warn("Refresh token reuse or invalid token for ip:", req.ip);
+        // ? I should throw an error here 
         return res.status(401).json({ error: "Invalid refresh token" });
     }
 
@@ -77,6 +78,9 @@ export async function refresh(req: Request, res: Response) {
 
     user.refreshTokens.push(newRefreshToken._id);
     await user.save();
+
+    // * Deleting the old user token , so that unnecessary data does not accumalate
+    await Token.findByIdAndDelete(userRefreshToken._id);
 
     res.cookie("refreshToken", newRefreshPlain, {
         httpOnly: true,

@@ -22,4 +22,4 @@ app.listen(PORT , async () => {
     await connectDb(process.env.MONGODB_URI || "")
     console.info(`Notification-Service 🔔 running on PORT : ✅${PORT}`);
     await initKafka();
-})
+});

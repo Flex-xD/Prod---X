@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import Notification from "../model/Notification";
 import { TypeCreateNotification } from "../schema";
 import { ApiError, getUser, logger } from "../shared";
-import User from "../shared/models/User";
 import mongoose, { ObjectId } from "mongoose";
 
 

@@ -5,6 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import Timer from "../models/Timer";
 import { TgetProductivityTimeRequestBody } from "../controllers/timer-controller";
 import User from "../shared/models/User";
+import { int } from "zod";
 
 // * Implement Redis caching later on
 
@@ -14,6 +15,9 @@ export const productivityTimerServices = {
         const { title, body, deadline, specifiedTime } = data;
 
         logger.info("Creating productivity timer for user ⏱️")
+
+        // ? I can try to convert these fetched variables strings into their specified types like number or dates , I have to see first
+        
         const productivityTimer = new Timer({
             title,
             body: body ? body : "",

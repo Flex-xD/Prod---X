@@ -1,4 +1,4 @@
-import express, { Request, response, Response } from "express";
+import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import { ApiError, authMiddleware, logger, sendError, sendResponse } from "./shared";
 import cors from "cors";
@@ -25,6 +25,9 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
+interface IAuthRequest extends Request {
+    userId?: mongoose.Types.ObjectId
+}
 
 app.use((req: IAuthRequest, res: Response, next: NextFunction) => {
     const path = req.path.replace(/^\/api\/v1/, "");
@@ -54,9 +57,6 @@ const services = {
     "/notification": "http://localhost:10000/api/v1",
 } as Record<string, string>;
 
-interface IAuthRequest extends Request {
-    userId?: mongoose.Types.ObjectId
-}
 
 app.all(/.*/, async (req: IAuthRequest, res: Response) => {
     const { userId } = req;

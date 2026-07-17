@@ -15,7 +15,7 @@ export type sendErrorType = {
 
 export const sendResponse = <T>(res: Response, { statusCode, success, message, data }: sendResponseType<T>) => {
     logger.info("✅ Response Sent:", { statusCode, success, message, data });
-    return res.json({
+    return res.status(statusCode).json({
         statusCode: statusCode,
         success: success,
         message: message,

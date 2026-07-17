@@ -7,7 +7,6 @@ import { productivityTimerServices } from "../services/timer-service";
 
 
 export const createProductivityTimer = asyncHandler(async (req: Request, res: Response) => {
-
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
@@ -45,7 +44,7 @@ export const submitProductivityTime = asyncHandler(async (req: Request, res: Res
     const { productivityDuration, productivityTimerId }: TgetProductivityTimeRequestBody = req.body;
     
     if (!productivityTimerId) {
-        throw ApiError(StatusCodes.BAD_GATEWAY, "No productivity timer id found !");
+        throw ApiError(StatusCodes.BAD_GATEWAY, "No productivity-timer id found !");
     };
 
     if (!productivityDuration || productivityDuration == 0) {
@@ -61,6 +60,12 @@ export const submitProductivityTime = asyncHandler(async (req: Request, res: Res
         productivityDuration, productivityTimerId
     });
 
+    let message = "Productivity Timer's time period updated successfully !";
+
+    if (updatedProductivityTimer.status = 'done') {
+        message = `Congratulation , Your productivity timer named ${updatedProductivityTimer.title} is completed now !` 
+    }
+
     await emitEvent("getProductivityTime.durationUpdated", {
         userId,
         productivityTimerId,
@@ -70,7 +75,7 @@ export const submitProductivityTime = asyncHandler(async (req: Request, res: Res
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
-        message: "Productivity Timer's time period updated successfully !",
+        message: message,
         data: updatedProductivityTimer
     })
 })

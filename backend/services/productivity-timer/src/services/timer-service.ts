@@ -17,7 +17,7 @@ export const productivityTimerServices = {
         logger.info("Creating productivity timer for user ⏱️")
 
         // ? I can try to convert these fetched variables strings into their specified types like number or dates , I have to see first
-        
+
         const productivityTimer = new Timer({
             title,
             body: body ? body : "",
@@ -58,6 +58,8 @@ export const productivityTimerServices = {
             throw ApiError(StatusCodes.NOT_FOUND, "Productivity Timer not found !");
         }
 
+        // ? I think I don't need to check this condition as user will not be able to edit the productivity-timer after it is either marked completed or has reached deadline
+
         if (productivityTimer.status == "done") {
             throw ApiError(StatusCodes.CONFLICT, "Productivity Timer is already completed !");
         }
@@ -65,8 +67,21 @@ export const productivityTimerServices = {
         if (Date.now() > productivityTimer.deadline.getTime()) {
             throw ApiError(StatusCodes.CONFLICT, "Productivity Timer has hit the deadline !")
         }
-        productivityTimer.completedTime! += productivityDuration;
+
         const remainingTimer = productivityTimer.specifiedTime as number - productivityTimer.completedTime!
+
+        if (productivityDuration > remainingTimer) {
+            // ? Changing the status here from 'pending' to 'done'
+            productivityTimer.status = 'done';
+            await emitEvent("productive.timer.completed", {
+                userId,
+                productivityTimerId,
+                productivityTimer
+            });
+        }
+
+        productivityTimer.completedTime! += productivityDuration;
+
 
         await Promise.all([
             productivityTimer.save(),
@@ -74,13 +89,7 @@ export const productivityTimerServices = {
         ])
 
         // ? utilize this event on the other relevant service
-        if (productivityDuration > remainingTimer) {
-            await emitEvent("productive.timer.completed", {
-                userId,
-                productivityTimerId,
-                productivityTimer
-            })
-        }
+
 
         return productivityTimer;
     }

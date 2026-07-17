@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { userDataController } from "../controllers/user-related-fetching";
+import { getUsersForGroupProductivityTimer, inviteUserToGroupTimer, userDataController } from "../controllers/user-related-fetching";
 
-const userRealtedRoutes = Router();
+const userRelatedRoutes = Router();
 
-userRealtedRoutes.get("/user-data", userDataController);
+userRelatedRoutes.get("/user-data", userDataController);
+userRelatedRoutes.get("/users-to-invite" , getUsersForGroupProductivityTimer);
+userRelatedRoutes.post("/invite-user/:userToInviteId" , inviteUserToGroupTimer );
 
-export default userRealtedRoutes;
+export default userRelatedRoutes;

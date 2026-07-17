@@ -81,12 +81,20 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
 
     // ! there is this problem where the api-gateway is not able to recognize if it is a valid api end-point even if it matches the target service
 
+    const consoleObject = {
+        body:req.body , 
+        params:req.params , 
+        path:req.path
+    }
     try {
-        console.log("This is req.body : " , req.body);
+
+        console.log(`This is the info about URL : ${consoleObject}`);
+        
         const response = await axios({
             method: req.method,
             url: forwardUrl,
             data: req.body,
+            params:req.query ,
             headers: {
                 authorization: req.headers.authorization,
                 "x-user-id": userId?.toString(),

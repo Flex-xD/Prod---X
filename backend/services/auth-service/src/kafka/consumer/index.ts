@@ -24,6 +24,7 @@ export const handleConsumer = async (topics: string[]) => {
         }
         await consumer.run({
             eachMessage: async ({ topic, message }) => {
+                // * implement the consumer handler logic here 
                 console.log(`Message received from topic ${topic}: ${message.value}`);
                 const value = message.value?.toString();
                 console.log("VALUE : " , value);

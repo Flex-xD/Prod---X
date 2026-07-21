@@ -1,4 +1,4 @@
-import mongoose, { Mongoose, Types } from "mongoose";
+import mongoose, { mongo, Mongoose, Types } from "mongoose";
 import User from "../shared/models/User";
 import { ApiError } from "../shared/utils/api-error";
 import { StatusCodes } from "http-status-codes";
@@ -14,29 +14,37 @@ export const userRelatedService = {
         }
         return user;
     },
-    getUsersForGroupProductivityTimer: async (query: string , userId:string) => {
+    getUsersForGroupProductivityTimer: async (query: string, userId: string) => {
         const escapedQuery = query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
         const regExp = new RegExp(escapedQuery, "i");
 
-        const users = await User.find({
+        const filter = {
             $or: [
-                {
-                    email: {
-                        $regex: regExp
-                    },
-                    username: {
-                        $regex:regExp
-                    }
-                } 
-            ] , 
-            _id:{$ne:new Types.ObjectId(userId)}
-        }).select("_id  username email avatar");
+                { email: { $regex: regExp } },
+                { username: { $regex: regExp } }
+            ],
+            _id: { $ne: new mongoose.Types.ObjectId(userId) }
+        };
 
+        const usersPipeline = [
+            {
+                $match:filter
+            },
+            {
+                $project: {
+                    username: 1,
+                    email: 1,
+                    avatar: 1,
+                }
+            }
+        ];
 
-        // ? see if you should handle the condition of users being undefined here or in the controller (for now I am handling it in the controller)
-        return users;
-    },
-    getInvitedUserIds: async (userId: mongoose.Types.ObjectId, data: any) => {
-        const user = await getUserOrThrow(userId);
+        const users = await User.aggregate(usersPipeline);
+        const totalUsers = await User.countDocuments(filter);
+        console.log("These are the users : ", users);
+        return {
+            users , 
+            totalUsers
+        };
     },
 }

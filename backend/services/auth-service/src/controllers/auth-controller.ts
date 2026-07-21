@@ -42,8 +42,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
         absoluteExpiresAt
     })
 
-    user.refreshTokens.push(refreshToken._id);
-
+    
     await user.save();
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
 
@@ -88,11 +87,11 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
     // res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
 
     await emitEvent("user.login", {
-        email,
+        email
     });
 
     console.log("This is the response of the LoginController : ", { refreshPlain, accessToken, user });
-    return sendResponse(res, {
+    return sendResponse(res , {
         statusCode: StatusCodes.OK,
         message: "User logged in successfully!",
         data: { refreshToken: refreshPlain, accessToken, user },

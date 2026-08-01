@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, X } from 'lucide-react';
 import { sp, softSp, MAX_GROUP_INVITES } from '../constants';
-import type { ModalStep, TimerType, IUser, ITimerForm } from '../types';
+import type { ModalStep, TimerType, ITimerForm } from '../types';
+import type { IUser } from '../../../../types/user';
 import TypeSelectStep from './steps/type-select-step';
 import InviteStep from './steps/invite-step';
 import DetailsStep from './steps';
+import useCreateProductivityTimerMutation from '@/custom-hooks/productivity-timer/create-productivity-timer';
 
 interface CreateTimerModalProps {
     onClose: () => void;
@@ -15,7 +17,7 @@ const EMPTY_FORM: ITimerForm = {
     title: '',
     description: '',
     deadline: '',
-    specifiedTime: '',
+    specifiedTime: 0,
 };
 
 const STEP_LABELS: Record<ModalStep, string> = {
@@ -36,6 +38,14 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
     const [invitedUsers, setInvitedUsers] = useState<IUser[]>([]);
     const [form, setForm] = useState<ITimerForm>(EMPTY_FORM);
 
+
+    const { mutateAsync: createProductivityTimer, isPending: isCreateProductivityTimerPending } = useCreateProductivityTimerMutation();
+
+    const handleCreateProductivityTimer = async () => {
+        await createProductivityTimer(form)
+    };
+
+
     // ── Derived step list (changes length based on type) ──────────────────────
     const steps: ModalStep[] = [
         'type-select',
@@ -49,23 +59,23 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
         setStep(t === 'group' ? 'invite-users' : 'fill-details');
     };
 
-    const handleBack = () => {
-        if (step === 'fill-details' && timerType === 'group') setStep('invite-users');
-        else setStep('type-select');
+    const handleBack = (step: ModalStep) => {
+        const currentStep = steps.indexOf(step);
+        setStep(steps[currentStep - 1]);
     };
 
     // ── Invite toggle ─────────────────────────────────────────────────────────
     const toggleInvite = (user: IUser) =>
         setInvitedUsers(prev =>
-            prev.find(u => u.id === user.id)
-                ? prev.filter(u => u.id !== user.id)
+            prev.find(u => u._id === user._id)
+                ? prev.filter(u => u._id !== user._id)
                 : prev.length < MAX_GROUP_INVITES ? [...prev, user] : prev,
         );
 
+
     // ── Submit ────────────────────────────────────────────────────────────────
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // TODO: wire up your createTaskMutation / createGroupTimerMutation here
-        console.log({ timerType, form, invitedUsers });
         onClose();
     };
 
@@ -122,7 +132,7 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
                                 {step !== 'type-select' && (
                                     <motion.button
                                         whileTap={{ scale: 0.88 }}
-                                        onClick={handleBack}
+                                        onClick={() => handleBack(step)}
                                         className="w-8 h-8 rounded-xl flex items-center justify-center text-white"
                                         style={{ background: 'rgba(255,255,255,0.12)' }}
                                     >
@@ -196,7 +206,7 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
                                 onChange={setForm}
                                 timerType={timerType}
                                 invitedUsers={invitedUsers}
-                                onSubmit={handleSubmit}
+                                onSubmit={handleCreateProductivityTimer}
                             />
                         )}
                     </AnimatePresence>

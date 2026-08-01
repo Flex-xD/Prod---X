@@ -18,7 +18,7 @@ const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => 
     const filtered = dummySearchUsers.filter(
         u =>
             u.username.toLowerCase().includes(query.toLowerCase()) &&
-            !invitedUsers.find(i => i._id === u.id),
+            !invitedUsers.find(i => i._id === u._id),
     );
 
     return (

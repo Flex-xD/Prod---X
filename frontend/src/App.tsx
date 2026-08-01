@@ -11,6 +11,9 @@ import { PublicRoutes } from "./custom-components/public-routes";
 import ProfilePage from "./pages/Profile-page";
 import TimerPage from "./pages/Productivity-timer-pages";
 
+
+// * Have a single source of truth here for authentication right now there is !!accessToken and one is isAuthenticated. . .
+
 function App() {
   console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
   

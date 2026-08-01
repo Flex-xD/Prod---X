@@ -9,11 +9,11 @@ import type { AxiosError } from "axios"
 import { toast } from "sonner"
 
 export const useToggleTaskMutation = () => {
+    const queryClient = useQueryClient();
     const userId = userAppStore((state) => state.user_id);
     if (!userId) {
         return toast.error("User ID not found !");
     }
-    const queryClient = useQueryClient();
     return useMutation<ApiResponse<ITask>, Error | AxiosError, { taskId: string; isTaskPending: boolean }>({
         mutationFn: async ({ taskId, isTaskPending }) => {
             const endPoint = isTaskPending ? ENDPOINTS.TASKS_ENDPOINTS.MARK_TASK_DONE : ENDPOINTS.TASKS_ENDPOINTS.MARK_TASK_PENDING

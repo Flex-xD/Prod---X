@@ -8,8 +8,8 @@ export interface ITokenState {
 
 export const tokenSlice:StateCreator<ITokenState> = (set) => ({
     accessToken:undefined , 
-    setAccessToken:(token) => {
-        set({accessToken:token});
+    setAccessToken:(accessToken) => {
+        set({accessToken});
     } , 
     clearAccessToken:() => {
         set({accessToken:undefined})

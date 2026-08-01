@@ -15,7 +15,6 @@ export async function refresh(req: Request, res: Response) {
     if (!refreshPlain) {
         throw ApiError(StatusCodes.UNAUTHORIZED, "Refresh Plain not found !");
     }
-
     const hashed = hashToken(refreshPlain);
     const userRefreshToken = await Token.findOne({ hashedToken: hashed });
     if (!userRefreshToken) {

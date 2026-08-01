@@ -26,9 +26,9 @@ export const LoginForm = ({ formData, showPassword, togglePassword, onChange, ha
             onSubmit={(e) => {
                 e.preventDefault();
                 handleLogin({
-                    email: formData.email,
-                    password: formData.password
-                })
+                        email: formData.email,
+                        password: formData.password
+                    })
             }}
         >
             <div className="space-y-2">

@@ -24,7 +24,7 @@ export const RegisterForm = ({ formData, showPassword, togglePassword, onChange,
         <form className='space-y-4'
             onSubmit={(e) => {
                 e.preventDefault();
-                // ? You should remove confirmPassword and add check statements for the credentials are properly filled or not
+                // ? You should remove confirmPassword and add check statements for the credentials weather they are properly filled or not
                 handleRegister(
                     formData
                 )

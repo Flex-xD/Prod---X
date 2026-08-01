@@ -30,7 +30,8 @@ const Dashboard = () => {
 
   // * CUSTOM HOOKS
   const { mutateAsync: createTaskMutation, isPending: createTaskPending } = useCreateTaskMutation(safeUserId);
-  // * fix this error below
+  // * fix this type error below
+  // * Below I can just toggle the task in the business logic rather then creating two endpoints (as the application is not that big)
   const {mutateAsync:updateTaskStatus , isPending:isUpdateTaskStatusPending} = useToggleTaskMutation();
 
   // ? Use the task's pending state from below
@@ -69,8 +70,6 @@ const Dashboard = () => {
   };
 
   const maxHours = Math.max(...weeklyData.map((d) => d.hours));
-
-
 
   const aiTips = [
     "Try the Pomodoro technique: 25 min focus + 5 min break!",
@@ -139,6 +138,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Add a option of deleting task (create the logic) */}
             <TasksCard tasks={tasksToDisplay} handleToggleTask={handleToggleTask} onToggleTaskPending={isUpdateTaskStatusPending} onAddTask={onAddTask} createTaskPending={createTaskPending} />
             <CalendarCard calendarData={calendarData} />
             <WeeklyGraphCard weeklyData={weeklyData} maxHours={maxHours} />

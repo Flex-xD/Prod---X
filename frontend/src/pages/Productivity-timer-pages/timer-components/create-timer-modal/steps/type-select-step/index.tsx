@@ -50,7 +50,7 @@ const TypeSelectStep = ({ onSelect }: TypeSelectStepProps) => (
         style={{ background: bg, borderColor: border }}
       >
         <div
-          className="w-11 h-11 rounded-2xl flex items-center justify-center text-white flex-shrink-0"
+          className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0"
           style={{ background: grad, boxShadow: '0 6px 16px rgba(0,0,0,0.18)' }}
         >
           <Icon className="w-5 h-5" />

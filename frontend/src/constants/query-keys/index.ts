@@ -12,6 +12,14 @@ export const QUERY_KEYS = {
         FOLLOWERS: (userId: string) => ["profile", userId, "followers"] as const,
         FOLLOWING: (userId: string) => ["profile", userId, "following"] as const,
     },
+    PRODUCTIVITY_TIMER :{
+        
+    }
+    ,
+    GROUP_PRODUCTIVITY_TIMER:{
+        MY_TIMERS:['']
+    }
+ ,
 
     BLOGS: {
         ALL: ["blogs"] as const,

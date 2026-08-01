@@ -2,9 +2,8 @@ export type TimerType = 'individual' | 'group';
 export type ModalStep = 'type-select' | 'invite-users' | 'fill-details';
 export type ViewMode = 'dashboard' | 'individual-detail' | 'group-detail';
 
-
 export interface IUser {
-    id: string;
+    _id: string;
     username: string;
     avatar: string;
     initials: string;
@@ -40,10 +39,18 @@ export interface IGroupTimer {
     isJoined: boolean;
 }
 
-
 export interface ITimerForm {
     title: string;
     description: string;
     deadline: string;
-    specifiedTime: string;
+    specifiedTime: number;
+}
+
+export interface IGroupTimerForm {
+    title:string , 
+    body:string , 
+    deadline:string , 
+    // ? Guesss what this specifiedTime could be 
+    specifiedTime:number , 
+    invitedUsersId:string[]
 }

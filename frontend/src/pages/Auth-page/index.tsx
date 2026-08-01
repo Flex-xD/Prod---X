@@ -26,7 +26,7 @@ export default function AuthPage() {
         confirmPassword: '',
     });
 
-    const { mutateAsync: handleGoogleAuth, isPending: isGoogleAuthPending, isError: isGoogleAuthError } = useGoogleAuth();
+    const { mutateAsync: handleGoogleAuth, isError: isGoogleAuthError } = useGoogleAuth();
     const { mutateAsync: handleLoginAuth, isPending: isLoginAuthPending, isError: isLoginAuthError } = useLoginMutation();
     const { mutateAsync: handleRegisterAuth, isPending: isRegisterAuthPending, isError: isRegisterAuthError } = useRegisterMutation();
 

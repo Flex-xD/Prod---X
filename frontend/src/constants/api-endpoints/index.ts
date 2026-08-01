@@ -16,6 +16,13 @@ const ENDPOINTS = {
     USER_ENDPOINTS:{
         USER_DATA:`${BASE_URL}/user/user-data`
     } , 
+    PRODUCTIVITY_TIMER:{
+        CREATE_PRODUCTIVITY_TIMER:`${BASE_URL}/productivity-timer/create-timer`
+    } , 
+    GROUP_PRODUCTITIVTY_TIMER:{
+        CREATE_GROUP_PRODUCTIVITY_TIMER:`${BASE_URL}/group-productivity-timer/create-group-timer` ,
+        GET_USERS_GROUP_PRODUCTIVITY_TIMER:`${BASE_URL}/group-productivity-timer/get-group-timers`
+    }
 
 }
 

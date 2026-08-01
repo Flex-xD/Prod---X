@@ -10,16 +10,18 @@ import { toast } from "sonner"
 
 export const useLogoutMutation = () => {
     const queryClient = useQueryClient();
-    const setIsAuthenticated =
-        userAppStore(
-            (state) => state.setIsAuthenticated
-        );
+    // const setIsAuthenticated =
+    //     userAppStore(
+    //         (state) => state.setIsAuthenticated
+    //     );
 
+    const { setIsAuthenticated, clearAccessToken, setUserId } = userAppStore.getState();
 
-    const clearAccessToken =
-        userAppStore(
-            (state) => state.clearAccessToken
-        ); const navigate = useNavigate();
+    // const clearAccessToken =
+    //     userAppStore(
+    //         (state) => state.clearAccessToken
+    //     ); 
+    const navigate = useNavigate();
     return useMutation({
         mutationFn: async () => {
             const response = await apiClient.post<ApiResponse<null>>(ENDPOINTS.AUTH_ENDPOINTS.LOGOUT);
@@ -29,18 +31,20 @@ export const useLogoutMutation = () => {
             }
             clearAccessToken();
             setIsAuthenticated(false);
+            // * May be I should be changing the userId to undefined instead of a string
+            setUserId('');
 
             console.log(
                 "Logout state:",
                 userAppStore.getState()
             );
-            
+
             return response.data;
         },
         onSuccess: async (data) => {
             await navigate("/");
             console.log(data)
-            await queryClient.invalidateQueries({queryKey:QUERY_KEYS.PROFILE.ME});
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
             return toast.success(data?.message || "Logout successfully done !")
         },
         onError: (error: AxiosError | Error) => {

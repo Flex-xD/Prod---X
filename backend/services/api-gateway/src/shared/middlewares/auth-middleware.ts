@@ -19,24 +19,21 @@ export const authMiddleware = async (req: IAuthRequest, res: Response, next: Nex
 
         const token = headers.split(" ")[1];
         if (!token) {
-            return sendResponse(res, {
+            return sendError(res, {
                 statusCode: StatusCodes.UNAUTHORIZED,
                 message: "JWT Token not found !",
-                success: false
             })
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: mongoose.Types.ObjectId }
         if (!decoded.userId) {
-            return sendResponse(res, {
+            return sendError(res, {
                 statusCode: StatusCodes.CONFLICT,
                 message: "Token not decoded !",
-                success: false
             })
         }
 
         req.userId = decoded.userId;
-        // console.log("req.userId is equal to : " , req.userId);
         next();
     } catch (error: any) {
 

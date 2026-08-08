@@ -19,7 +19,7 @@ export const connectProducer = async (retries = 5) => {
             return;
         } catch (err) {
             retries--;
-            logger.error("❌ kafka connection producer failed --> [ notification-service ] ,", retries, "left");
+            logger.error("❌ kafka producer connection failed --> [ notification-service ] ,", retries, "left");
             await new Promise((resolve) => setTimeout(resolve, 2000));
         }
         console.error("❌ Kafka connection failed after all retries. Exiting.");

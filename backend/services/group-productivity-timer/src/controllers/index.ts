@@ -28,6 +28,8 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
     const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(toObjectId(userId), { title, body, deadline, specifiedTime, invitedUsersId } as TcreateGroupProductivityTimerInputForBody);
     logger.info(`Sending Response to client ✅ with userid: ${userId}`);
     
+    //  * have to emit the socket.io event here , and then listen for it on the frontend and on being listened , it will initaite a notification for the users whenever he will connect to the server . . .
+    
     await emitEvent("group.timer.created", {
         userId,
         invitedUsersId,

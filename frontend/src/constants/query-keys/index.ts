@@ -12,15 +12,18 @@ export const QUERY_KEYS = {
         FOLLOWERS: (userId: string) => ["profile", userId, "followers"] as const,
         FOLLOWING: (userId: string) => ["profile", userId, "following"] as const,
     },
-    PRODUCTIVITY_TIMER :{
-        
+    PRODUCTIVITY_TIMER: {
+        ALL: ["productivity-timer"] as const,
+        USER: (userId: string) => ["productivity-timer", userId] as const,
+        BY_ID: (productivityTimerId: string) => ["productivity-timer", productivityTimerId] as const
     }
     ,
-    GROUP_PRODUCTIVITY_TIMER:{
-        MY_TIMERS:['']
+    GROUP_PRODUCTIVITY_TIMER: {
+        USER_GROUP_TIMER:(groupProductivityTimerId:string) => ["group-productivity-timer"  , groupProductivityTimerId] ,
     }
- ,
+    ,
 
+    // ? The key's below are from my last full-stack project
     BLOGS: {
         ALL: ["blogs"] as const,
         BY_ID: (blogId: string) => ["blogs", "id", blogId] as const,

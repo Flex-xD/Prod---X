@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import './index.css'
 import App from './App.tsx'
+import { SocketProvider } from "./context/socket-context/index.tsx";
 
 const queryCleint = new QueryClient({
   defaultOptions: {
@@ -23,10 +24,13 @@ const queryCleint = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryCleint}>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID} >
-      <App />
-      <Toaster position="top-right" richColors />
-    </GoogleOAuthProvider>
+    {/* ? See if socket provider should be after queryClientProvider or before it  */}
+    <SocketProvider>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID} >
+        <App />
+        <Toaster position="top-right" richColors />
+      </GoogleOAuthProvider>
+    </SocketProvider>
   </QueryClientProvider>
 
 

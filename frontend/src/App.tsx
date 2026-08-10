@@ -4,28 +4,32 @@ import ProdXDashboard from "./pages/Dashboard";
 import ProdXLandingPage from "./pages/LandingPage";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { userAppStore } from "./store";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { Loader } from "lucide-react";
 import { ProtectedRoutes } from "./custom-components/protected-routes";
 import { PublicRoutes } from "./custom-components/public-routes";
 import ProfilePage from "./pages/Profile-page";
 import TimerPage from "./pages/Productivity-timer-pages";
+import { socketContext } from "./context/socket-context";
+import socket from "./lib/socket.io";
+import { toast } from "sonner";
 
 
 // * Have a single source of truth here for authentication right now there is !!accessToken and one is isAuthenticated. . .
 
 function App() {
-  console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
-  
+  // console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
+
+  const isSocketConnected = useContext(socketContext);
+  console.log(`Socket Connection : ${JSON.stringify(isSocketConnected)}`);
+
   const setIsAuthenticated = userAppStore((state) => state.setIsAuthenticated);
   const setUserId = userAppStore((state) => state.setUserId);
 
   const user_id = userAppStore((state) => state.user_id);
 
-  const { data, isPending , isError} = useUserData();
-  
-  console.log("This is App.tsx : " , "data :" , data , "ispending : " , isPending , "isError : " , isError);
-  console.log("UserId in APP.tsx : ",user_id);
+  const { data, isPending, isError } = useUserData();
+
   useEffect(() => {
     if (data?.success) {
       setIsAuthenticated(true);
@@ -38,11 +42,18 @@ function App() {
 
   if (isPending) {
     return <div className="h-screen w-screen flex justify-center items-center">
-      <Loader/>
+      <Loader />
     </div>;
   }
 
-  // Now I have to test it , weather useUserData API is acting accordingly for the source of truth of the user's authentication
+  // * Test this ASAP !
+  socket.on("invitation-notification", (payload: any) => {
+    console.log(`This is the payload : ${{payload}}`);
+    toast.info(`You are invited to group-timer from ${payload.from}`)
+  });
+  
+  console.log("This is App.tsx : ", "data :", data, "ispending : ", isPending, "isError : ", isError);
+  console.log("UserId in APP.tsx : ", user_id);
 
   return (
     <BrowserRouter>

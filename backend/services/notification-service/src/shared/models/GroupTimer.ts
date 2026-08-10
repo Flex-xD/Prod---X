@@ -15,7 +15,7 @@ export interface IGroupTimer extends mongoose.Document {
         username: string;
         avatar?: string;
     };
-    participantsCompletedTime:
+    participantsCompletedTime?:
     {
         participantId: mongoose.Types.ObjectId,
         completedTime: number
@@ -64,7 +64,7 @@ groupTimerSchema.virtual("authorDetails", {
     localField: "author",
     foreignField: "_id",
     justOne: true
-})
+});
 
 const GroupTimer: Model<IGroupTimer> = mongoose.model<IGroupTimer>("GroupTimer", groupTimerSchema);
 export default GroupTimer;

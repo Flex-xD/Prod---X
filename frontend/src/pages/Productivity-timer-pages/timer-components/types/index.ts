@@ -48,7 +48,7 @@ export interface ITimerForm {
 
 export interface IGroupTimerForm {
     title:string , 
-    body:string , 
+    description:string , 
     deadline:string , 
     // ? Guesss what this specifiedTime could be 
     specifiedTime:number , 

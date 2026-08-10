@@ -90,7 +90,7 @@ const DetailsStep = ({ form, onChange, timerType, invitedUsers, onSubmit }: Deta
                 >
                     <div className="flex -space-x-2">
                         {invitedUsers.slice(0, 4).map((u, i) => (
-                            <Avatar key={u.id} initials={u.initials} idx={i} size="sm" />
+                            <Avatar key={u._id} initials={u.initials} idx={i} size="sm" />
                         ))}
                     </div>
                     <span className="text-xs font-bold text-violet-700">

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError, asyncHandler, getUser, logger, sendResponse, toObjectId } from "../shared";
-import mongoose from "mongoose";
+import mongoose, { get } from "mongoose";
 import { notificationServices } from "../service";
 import { StatusCodes } from "http-status-codes";
 import { emitEvent } from "../kafka/producer";
@@ -29,9 +29,7 @@ export const createNotification = asyncHandler(async (req: IAuthRequest, res: Re
 
     // ? Emitting the notification.created event
     await emitEvent("notification.created", {
-        notificationId:notification._id,
-        notificationReceivingUsersId:to , 
-        userId
+        notification ,
     });
     
     return sendResponse(res, {
@@ -55,11 +53,11 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
     // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
     logger.info(`Forwaring the data to the notification-servive...`)
     const notification:TypeCreateNotification  = await notificationServices.sendNotification(notificationReceivingUserId , notificationId);
-
+    const user = await getUser(userId);
     // ? Emitting the notification.created event
-    await emitEvent("notification.send", {
-        notificationId, 
-        from:userId
+    await emitEvent("invitation.notification.created", {
+        notification, 
+        username:user.username
     });
 
     return sendResponse(res, {

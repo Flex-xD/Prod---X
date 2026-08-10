@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, UserPlus, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { dummySearchUsers, MAX_GROUP_INVITES, sp } from '../../../constants';
-import type { IUser } from '@/types/user';
 import { Avatar } from '../../../ui';
+import type { IUser } from '../../../types';
 
 interface InviteStepProps {
     invitedUsers: IUser[];
@@ -51,7 +51,7 @@ const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => 
                                 className="flex items-center gap-1.5 bg-white rounded-xl px-2.5 py-1.5"
                                 style={{ border: '1px solid #ddd6fe', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
                             >
-                                <Avatar initials={u.initials} idx={i} size="sm" />
+                                <Avatar initials={""} idx={i} size="sm" />
                                 <span className="text-xs font-bold text-slate-700">{u.username}</span>
                                 <button
                                     onClick={() => onToggle(u)}
@@ -88,7 +88,7 @@ const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => 
                         className="flex items-center gap-3 p-3 rounded-2xl"
                         style={{ background: '#f8fafc' }}
                     >
-                        <Avatar initials={user.initials} idx={i + 2} size="md" isOnline={user.isOnline} />
+                        <Avatar initials={""} idx={i + 2} size="md" isOnline={user.isOnline} />
 
                         <div className="flex-1">
                             <div className="font-bold text-slate-800 text-sm">{user.username}</div>

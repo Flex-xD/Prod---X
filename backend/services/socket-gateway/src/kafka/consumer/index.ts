@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import kafka from "..";
 import { ApiError, logger } from "../../shared";
 import { handlers } from "./handlers";
@@ -16,16 +17,6 @@ export const connectConsumer = async () => {
     }
 };
 
-// * TYPE FOR THE GroupProductivityTimer via value
-export type TgroupProductivityTimerForConsumer = {
-    title: string,
-    body: string,
-    deadline: Date,
-    invitedUsersId: string[],
-    participants: string[],
-    specifiedTime: number,
-    author:string
-}
 
 export const handleConsumer = async (topics: string[]) => {
     try {
@@ -40,14 +31,13 @@ export const handleConsumer = async (topics: string[]) => {
                 const handler = handlers[topic as keyof typeof handlers];
                 logger.info(`This is the topic : ${topic}`);
                 logger.info(`This is the message : ${message}`);
-                // if (!handler) {
-                //     // ? should I return a response or throw a Error here 
-                //     throw ApiError(StatusCodes.CONFLICT , "Topic didn't match handlers
-                //  of notification-service consumer !");
-                // }
-                // ? Don't forget to remove "!" from below , it's an unsafe practice
+                if (!handler) {
+                    // ? should I return a response or throw a Error here 
+                    throw ApiError(StatusCodes.CONFLICT ,                     "Topic didn't match handlers of notification-service consumer !");
+                }
+                // ? Don't forget to remo)ve "!" from below , it's an unsafe practice
                 const parsedValue = JSON.parse(message.value!.toString());
-                // await handler(parsedValue);
+                await handler(parsedValue);
             
             }
         })

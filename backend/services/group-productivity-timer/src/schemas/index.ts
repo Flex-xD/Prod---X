@@ -12,7 +12,7 @@ const createProductivityTimerSchema = z.object({
 
 const createGroupProductivityTimerSchemaForBody = z.object({
     title: z.string().min(4, "Title must be at least 4 character long !"),
-    body: z.string().optional(),
+    description: z.string().optional(),
     specifiedTime: z.number(),
     deadline: z.date(),
     invitedUsersId:z.array(z.string())

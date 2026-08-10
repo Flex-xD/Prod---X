@@ -9,7 +9,6 @@ import { toast } from "sonner"
 
 
 const useCreateProductivityTimerMutation = () => {
-
     // const queryClient = useQueryClient();
     // ? invalidate the queries when the useQueryClientWillBeFetched
     return useMutation<ApiResponse<ITimerForm>, Error | AxiosError, ITimerForm>({

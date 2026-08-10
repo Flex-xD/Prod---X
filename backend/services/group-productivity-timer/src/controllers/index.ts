@@ -15,24 +15,21 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
 
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
-    const { title, body, deadline, specifiedTime, invitedUsersId }: TcreateGroupProductivityTimerInputForBody = req.body;
-
-    if (!title || !specifiedTime || !deadline) {
-        throw ApiError(StatusCodes.BAD_REQUEST, "Title , specifiedTime and deadline are required !");
-    }
+    const { title, description, deadline, specifiedTime, invitedUsersId }: TcreateGroupProductivityTimerInputForBody = req.body;
 
     if (invitedUsersId.length == 0) {
         throw ApiError(StatusCodes.BAD_REQUEST , "You must invite at least one user !");
     }
 
-    const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(toObjectId(userId), { title, body, deadline, specifiedTime, invitedUsersId } as TcreateGroupProductivityTimerInputForBody);
+    if (!title || !specifiedTime || !deadline) {
+        throw ApiError(StatusCodes.BAD_REQUEST, "Title , specifiedTime and deadline are required !");
+    }
+
+    const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(toObjectId(userId), { title, description, deadline, specifiedTime, invitedUsersId } as TcreateGroupProductivityTimerInputForBody);
     logger.info(`Sending Response to client ✅ with userid: ${userId}`);
-    
-    //  * have to emit the socket.io event here , and then listen for it on the frontend and on being listened , it will initaite a notification for the users whenever he will connect to the server . . .
     
     await emitEvent("group.timer.created", {
         userId,
-        invitedUsersId,
         groupProductivityTimer,
         token
     })

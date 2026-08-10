@@ -20,6 +20,7 @@ export const QUERY_KEYS = {
     ,
     GROUP_PRODUCTIVITY_TIMER: {
         USER_GROUP_TIMER:(groupProductivityTimerId:string) => ["group-productivity-timer"  , groupProductivityTimerId] ,
+        MY_TIMERS:["MyTimers"]
     }
     ,
 

@@ -13,7 +13,7 @@ export const connectProducer = async (retries = 5) => {
             producer = kafka.producer();
             await producer.connect();
             isConnected = true;
-            logger.info("Kafka Producer connected successfully ! --> [ socket-service ]")
+            logger.info("✅ Kafka Producer is connected ! --> [ socket-service ]")
             return;
         } catch (error: any) {
             retries--;

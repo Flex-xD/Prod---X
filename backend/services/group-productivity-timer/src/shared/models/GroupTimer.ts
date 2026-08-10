@@ -4,7 +4,7 @@ import mongoose, { Model, Schema } from "mongoose";
 export interface IGroupTimer extends mongoose.Document {
     _id: mongoose.Types.ObjectId,
     title: string,
-    body: string,
+    description: string,
     // ? see if setting the below timer to Date is good or find a way to set it to time 
     specifiedTime: number,
     deadline: Date,
@@ -24,7 +24,7 @@ const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
         type: String,
         required: true,
     },
-    body: {
+    description: {
         type: String,
         required: false,
     },

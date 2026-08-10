@@ -13,7 +13,7 @@ export const groupProductivityTimerServices = {
 
         const groupProductivityTimer = new GroupTimer({
             title: data.title,
-            body: data.body ? data.body : "",
+            body: data.description ? data.description : "",
             deadline: data.deadline,
             invitedUsersId: data.invitedUsersId,
             participants: [],

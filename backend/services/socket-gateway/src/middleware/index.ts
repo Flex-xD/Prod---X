@@ -10,8 +10,9 @@ export interface IAuthedSocket extends Socket {
 
 const authedSocketMiddleware = async (socket:IAuthedSocket , next:NextFunction) => {
     try {
-        const token = socket.handshake.auth.accessToken;
+        const token = socket.handshake.auth.token;
         if (!token) {
+            console.log("token : " ,token);
             throw ApiError(StatusCodes.UNAUTHORIZED , "Unauthorized access !")
         };
         console.log("This is the token in the Socket-Middleware : " , token);

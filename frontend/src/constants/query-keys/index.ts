@@ -11,6 +11,7 @@ export const QUERY_KEYS = {
         BY_ID: (userId: string) => ["profile", userId] as const,
         FOLLOWERS: (userId: string) => ["profile", userId, "followers"] as const,
         FOLLOWING: (userId: string) => ["profile", userId, "following"] as const,
+        RANDOM:["random"]
     },
     PRODUCTIVITY_TIMER: {
         ALL: ["productivity-timer"] as const,

@@ -6,7 +6,6 @@ export interface IUser {
     _id: string;
     username: string;
     avatar: string;
-    initials: string;
     isOnline: boolean;
 }
 

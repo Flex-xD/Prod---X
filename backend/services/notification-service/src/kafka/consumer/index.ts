@@ -50,7 +50,6 @@ export const handleConsumer = async (topics: string[]) => {
                 if (!topic || !message) {
                     return;
                 }
-                // * understand what the hell this 'topic of keyof typeof does'
                 const handler = handlers[topic as keyof typeof handlers];
                 logger.info(`This is the topic : ${topic}`);
                 logger.info(`This is the message : ${message}`);

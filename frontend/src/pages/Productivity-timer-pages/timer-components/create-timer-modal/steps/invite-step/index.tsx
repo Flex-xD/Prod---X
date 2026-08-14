@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { dummySearchUsers, MAX_GROUP_INVITES, sp } from '../../../constants';
 import { Avatar } from '../../../ui';
 import type { IUser } from '../../../types';
+import UserGetUsersToInvite from '@/custom-hooks/group-productivity-timer/get-users-to-invite';
 
 interface InviteStepProps {
     invitedUsers: IUser[];
@@ -14,12 +15,25 @@ interface InviteStepProps {
 
 const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => {
     const [query, setQuery] = useState('');
+    const { data: usersToInvite, isPending: isUsersToInvitePending, isError: isUsersToInviteError } = UserGetUsersToInvite(query);
 
+    // ? Replace the dummySearchUsers with actuall data from the backend
     const filtered = dummySearchUsers.filter(
         u =>
             u.username.toLowerCase().includes(query.toLowerCase()) &&
             !invitedUsers.find(i => i._id === u._id),
     );
+
+
+    console.log("This is the data from : ", usersToInvite);
+    // if (!isUsersToInvitePending) {
+    //     return <Loader/>;
+    // }
+
+
+    if (!isUsersToInviteError) {
+        console.log(`There is error while fetching the users to invite : ${isUsersToInviteError}`);
+    }
 
     return (
         <motion.div
@@ -79,16 +93,16 @@ const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => 
             {/* Results list */}
             <div className="space-y-1.5 max-h-52 overflow-y-auto">
                 {/* ? Fix the types of user and i below */}
-                {filtered.map((user:any, i:any) => (
+                {filtered.map((user: IUser, i: any) => (
                     <motion.div
-                        key={user.id}
+                        key={user._id}
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.04 }}
                         className="flex items-center gap-3 p-3 rounded-2xl"
                         style={{ background: '#f8fafc' }}
                     >
-                        <Avatar initials={""} idx={i + 2} size="md" isOnline={user.isOnline} />
+                        <Avatar initials={user.username.split(' ').map(word => word.charAt(0)).join('')} idx={i + 2} size="md" isOnline={user.isOnline} />
 
                         <div className="flex-1">
                             <div className="font-bold text-slate-800 text-sm">{user.username}</div>

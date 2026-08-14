@@ -4,8 +4,9 @@ import { ApiError } from "../shared/utils/api-error";
 import { asyncHandler } from "../shared/utils/async-handler";
 import {  Response } from "express";
 import { userRelatedService } from "../service-layer/user-realted-service";
-import { sendResponse } from "../shared/utils/response-utils";
+import { sendError, sendResponse } from "../shared/utils/response-utils";
 import mongoose from "mongoose";
+import { toObjectId } from "../shared/utils/into-objectId";
 
 // ! USER-RELATED-FETCHING
 export const userDataController = asyncHandler(async (req: IAuthRequest, res: Response) => {
@@ -22,6 +23,8 @@ export const userDataController = asyncHandler(async (req: IAuthRequest, res: Re
         data: userData
     })
 });
+
+
 
 export const getUsersForGroupProductivityTimer = asyncHandler(async (req: IAuthRequest, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
@@ -51,5 +54,3 @@ export const getUsersForGroupProductivityTimer = asyncHandler(async (req: IAuthR
         message: "Users found with the following query !"
     });
 });
-
-

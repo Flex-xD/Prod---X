@@ -37,7 +37,7 @@ export const MAX_GROUP_INVITES = 5;
 // Replace these with real API calls in your data-fetching hooks.
 
 export const dummyMe: IUser = {
-    id: 'me',
+    _id: 'me',
     username: 'you',
     avatar: '',
     initials: 'YU',
@@ -85,7 +85,7 @@ export const dummyGroupTimers: IGroupTimer[] = [
         deadline: '2025-05-12',
         specifiedTime: 180,
         author: {
-            id: 'u1',
+            _id: 'u1',
             username: 'aditya_dev',
             avatar: '',
             initials: 'AD',
@@ -94,7 +94,7 @@ export const dummyGroupTimers: IGroupTimer[] = [
         isJoined: true,
         participants: [
             {
-                user: { id: 'u1', username: 'aditya_dev', avatar: '', initials: 'AD', isOnline: true },
+                user: { _id: 'u1', username: 'aditya_dev', avatar: '', initials: 'AD', isOnline: true },
                 productivityDone: 7200,
                 isCurrentlyActive: true,
                 rank: 1,
@@ -106,13 +106,13 @@ export const dummyGroupTimers: IGroupTimer[] = [
                 rank: 2,
             },
             {
-                user: { id: 'u2', username: 'sara_codes', avatar: '', initials: 'SC', isOnline: true },
+                user: { _id: 'u2', username: 'sara_codes', avatar: '', initials: 'SC', isOnline: true },
                 productivityDone: 3600,
                 isCurrentlyActive: true,
                 rank: 3,
             },
             {
-                user: { id: 'u3', username: 'dev_rohan', avatar: '', initials: 'DR', isOnline: false },
+                user: { _id: 'u3', username: 'dev_rohan', avatar: '', initials: 'DR', isOnline: false },
                 productivityDone: 1800,
                 isCurrentlyActive: false,
                 rank: 4,
@@ -122,9 +122,9 @@ export const dummyGroupTimers: IGroupTimer[] = [
 ];
 
 export const dummySearchUsers: IUser[] = [
-    { id: 'u10', username: 'kaito_builds', avatar: '', initials: 'KB', isOnline: true },
-    { id: 'u11', username: 'priya_focuses', avatar: '', initials: 'PF', isOnline: false },
-    { id: 'u12', username: 'zara_dev', avatar: '', initials: 'ZD', isOnline: true },
-    { id: 'u13', username: 'leo_codes', avatar: '', initials: 'LC', isOnline: true },
-    { id: 'u14', username: 'mia_builds', avatar: '', initials: 'MB', isOnline: false },
+    { _id: 'u10', username: 'kaito_builds', avatar: '', initials: 'KB', isOnline: true },
+    { _id: 'u11', username: 'priya_focuses', avatar: '', initials: 'PF', isOnline: false },
+    { _id: 'u12', username: 'zara_dev', avatar: '', initials: 'ZD', isOnline: true },
+    { _id: 'u13', username: 'leo_codes', avatar: '', initials: 'LC', isOnline: true },
+    { _id: 'u14', username: 'mia_builds', avatar: '', initials: 'MB', isOnline: false },
 ];

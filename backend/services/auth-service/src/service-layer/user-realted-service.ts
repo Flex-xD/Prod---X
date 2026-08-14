@@ -14,7 +14,9 @@ export const userRelatedService = {
         }
         return user;
     },
-    getUsersForGroupProductivityTimer: async (query: string, userId: string) => {
+    
+
+ getUsersForGroupProductivityTimer: async (query: string, userId: string) => {
         const escapedQuery = query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
         const regExp = new RegExp(escapedQuery, "i");
 
@@ -47,4 +49,5 @@ export const userRelatedService = {
             totalUsers
         };
     },
+
 }

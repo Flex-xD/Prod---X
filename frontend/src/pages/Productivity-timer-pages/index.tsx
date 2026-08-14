@@ -12,7 +12,6 @@ import IndividualTimerCard from './timer-components/individual-timer-card';
 import IndividualTimerDetail from './timer-components/individual-timer-detail';
 import GroupTimerDetail from './timer-components/group-timer-detail';
 import CreateTimerModal from './timer-components/create-timer-modal';
-import useCreateGroupProductivityTimer from '@/custom-hooks/group-productivity-timer/create-group-timer';
 
 const TimerPage = () => {
     const [showModal, setShowModal] = useState(false);
@@ -21,11 +20,6 @@ const TimerPage = () => {
     const [selectedGrp, setSelectedGrp] = useState<IGroupTimer | null>(null);
 
     const canCreate = dummyIndividualTimers.length < MAX_INDIVIDUAL_TIMERS;
-
-    // ? POST HOOKS
-
-    // * isPending:handleCreateGroupTimerPending , isError:handleCreateGroupTimerError
-    const {mutateAsync:handleCreateGroupTimer  } = useCreateGroupProductivityTimer();
 
     const handleBack = () => {
         setView('dashboard');

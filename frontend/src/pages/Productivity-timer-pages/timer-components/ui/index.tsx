@@ -26,7 +26,7 @@ export const CircularRing = ({
   const offset = circ - (percent / 100) * circ;
 
   return (
-    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
         <circle
           cx={size / 2} cy={size / 2} r={r}
@@ -64,7 +64,7 @@ export const Avatar = ({ initials, idx, size = 'md', isOnline }: AvatarProps) =>
   const fs = AVATAR_FS[size];
 
   return (
-    <div className="relative flex-shrink-0" style={{ width: d, height: d }}>
+    <div className="relative shrink-0" style={{ width: d, height: d }}>
       <div
         className="w-full h-full rounded-2xl flex items-center justify-center text-white font-bold"
         style={{

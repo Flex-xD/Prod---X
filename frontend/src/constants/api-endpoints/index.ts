@@ -5,7 +5,7 @@ const ENDPOINTS = {
         REGISTER: `${BASE_URL}/auth/register`,
         LOGIN: `${BASE_URL}/auth/login`,
         GOOGLE_AUTH: `${BASE_URL}/auth/google-auth` , 
-        LOGOUT:`${BASE_URL}/auth/logout`
+        LOGOUT:`${BASE_URL}/auth/logout` , 
     } , 
     TASKS_ENDPOINTS:{
         CREATE_TASK:`${BASE_URL}/task/create-task`, 
@@ -14,7 +14,9 @@ const ENDPOINTS = {
         MARK_TASK_PENDING:`${BASE_URL}/task/pending` , 
     } , 
     USER_ENDPOINTS:{
-        USER_DATA:`${BASE_URL}/user/user-data`
+        USER_DATA:`${BASE_URL}/user/user-data` , 
+        USERS_TO_SHOW:(query:string) => `${BASE_URL}/user/users-to-invite?query=${query}`
+
     } , 
     PRODUCTIVITY_TIMER:{
         CREATE_PRODUCTIVITY_TIMER:`${BASE_URL}/productivity-timer/create-timer` , 

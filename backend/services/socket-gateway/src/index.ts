@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import { logger, sendError } from "./shared";
 import { initKafka } from "./utils/kafka";
@@ -26,8 +26,14 @@ app.use((err: any, req: Request, res: Response) => {
     return sendError(res, { error: err });
 })
 
-// ? Fix this error
-app.use(authedSocketMiddleware);
+// ? adapt next's type to socket.io's expected signature and handle async middleware
+io.use(async (socket, next: (err?: any) => void) => {
+    try {
+        await authedSocketMiddleware(socket, next as any);
+    } catch (err) {
+        next(err);
+    }
+});
 
 registerConnectionHandlers(io);
 

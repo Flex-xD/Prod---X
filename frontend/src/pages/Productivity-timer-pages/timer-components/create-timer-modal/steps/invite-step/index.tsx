@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, UserPlus, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { dummySearchUsers, MAX_GROUP_INVITES, sp } from '../../../constants';
+import { MAX_GROUP_INVITES, sp } from '../../../constants';
 import { Avatar } from '../../../ui';
 import type { IUser } from '../../../types';
 import UserGetUsersToInvite from '@/custom-hooks/group-productivity-timer/get-users-to-invite';
+import { toast } from 'sonner';
 
 interface InviteStepProps {
     invitedUsers: IUser[];
@@ -14,11 +15,23 @@ interface InviteStepProps {
 }
 
 const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => {
+    // * Local State
     const [query, setQuery] = useState('');
-    const { data: usersToInvite, isPending: isUsersToInvitePending, isError: isUsersToInviteError } = UserGetUsersToInvite(query);
 
-    // ? Replace the dummySearchUsers with actuall data from the backend
-    const filtered = dummySearchUsers.filter(
+
+    // * Users to invite query
+    const { data: usersToInvite, isError: isUsersToInviteError } = UserGetUsersToInvite(query);
+
+
+
+
+    // ? Replace the dummySearchUsers with actual data from the backend
+    // if (!usersToInvite?.data.users) {
+    //     throw Error("No User found with this username and email !");
+    // }
+
+
+    const filtered = usersToInvite?.data.users ?? usersToInvite?.data.users.filter(
         u =>
             u.username.toLowerCase().includes(query.toLowerCase()) &&
             !invitedUsers.find(i => i._id === u._id),
@@ -27,12 +40,12 @@ const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => 
 
     console.log("This is the data from : ", usersToInvite);
     // if (!isUsersToInvitePending) {
-    //     return <Loader/>;
+    //     return <Loader2Icon />;
     // }
 
-
-    if (!isUsersToInviteError) {
+    if (isUsersToInviteError) {
         console.log(`There is error while fetching the users to invite : ${isUsersToInviteError}`);
+        toast.error("Error while fetching the users !");
     }
 
     return (
@@ -85,7 +98,7 @@ const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => 
                 <Input
                     placeholder="Search username…"
                     value={query}
-                    onChange={e => setQuery(e.target.value)}
+                    onChange={(e) => setQuery(e.target.value)}
                     className="pl-9 rounded-xl h-10 text-sm border-slate-200 focus-visible:ring-violet-400"
                 />
             </div>
@@ -93,7 +106,7 @@ const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => 
             {/* Results list */}
             <div className="space-y-1.5 max-h-52 overflow-y-auto">
                 {/* ? Fix the types of user and i below */}
-                {filtered.map((user: IUser, i: any) => (
+                {filtered && filtered?.map((user: IUser, i: any) => (
                     <motion.div
                         key={user._id}
                         initial={{ opacity: 0, y: 6 }}

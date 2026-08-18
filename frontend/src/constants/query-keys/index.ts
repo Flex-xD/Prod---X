@@ -11,17 +11,17 @@ export const QUERY_KEYS = {
         BY_ID: (userId: string) => ["profile", userId] as const,
         FOLLOWERS: (userId: string) => ["profile", userId, "followers"] as const,
         FOLLOWING: (userId: string) => ["profile", userId, "following"] as const,
-        RANDOM:["random"]
+        USERS_TO_SHOW:(query:string) => ["users_to_show" , query]
     },
     PRODUCTIVITY_TIMER: {
         ALL: ["productivity-timer"] as const,
-        USER: (userId: string) => ["productivity-timer", userId] as const,
+        ACTIVE_PRODUCTIVIY_TIMERS: (userId: string) => ["active-productivity-timer", userId] as const,
         BY_ID: (productivityTimerId: string) => ["productivity-timer", productivityTimerId] as const
     }
     ,
     GROUP_PRODUCTIVITY_TIMER: {
         USER_GROUP_TIMER:(groupProductivityTimerId:string) => ["group-productivity-timer"  , groupProductivityTimerId] ,
-        MY_TIMERS:["MyTimers"]
+        ACTIVE_GROUP_TIMERS:(userId:string) => ["active-group-timers"  , userId]
     }
     ,
 

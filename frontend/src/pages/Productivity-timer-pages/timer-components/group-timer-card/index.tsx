@@ -12,7 +12,7 @@ interface GroupTimerCardProps {
 }
 
 const GroupTimerCard = ({ timer, index, onClick }: GroupTimerCardProps) => {
-    const myPart = timer.participants.find(p => p.user.id === 'me');
+    const myPart = timer.participants.find(p => p.user._id === 'me');
     const myPct = myPart ? progressPercent(myPart.productivityDone, timer.specifiedTime) : 0;
     const topUser = [...timer.participants].sort((a, b) => b.productivityDone - a.productivityDone)[0];
     const activeCount = timer.participants.filter(p => p.isCurrentlyActive).length;
@@ -30,7 +30,7 @@ const GroupTimerCard = ({ timer, index, onClick }: GroupTimerCardProps) => {
         >
             {/* Rose accent stripe */}
             <div
-                className="absolute top-0 left-0 right-0 h-[3px]"
+                className="absolute top-0 left-0 right-0 h-0.75"
                 style={{ background: 'linear-gradient(90deg, #EC4899, #F43F5E44)' }}
             />
 
@@ -52,8 +52,8 @@ const GroupTimerCard = ({ timer, index, onClick }: GroupTimerCardProps) => {
                     {/* Stacked participant avatars */}
                     <div className="flex -space-x-2 ml-3 flex-shrink-0">
                         {timer.participants.slice(0, 4).map((p, i) => (
-                            <div key={p.user.id} style={{ zIndex: 4 - i, border: '2px solid white', borderRadius: 14 }}>
-                                <Avatar initials={p.user.initials} idx={i} size="sm" />
+                            <div key={p.user._id} style={{ zIndex: 4 - i, border: '2px solid white', borderRadius: 14 }}>
+                                <Avatar initials={""} idx={i} size="sm" />
                             </div>
                         ))}
                     </div>

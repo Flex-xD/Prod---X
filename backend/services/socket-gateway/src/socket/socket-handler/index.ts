@@ -1,4 +1,4 @@
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import { emitEvent, logger } from "../../shared";
 import { IAuthedSocket } from "../../middleware";
 import { markUserOnline, scheduleUserOffline } from "../user-status-store";

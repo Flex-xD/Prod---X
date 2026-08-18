@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query"
 
 const useGetProductivityTimer = (userId:string) => {
     return useQuery({
-        queryKey:QUERY_KEYS.TASKS.TODAYS_TASKS(userId) , 
+        queryKey:QUERY_KEYS.PRODUCTIVITY_TIMER.ACTIVE_PRODUCTIVIY_TIMERS(userId) , 
         queryFn:async () => {
             const response = await apiClient.get(ENDPOINTS.PRODUCTIVITY_TIMER.GET_PRODUCTIVITY_TIMERS);
             if (!response.data) {

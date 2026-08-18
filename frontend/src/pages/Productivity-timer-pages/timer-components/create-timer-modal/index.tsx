@@ -8,6 +8,7 @@ import InviteStep from './steps/invite-step';
 import DetailsStep from './steps';
 import useCreateProductivityTimerMutation from '@/custom-hooks/productivity-timer/create-productivity-timer';
 import useCreateGroupProductivityTimer from '@/custom-hooks/group-productivity-timer/create-group-timer';
+import { userAppStore } from '@/store';
 
 interface CreateTimerModalProps {
     onClose: () => void;
@@ -38,12 +39,17 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
     const [invitedUsers, setInvitedUsers] = useState<IUser[]>([]);
     const [form, setForm] = useState<ITimerForm>(EMPTY_FORM);
 
+
+    const userId = userAppStore((state) => state.user_id);
+    console.log("Invited User's ID : " , invitedUsers);
     // ? DERIVED STATE
     const invitedUsersId = invitedUsers.map(user => user._id);
+    console.log(invitedUsersId);
 
     // ? POST HOOKS
-    const { mutateAsync: createProductivityTimer } = useCreateProductivityTimerMutation();
-    const { mutateAsync: handleCreateGroupTimer } = useCreateGroupProductivityTimer();
+    const { mutateAsync: createProductivityTimer } = useCreateProductivityTimerMutation(userId ?? "");
+    // ! It is a bad practice to use ?? "" so fix it later on 
+    const { mutateAsync: handleCreateGroupTimer } = useCreateGroupProductivityTimer(userId ?? "");
 
     // ? HANDLER FUNCTIONS
     const handleSubmitCreateProductivityTimer = async () => {

@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
-import cors from "cors";
 import { logger, sendError } from "./shared";
 import { initKafka } from "./utils/kafka";
 import authedSocketMiddleware from "./middleware";

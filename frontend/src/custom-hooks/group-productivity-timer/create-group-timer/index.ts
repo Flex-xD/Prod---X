@@ -8,7 +8,8 @@ import {  type AxiosError } from "axios"
 import { toast } from "sonner"
 
 
-const useCreateGroupProductivityTimer = () => {
+const useCreateGroupProductivityTimer = (userId:string) => {
+    // if (!userId) return;
     const queryClient = useQueryClient();
     return useMutation<ApiResponse<IGroupTimer>, Error | AxiosError, IGroupTimerForm>({
         mutationFn: async (data) => {
@@ -32,7 +33,7 @@ const useCreateGroupProductivityTimer = () => {
             console.log("Timer created successfully : ", data.data);
 
             // ? I have to invalidate the queries also
-            await queryClient.invalidateQueries({queryKey:QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.MY_TIMERS})
+            await queryClient.invalidateQueries({queryKey:QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId)});
 
             return toast.success(data.message);
         },

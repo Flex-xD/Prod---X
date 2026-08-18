@@ -8,10 +8,11 @@ import { useQuery } from "@tanstack/react-query"
 const UserGetUsersToInvite = (query:string) => {
     return useQuery({
         // ? Change the query key below
-        queryKey:QUERY_KEYS.PROFILE.RANDOM , 
+        queryKey:QUERY_KEYS.PROFILE.USERS_TO_SHOW(query) , 
         queryFn:async () => {
             const response = await apiClient.get(ENDPOINTS.USER_ENDPOINTS.USERS_TO_SHOW(query));
-            return response.data as ApiResponse<IUser[]>
+            console.log("UserGetUsersToInvite : " , response.data)
+            return response.data as ApiResponse<{users:IUser[] , totalUsers:number}>
         } 
     })
 }

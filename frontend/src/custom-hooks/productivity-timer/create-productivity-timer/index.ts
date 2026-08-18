@@ -5,11 +5,12 @@ import type { ApiResponse } from "@/types/api-response"
 import apiClient from "@/utils/Axios-client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {  type AxiosError } from "axios"
+import { useId } from "react"
 import { toast } from "sonner"
 
 
-const useCreateProductivityTimerMutation = () => {
-    // const queryClient = useQueryClient();
+const useCreateProductivityTimerMutation = (userId:string) => {
+    const queryClient = useQueryClient();
     // ? invalidate the queries when the useQueryClientWillBeFetched
     return useMutation<ApiResponse<ITimerForm>, Error | AxiosError, ITimerForm>({
         mutationFn: async (data) => {
@@ -32,19 +33,19 @@ const useCreateProductivityTimerMutation = () => {
             }
             console.log("Timer created successfully : ", data.data);
 
-            // await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS.TODAYS_TASKS() });
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTIVITY_TIMER.ACTIVE_PRODUCTIVIY_TIMERS(userId)});
 
             return toast.success(data.message);
         },
         onError: async (error: Error | AxiosError) => {
 
             console.log(
-                "Error while creating Group-productivity-timer :",
+                "Error while creating Productivity-timer :",
                 error
             );
 
             let message =
-                "Group-productivity-timer  creation failed!";
+                "Productivity-timer creation failed!";
 
             if (
                 (error as AxiosError).isAxiosError &&

@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { IAuthRequest } from "../shared/middlewares/auth-middleware";
 import { ApiError } from "../shared/utils/api-error";
 import { asyncHandler } from "../shared/utils/async-handler";
-import {  Response } from "express";
+import { Response } from "express";
 import { userRelatedService } from "../service-layer/user-realted-service";
 import { sendError, sendResponse } from "../shared/utils/response-utils";
 import mongoose from "mongoose";
@@ -30,14 +30,14 @@ export const getUsersForGroupProductivityTimer = asyncHandler(async (req: IAuthR
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
-    const {query}  = req.query as { query: string };
-    console.log("This is the query : " , query);
-    if (!query.trim()) {
-        // ? see if the parameter condiion is right or not
-        throw ApiError(StatusCodes.BAD_REQUEST, "Query not found !");
-    }
-    
-    const data = await userRelatedService.getUsersForGroupProductivityTimer(query , userId);
+    const { query } = req.query as { query: string };
+    console.log("This is the query : ", query);
+    // if (!query.trim()) {
+    //     // ? see if the parameter condiion is right or not
+    //     throw ApiError(StatusCodes.BAD_REQUEST, "Query not found !");
+    // }
+
+    const data = await userRelatedService.getUsersForGroupProductivityTimer(query, userId);
     if (data.totalUsers == 0) {
         return sendResponse(res, {
             statusCode: StatusCodes.NOT_FOUND,
@@ -51,6 +51,6 @@ export const getUsersForGroupProductivityTimer = asyncHandler(async (req: IAuthR
         statusCode: StatusCodes.OK,
         success: true,
         data: data,
-        message: "Users found with the following query !"
+        message: `Users found with the following query : ${query}`
     });
 });

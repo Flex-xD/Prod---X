@@ -17,6 +17,7 @@ export interface IGroupTimer extends mongoose.Document {
         userId: mongoose.Types.ObjectId,
         completedTime: number
     }[];
+    isActive:boolean
 }
 
 const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
@@ -58,7 +59,12 @@ const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
             participantId: mongoose.Types.ObjectId,
             completedTime: Number
         }
-    ]
+    ] , 
+    isActive:{
+        type:Boolean , 
+        default:true, 
+        isRequired:true 
+    }
 }, {
     timestamps: true,
 });

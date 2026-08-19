@@ -30,6 +30,8 @@ const TimerPage = () => {
 
     // * Use the above actual data in use of the dummy data from the frontend
 
+    console.log("This is the data of the activeGroupProductivityTimers : " , activeGroupProductivityTimers?.data);
+
     const canCreate = dummyIndividualTimers.length < MAX_INDIVIDUAL_TIMERS;
 
     const handleBack = () => {

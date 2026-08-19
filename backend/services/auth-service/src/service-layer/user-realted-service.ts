@@ -14,9 +14,9 @@ export const userRelatedService = {
         }
         return user;
     },
-    
 
- getUsersForGroupProductivityTimer: async (query: string, userId: string) => {
+
+    getUsersForGroupProductivityTimer: async (query: string, userId: string) => {
         const escapedQuery = query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
         const regExp = new RegExp(escapedQuery, "i");
 
@@ -30,7 +30,7 @@ export const userRelatedService = {
 
         const usersPipeline = [
             {
-                $match:filter
+                $match: filter
             },
             {
                 $project: {
@@ -43,9 +43,9 @@ export const userRelatedService = {
 
         const users = await User.aggregate(usersPipeline);
         const totalUsers = await User.countDocuments(filter);
-        console.log("These are the users : ", users);
+        console.log("This is the data of the usersPipeLine : ", usersPipeline);
         return {
-            users , 
+            users,
             totalUsers
         };
     },

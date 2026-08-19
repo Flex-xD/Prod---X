@@ -10,7 +10,7 @@ const useGetUsersGroupTimers = (userId:string) => {
         queryKey:QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) , 
         queryFn: async () => {
             const response = await apiClient.get(ENDPOINTS.GROUP_PRODUCTITIVTY_TIMER.GET_USERS_GROUP_PRODUCTIVITY_TIMER);
-            return response.data as ApiResponse<IGroupTimer>;
+            return response.data as ApiResponse<IGroupTimer[]>;
         } , 
         // enabled:userId!!
     })

@@ -1,5 +1,6 @@
 import mongoose, { Model } from "mongoose";
 import bcrypt from "bcrypt";
+import { boolean } from "zod/mini";
 
 export interface IUser extends mongoose.Document {
     _id:mongoose.Types.ObjectId ,
@@ -13,6 +14,7 @@ export interface IUser extends mongoose.Document {
     provider:"local" | "google" ,
     refreshTokens:mongoose.Types.ObjectId[]
     notifications:mongoose.Types.ObjectId[];
+    isOnline?:boolean
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -66,7 +68,11 @@ const userSchema = new mongoose.Schema<IUser>({
     notifications:[{
         type:mongoose.Schema.Types.ObjectId ,
         ref:"Notification"
-    }]
+    }] , 
+    isOnline:{
+        type:boolean , 
+        
+    }
 } , {
     timestamps:true
 })

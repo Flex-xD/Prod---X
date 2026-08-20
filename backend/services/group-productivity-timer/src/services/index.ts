@@ -5,6 +5,7 @@ import { TcreateGroupProductivityTimerInputForBody } from "../schemas";
 import GroupTimer from "../shared/models/GroupTimer";
 import { emitEvent } from "../kafka/producer";
 import User from "../shared/models/User";
+import { userInfo } from "os";
 
 export const groupProductivityTimerServices = {
     createGroupProductivityTimerService: async (userId: mongoose.Types.ObjectId, data: TcreateGroupProductivityTimerInputForBody) => {
@@ -34,25 +35,25 @@ export const groupProductivityTimerServices = {
         return groupProductivityTimer;
     },
     getUsersActiveGroupProductivityTimers: async (userId: mongoose.Types.ObjectId) => {
+        const filter = {
+            isActive: true,
+            $or: [
+                {
+                    author:userId
+                },
+                {
+                    participants:userId
+                }
+            ]
+        }
 
-        // * here also imply the condition that either author should have the userId or 
-        // * participants should include userId
-        // * this way we are ensuring that there only user related timers are fetched 
-        const activeGroupProductivityTimers = await GroupTimer.find(
-            {  $or:[
-                
-            ],
-                isActive:true 
-            }
-        );
-        // ? Decide when group-timer is being marked done and when we have to mark it done
+        const activeGroupProductivityTimers = await GroupTimer.find(filter);
 
-        if (activeGroupProductivityTimers) {
+        if (activeGroupProductivityTimers.length == 0) {
             throw ApiError(StatusCodes.NOT_FOUND, "User has not created or joined any group-productivity-timers yet !");
         }
 
-
-        const totalGroupTimers = await GroupTimer.countDocuments(activeGroupProductivityTimers);
+        const totalGroupTimers = activeGroupProductivityTimers.length;
 
         return {
             activeGroupProductivityTimers,

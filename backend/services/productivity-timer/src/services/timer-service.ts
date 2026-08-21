@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { TcreateProductivityTimerInputForBody } from "../schemas/timer-schema";
 import { ApiError, emitEvent, getUser, logger, sendResponse } from "../shared";
 import { StatusCodes } from "http-status-codes";
@@ -82,7 +82,6 @@ export const productivityTimerServices = {
 
         productivityTimer.completedTime! += productivityDuration;
 
-
         await Promise.all([
             productivityTimer.save(),
             user.save()
@@ -92,5 +91,25 @@ export const productivityTimerServices = {
 
 
         return productivityTimer;
+    },
+
+    getActiveUsersProductivityTimer: async (userId:mongoose.Types.ObjectId) => {
+        const filter = {
+            $and: [
+                { isActive: true },
+                { author: userId }
+            ]
+        };
+
+        const activeProductivityTimers = await Timer.find(filter).sort({createdAt:-1});
+
+        // ? Hard coded value is a bad practice
+        if (activeProductivityTimers.length == 5) {
+            throw ApiError(StatusCodes.BAD_REQUEST , "User already have maximum productivity-timers !");
+        }
+
+        // * If it is empty array , send the message in the controller 
+
+        return { activeProductivityTimers };
     }
 }

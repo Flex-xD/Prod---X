@@ -50,7 +50,8 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
     
     // const user = await getUser(toObjectId(userId));
 
-    // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
+    // ? req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
+    
     logger.info(`Forwaring the data to the notification-servive...`)
     const notification:TypeCreateNotification  = await notificationServices.sendNotification(notificationReceivingUserId , notificationId);
     const user = await getUser(userId);

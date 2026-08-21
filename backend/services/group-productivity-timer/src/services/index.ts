@@ -39,18 +39,24 @@ export const groupProductivityTimerServices = {
             isActive: true,
             $or: [
                 {
-                    author:userId
+                    author: userId
                 },
                 {
-                    participants:userId
+                    participants: userId
                 }
             ]
         }
 
-        const activeGroupProductivityTimers = await GroupTimer.find(filter);
+
+        const activeGroupProductivityTimers = await GroupTimer.find(filter).sort({createdAt:-1});
 
         if (activeGroupProductivityTimers.length == 0) {
             throw ApiError(StatusCodes.NOT_FOUND, "User has not created or joined any group-productivity-timers yet !");
+        }
+
+        // ? Condition for checking weather user already has 5 group-timers
+        if (activeGroupProductivityTimers.length == 5) {
+            throw ApiError(StatusCodes.BAD_REQUEST, "User already have maximum number of timers !");
         }
 
         const totalGroupTimers = activeGroupProductivityTimers.length;

@@ -42,7 +42,7 @@ export const submitProductivityTime = asyncHandler(async (req: Request, res: Res
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
     const { productivityDuration, productivityTimerId }: TgetProductivityTimeRequestBody = req.body;
-    
+
     if (!productivityTimerId) {
         throw ApiError(StatusCodes.BAD_GATEWAY, "No productivity-timer id found !");
     };
@@ -63,7 +63,7 @@ export const submitProductivityTime = asyncHandler(async (req: Request, res: Res
     let message = "Productivity Timer's time period updated successfully !";
 
     if (updatedProductivityTimer.status = 'done') {
-        message = `Congratulation , Your productivity timer named ${updatedProductivityTimer.title} is completed now !` 
+        message = `Congratulation , Your productivity timer named ${updatedProductivityTimer.title} is completed now !`
     }
 
     await emitEvent("getProductivityTime.durationUpdated", {
@@ -77,5 +77,30 @@ export const submitProductivityTime = asyncHandler(async (req: Request, res: Res
         success: true,
         message: message,
         data: updatedProductivityTimer
+    })
+})
+
+export const getActiveUsersProductivityTimers = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) {
+        throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized Access !");
+    }
+
+    const { activeProductivityTimers } = await productivityTimerServices.getActiveUsersProductivityTimer(toObjectId(userId));
+
+    if (activeProductivityTimers.length === 0) {
+        return sendResponse(res, {
+            statusCode: StatusCodes.OK,
+            success: true,
+            message: "User has not created any Productivity Timer yet !",
+            data: null
+        })
+    }
+
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Active Productivity Timers fetched successfully",
+        data: activeProductivityTimers
     })
 })

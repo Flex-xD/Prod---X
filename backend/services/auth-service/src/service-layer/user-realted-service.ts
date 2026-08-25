@@ -2,9 +2,6 @@ import mongoose, { mongo, Mongoose, Types } from "mongoose";
 import User from "../shared/models/User";
 import { ApiError } from "../shared/utils/api-error";
 import { StatusCodes } from "http-status-codes";
-import { getUserOrThrow } from "../shared/utils/user-exists";
-import { sendResponse } from "../shared/utils/response-utils";
-import { toObjectId } from "../shared/utils/into-objectId";
 
 export const userRelatedService = {
     userData: async (userId: mongoose.Types.ObjectId) => {
@@ -43,7 +40,6 @@ export const userRelatedService = {
 
         const users = await User.aggregate(usersPipeline);
         const totalUsers = await User.countDocuments(filter);
-        console.log("This is the data of the usersPipeLine : ", usersPipeline);
         return {
             users,
             totalUsers

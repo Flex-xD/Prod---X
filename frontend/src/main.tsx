@@ -5,6 +5,7 @@ import { Toaster } from 'sonner'
 import './index.css'
 import App from './App.tsx'
 import { SocketProvider } from "./context/socket-context/index.tsx";
+import { PresenceProvider } from "./context/user-presence-context/index.tsx";
 
 const queryCleint = new QueryClient({
   defaultOptions: {
@@ -21,15 +22,16 @@ const queryCleint = new QueryClient({
   }
 })
 
-
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryCleint}>
     {/* ? See if socket provider should be after queryClientProvider or before it  */}
     <SocketProvider>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID} >
-        <App />
-        <Toaster position="top-right" richColors />
-      </GoogleOAuthProvider>
+      <PresenceProvider>
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID} >
+          <App />
+          <Toaster position="top-right" richColors />
+        </GoogleOAuthProvider>
+      </PresenceProvider>
     </SocketProvider>
   </QueryClientProvider>
 

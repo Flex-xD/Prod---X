@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, X } from 'lucide-react';
 import { sp, softSp, MAX_GROUP_INVITES } from '../constants';
@@ -9,6 +9,7 @@ import DetailsStep from './steps';
 import useCreateProductivityTimerMutation from '@/custom-hooks/productivity-timer/create-productivity-timer';
 import useCreateGroupProductivityTimer from '@/custom-hooks/group-productivity-timer/create-group-timer';
 import { userAppStore } from '@/store';
+import { usePresence } from '@/context/user-presence-context';
 
 interface CreateTimerModalProps {
     onClose: () => void;
@@ -38,27 +39,34 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
     const [timerType, setTimerType] = useState<TimerType>('individual');
     const [invitedUsers, setInvitedUsers] = useState<IUser[]>([]);
     const [form, setForm] = useState<ITimerForm>(EMPTY_FORM);
-
+    const { seedOnlineUsers } = usePresence();
 
     const userId = userAppStore((state) => state.user_id);
-    console.log("Invited User's ID : " , invitedUsers);
+    console.log("Invited User's ID : ", invitedUsers);
     // ? DERIVED STATE
-    const invitedUsersId = invitedUsers.map(user => user._id);
-    console.log(invitedUsersId);
+    const invitedUsersId = useMemo(() => {
+        return invitedUsers.map(user => user._id);
+    } , [invitedUsers]);
+
+    console.log("Invited Users ID : " ,invitedUsersId);
+
+    useEffect(() => {
+        seedOnlineUsers(invitedUsersId);
+    }, [invitedUsersId, seedOnlineUsers])
+
 
     // ? POST HOOKS
-    const { mutateAsync: createProductivityTimer } = useCreateProductivityTimerMutation(userId ?? "");
     // ! It is a bad practice to use ?? "" so fix it later on 
+    const { mutateAsync: createProductivityTimer } = useCreateProductivityTimerMutation(userId ?? "");
     const { mutateAsync: handleCreateGroupTimer } = useCreateGroupProductivityTimer(userId ?? "");
 
-    // ? HANDLER FUNCTIONS
-    const handleSubmitCreateProductivityTimer = async () => {
-        await createProductivityTimer(form)
-        onClose();
-    };
-
-    const handleSubmitGroupProductivityTimer = async () => {
-        await handleCreateGroupTimer({ ...form, invitedUsersId });
+    // ? Handler function
+    const handleSubmit = async () => {
+        if (timerType == "individual") {
+            await createProductivityTimer(form)
+        } else {
+            await handleCreateGroupTimer({ ...form, invitedUsersId });
+        }
         onClose();
     }
 
@@ -88,13 +96,8 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
                 : prev.length < MAX_GROUP_INVITES ? [...prev, user] : prev,
         );
 
-    
 
-    // ── Submit ────────────────────────────────────────────────────────────────
-    // const handleSubmit = async () => {
-    //     // TODO: wire up your createTaskMutation / createGroupTimerMutation here
-    //     onClose();
-    // };
+
 
     return (
         <motion.div
@@ -223,7 +226,7 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
                                 onChange={setForm}
                                 timerType={timerType}
                                 invitedUsers={invitedUsers}
-                                onSubmit={timerType == "individual" ? () => handleSubmitCreateProductivityTimer : () => handleSubmitGroupProductivityTimer}
+                                onSubmit={handleSubmit}
                             />
                         )}
                     </AnimatePresence>

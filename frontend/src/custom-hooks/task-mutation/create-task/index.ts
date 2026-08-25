@@ -1,6 +1,6 @@
 import ENDPOINTS from "@/constants/api-endpoints"
 import { QUERY_KEYS } from "@/constants/query-keys"
-import type { ITaskData } from "@/pages/Dashboard/dashboard-components/tasks-card/tasks-card-types"
+import type { ITask, ITaskData } from "@/pages/Dashboard/dashboard-components/tasks-card/tasks-card-types"
 import type { ApiResponse } from "@/types/api-response"
 import apiClient from "@/utils/Axios-client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -12,12 +12,12 @@ const useCreateTaskMutation = (userId: string) => {
     const queryClient = useQueryClient();
     return useMutation({
 
-        mutationFn: async ({title , description}: ITaskData) => {
+        mutationFn: async ({ title, description }: ITaskData) => {
             if (!userId) {
                 throw Error("userID not defined in createTaskMutation !");
             };
             const response = await apiClient.post(ENDPOINTS.TASKS_ENDPOINTS.CREATE_TASK, {
-                title , description
+                title, description
             });
             return response.data as ApiResponse<ITaskData>;
         },
@@ -29,13 +29,23 @@ const useCreateTaskMutation = (userId: string) => {
                 throw Error(failedMessage);
             }
             console.log("Task created successfully : ", data.data);
-
             await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS.TODAYS_TASKS(userId) });
 
             return toast.success(data.message);
-        },
-        onError: (error: AxiosError | Error) => {
 
+        },
+        onMutate: async (data) => {
+            await queryClient.cancelQueries({ queryKey: QUERY_KEYS.TASKS.TODAYS_TASKS(userId) });
+            const previous = queryClient.getQueryData(QUERY_KEYS.TASKS.TODAYS_TASKS(userId));
+            // ? here below I have to update the optimistically
+            // queryClient.setQueryData(['tasks'], (old:ITask[]) =>
+            //     old.map(t => t._id === data. ? { ...t, status: newTask.status } : t)
+            // );
+
+            return { previous };
+        },
+        onError: async (error: AxiosError | Error,data , context) => {
+            await queryClient.setQueryData(QUERY_KEYS.TASKS.TODAYS_TASKS(userId), context?.previous);
             console.log(
                 "Error while creating task:",
                 error

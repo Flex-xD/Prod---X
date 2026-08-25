@@ -13,6 +13,7 @@ import TimerPage from "./pages/Productivity-timer-pages";
 import { socketContext } from "./context/socket-context";
 import socket from "./lib/socket.io";
 import { toast } from "sonner";
+import { usePresence } from "./context/user-presence-context";
 
 
 // * Have a single source of truth here for authentication right now there is !!accessToken and one is isAuthenticated. . .
@@ -21,6 +22,13 @@ function App() {
   // console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
 
   const isSocketConnected = useContext(socketContext);
+
+
+  // ? Debug this , isUserOnline is showing false when connected
+  const {isUserOnline , seedOnlineUsers} = usePresence();
+  
+  console.log("Is User Online : " , isUserOnline);
+
   console.log(`Socket Connection : ${JSON.stringify(isSocketConnected)}`);
 
   const setIsAuthenticated = userAppStore((state) => state.setIsAuthenticated);
@@ -49,7 +57,7 @@ function App() {
   // * Test this ASAP !
   socket.on("invitation-notification", (payload: any) => {
     console.log(`This is the payload : ${{payload}}`);
-    toast.info(`You are invited to group-timer from ${payload.from}`)
+    toast.info(`You are invited to group-timer from ${payload.username}`)
   });
   
   console.log("This is App.tsx : ", "data :", data, "ispending : ", isPending, "isError : ", isError);

@@ -20,12 +20,11 @@ const ENDPOINTS = {
     } , 
     PRODUCTIVITY_TIMER:{
         CREATE_PRODUCTIVITY_TIMER:`${BASE_URL}/productivity-timer/create-timer` , 
-        GET_PRODUCTIVITY_TIMERS:`${BASE_URL}/productivity-timer/get-timers`
+        GET_ACTIVE_PRODUCTIVITY_TIMERS:`${BASE_URL}/productivity-timer/active-productivity-timers`
     } , 
     GROUP_PRODUCTITIVTY_TIMER:{
         CREATE_GROUP_PRODUCTIVITY_TIMER:`${BASE_URL}/group-productivity-timer/create-group-timer` ,
-        GET_USERS_ACTIVE_GROUP_PRODUCTIVITY_TIMERS:`${BASE_URL}/group-productivity-timer/get-group-timers` , 
-        GET_USERS_GROUP_PRODUCTIVITY_TIMER:`${BASE_URL}/group-productivity-timer/get-group-timer/:timerid` , 
+        GET_USERS_ACTIVE_GROUP_PRODUCTIVITY_TIMERS:`${BASE_URL}/group-productivity-timer/active-group-timers` , 
     }
 
 }

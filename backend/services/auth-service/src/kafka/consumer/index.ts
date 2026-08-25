@@ -1,10 +1,12 @@
 import { kafka } from "..";
 import { logger } from "../../shared/utils/winston-logger";
+import { handlers } from "./handlers";
+import { ApiError } from "../../shared/utils/api-error";
+import { StatusCodes } from "http-status-codes";
 
 const consumer = kafka.consumer({
     groupId: "auth-service"
 });
-
 
 export const connectConsumer = async () => {
     try {
@@ -14,7 +16,6 @@ export const connectConsumer = async () => {
         logger.error("❌ kafka consumer connection failed --> [ auth-service ] : ", { error });
         process.exit(1);
     }
-
 }
 
 export const handleConsumer = async (topics: string[]) => {
@@ -24,10 +25,21 @@ export const handleConsumer = async (topics: string[]) => {
         }
         await consumer.run({
             eachMessage: async ({ topic, message }) => {
-                // * implement the consumer handler logic here 
+                if (!message.value) {
+                    logger.error("There is not data with topic : " , topic);
+                }
                 console.log(`Message received from topic ${topic}: ${message.value}`);
+                const handler = handlers[topic as keyof typeof handlers];
                 const value = message.value?.toString();
-                console.log("VALUE : " , value);
+                logger.info(`This is the topic : ${topic}`);
+                logger.info(`This is the message : ${message}`);
+                if (!handler) {
+                    logger.error("Handler not found for : " , topic);
+                    return;
+                }
+                // ? Don't forget to remove "!" from below , it's an unsafe practice
+                const parsedValue = JSON.parse(message.value!.toString());
+                await handler(parsedValue); console.log("VALUE : ", value);
             }
         })
     } catch (error) {
@@ -36,11 +48,9 @@ export const handleConsumer = async (topics: string[]) => {
 }
 
 
-const authEvents: string[] = ["user.register", "user.login", "user.google-auth", "user.logout"];
-const taskEvents: string[] = ["task.created", "task.completed", "task.updated", "task.deleted"];
-const timerEvents: string[] = ["timer.created", "timer.started", "timer.paused", "timer.resumed", "timer.submitted", "timer.updated", "timer.deleted"];
+const authEvents: string[] = ["user.status.online" , "user.status.offline"];
 
-export const events: string[] = [...authEvents, ...taskEvents, ...timerEvents];
+export const events: string[] = [...authEvents];
 // ? I have to add a disconnect function here 
 
 

@@ -4,16 +4,16 @@ import type { IGroupTimer, IGroupTimerForm } from "@/pages/Productivity-timer-pa
 import type { ApiResponse } from "@/types/api-response"
 import apiClient from "@/utils/Axios-client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import {  type AxiosError } from "axios"
+import { type AxiosError } from "axios"
 import { toast } from "sonner"
 
 
-const useCreateGroupProductivityTimer = (userId:string) => {
+const useCreateGroupProductivityTimer = (userId: string) => {
     // if (!userId) return;
     const queryClient = useQueryClient();
     return useMutation<ApiResponse<IGroupTimer>, Error | AxiosError, IGroupTimerForm>({
         mutationFn: async (data) => {
-            const response = await apiClient.post(ENDPOINTS.GROUP_PRODUCTITIVTY_TIMER.CREATE_GROUP_PRODUCTIVITY_TIMER,{
+            const response = await apiClient.post(ENDPOINTS.GROUP_PRODUCTITIVTY_TIMER.CREATE_GROUP_PRODUCTIVITY_TIMER, {
                 data
             });
 
@@ -22,6 +22,22 @@ const useCreateGroupProductivityTimer = (userId:string) => {
             }
 
             return response.data;
+        },
+        onMutate: async (newGroupTimer) => {
+            // ? I am optimistically updating the UI here
+            await queryClient.cancelQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
+
+            const previous = await queryClient.getQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId));
+
+            // * Fix the type of old below 
+            await queryClient.setQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId), (old: any) => [...old, newGroupTimer])
+            return {
+                previous
+            };
+        },
+        onSettled: async () => {
+
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
         },
         onSuccess: async (data) => {
             let failedMessage;
@@ -32,13 +48,12 @@ const useCreateGroupProductivityTimer = (userId:string) => {
             }
             console.log("Timer created successfully : ", data.data);
 
-            // ? I have to invalidate the queries also
-            await queryClient.invalidateQueries({queryKey:QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId)});
 
             return toast.success(data.message);
         },
-        onError: async (error: Error | AxiosError) => {
-
+        // * Fix the context type below here 
+        onError: async (error: Error | AxiosError, newGroupTimer, context: any) => {
+            await queryClient.setQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId), context.previous);
             console.log(
                 "Error while creating group-productivity-timer:",
                 error

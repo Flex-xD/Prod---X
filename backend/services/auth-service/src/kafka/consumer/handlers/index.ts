@@ -12,7 +12,7 @@ interface IUserStatusOnline {
 interface IUserStatusOffline {
     isOnline: boolean,
     userId: mongoose.Types.ObjectId,
-    lastSeen:Date
+    lastSeen: Date
 }
 
 export const handlers = {
@@ -21,12 +21,17 @@ export const handlers = {
             { isOnline },
             { new: true, upsert: true }
         )
+        console.log("User updated : isActive:true");
+
     },
-    "user.status.offline": async ({isOnline , userId , lastSeen} : IUserStatusOffline) => {
-        await User.findByIdAndUpdate(userId , 
-            {isOnline , lastSeen} , 
-            {new :true , upsert:true}
-            
+    "user.status.offline": async ({ isOnline, userId, lastSeen }: IUserStatusOffline) => {
+        await User.findByIdAndUpdate(userId,
+            { isOnline, lastSeen },
+            { new: true, upsert: true }
+
         )
+
+        console.log("User updated : isActive:false");
+
     }
 }

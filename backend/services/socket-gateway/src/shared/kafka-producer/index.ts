@@ -35,7 +35,7 @@ const connectProducer = async (retries = 5) => {
 
 
 export const emitEvent =
-// ? Here classify what the event type should be , later on
+    // ? Here classify what the event type should be , later on
     async <T extends object>(topic: string, event: T) => {
         try {
             if (!producer || !isConnected) {
@@ -49,7 +49,10 @@ export const emitEvent =
                         value: JSON.stringify(event)
                     }
                 ]
-            })
+            });
+
+            console.log("Topic : " , topic , " and Event : "  , event);
+
         } catch (error) {
             logger.error("❌ Failed to emit event : ", { error });
         }
@@ -66,6 +69,6 @@ async function disconnectProducer() {
     }
 }
 
-process.on("SIGTTIN" , disconnectProducer);
-process.on("SIGINT" , disconnectProducer);
+process.on("SIGTTIN", disconnectProducer);
+process.on("SIGINT", disconnectProducer);
 

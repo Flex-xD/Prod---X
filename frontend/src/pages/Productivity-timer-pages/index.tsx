@@ -12,9 +12,9 @@ import IndividualTimerCard from './timer-components/individual-timer-card';
 import IndividualTimerDetail from './timer-components/individual-timer-detail';
 import GroupTimerDetail from './timer-components/group-timer-detail';
 import CreateTimerModal from './timer-components/create-timer-modal';
-import useGetUsersGroupTimers from '@/custom-hooks/group-productivity-timer/get-users-group-timer';
 import useGetProductivityTimer from '@/custom-hooks/productivity-timer/get-productivity-timer';
 import { userAppStore } from '@/store';
+import useGetActiveGroupProductivityTimers from '@/custom-hooks/group-productivity-timer/get-group-productivity-timer';
 
 const TimerPage = () => {
     const [showModal, setShowModal] = useState(false);
@@ -25,7 +25,7 @@ const TimerPage = () => {
     const userId = userAppStore((state) => state.user_id);
 
     // * Currently I am getting apiResponse<timerType>
-    const {data:activeGroupProductivityTimers} = useGetUsersGroupTimers(userId ?? "");
+    const {data:activeGroupProductivityTimers} = useGetActiveGroupProductivityTimers();
     const {data:activeProductivityTimers} = useGetProductivityTimer(userId ?? "");
 
     // * Use the above actual data in use of the dummy data from the frontend

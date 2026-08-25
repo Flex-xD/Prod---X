@@ -13,13 +13,13 @@ const PresenceContext = createContext<IPresenceContext>({
 
 export const PresenceProvider = ({ children }: { children: ReactNode }) => {
     const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
-
+    console.log("OnlineIDS : " , onlineIds);
     const seedOnlineUsers = useCallback((userIds: string[]) => {
         setOnlineIds((prev) => new Set([...prev, ...userIds]));
     }, []);
 
     useSocketEvent<{ userId: string; isOnline: boolean }>(
-        "user.status.changed",
+        "user-status-changes",
         useCallback(({ userId, isOnline }) => {
             setOnlineIds((prev) => {
                 const next = new Set(prev);
@@ -29,10 +29,12 @@ export const PresenceProvider = ({ children }: { children: ReactNode }) => {
         }, [])
     );
 
+    console.log("OnlineIds : " ,onlineIds);
+
     const isUserOnline = useCallback((userId: string) => onlineIds.has(userId), [onlineIds]);
 
     return (
-        <PresenceContext.Provider value={{ isUserOnline, seedOnlineUsers }}>
+        <PresenceContext.Provider value={{ isUserOnline, seedOnlineUsers  }}>
             {children}
         </PresenceContext.Provider>
     );

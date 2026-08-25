@@ -2,7 +2,7 @@ import ENDPOINTS from "@/constants/api-endpoints";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { userAppStore } from "@/store";
 import type { ApiResponse } from "@/types/api-response";
-import type { ILoginResponseData, IUser } from "@/types/user";
+import type { ILoginResponseData } from "@/types/user";
 import apiClient from "@/utils/Axios-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";

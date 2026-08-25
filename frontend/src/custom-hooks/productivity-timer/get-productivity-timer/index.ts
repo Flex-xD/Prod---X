@@ -9,12 +9,12 @@ const useGetProductivityTimer = (userId:string) => {
     return useQuery({
         queryKey:QUERY_KEYS.PRODUCTIVITY_TIMER.ACTIVE_PRODUCTIVIY_TIMERS(userId) , 
         queryFn:async () => {
-            const response = await apiClient.get(ENDPOINTS.PRODUCTIVITY_TIMER.GET_PRODUCTIVITY_TIMERS);
+            const response = await apiClient.get(ENDPOINTS.PRODUCTIVITY_TIMER.GET_ACTIVE_PRODUCTIVITY_TIMERS);
             if (!response.data) {
                 throw Error("Productivity-timers not fetched !");
             }
             console.log("This is the response data of getProductivityTimers : ",response.data)
-            return response.data as ApiResponse<IProductivityTimer>;
+            return response.data as ApiResponse<IProductivityTimer[]>;
         } , 
         enabled:!!userId
         // ? Add suitable refetch interval

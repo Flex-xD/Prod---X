@@ -27,7 +27,6 @@ export const connectProducer = async (retries = 5) => {
     }
 }
 
-
 export const emitEvent =
     // ? Here classify what the event type should be , later on
     async <T extends object>(topic: string, event: T) => {

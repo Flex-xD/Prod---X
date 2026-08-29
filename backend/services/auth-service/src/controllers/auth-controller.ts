@@ -34,7 +34,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
     const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    const refreshToken = await Token.create({
+    await Token.create({
         hashedToken: hashed,
         userAgent: req.headers["user-agent"] as string,
         ip: req.ip as string,
@@ -42,7 +42,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
         absoluteExpiresAt
     })
 
-    
+
     await user.save();
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
 
@@ -91,7 +91,7 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
     });
 
     console.log("This is the response of the LoginController : ", { refreshPlain, accessToken, user });
-    return sendResponse(res , {
+    return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "User logged in successfully!",
         data: { refreshToken: refreshPlain, accessToken, user },

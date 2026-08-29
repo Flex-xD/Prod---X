@@ -42,18 +42,20 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
     const { seedOnlineUsers } = usePresence();
 
     const userId = userAppStore((state) => state.user_id);
-    console.log("Invited User's ID : ", invitedUsers);
+
     // ? DERIVED STATE
+    const onlineInvitedUsersId = useMemo(() => {
+        return invitedUsers.filter(user => user.isOnline == true).map(user => user._id);
+    }, [invitedUsers]);
+
     const invitedUsersId = useMemo(() => {
         return invitedUsers.map(user => user._id);
-    } , [invitedUsers]);
+    }, [invitedUsers]);
 
-    console.log("Invited Users ID : " ,invitedUsersId);
 
     useEffect(() => {
-        seedOnlineUsers(invitedUsersId);
-    }, [invitedUsersId, seedOnlineUsers])
-
+        seedOnlineUsers([...onlineInvitedUsersId]);
+    }, [onlineInvitedUsersId, seedOnlineUsers]);
 
     // ? POST HOOKS
     // ! It is a bad practice to use ?? "" so fix it later on 
@@ -95,9 +97,6 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
                 ? prev.filter(u => u._id !== user._id)
                 : prev.length < MAX_GROUP_INVITES ? [...prev, user] : prev,
         );
-
-
-
 
     return (
         <motion.div

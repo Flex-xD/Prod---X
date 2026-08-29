@@ -34,6 +34,7 @@ export const userRelatedService = {
                     username: 1,
                     email: 1,
                     avatar: 1,
+                    isOnline:1
                 }
             }
         ];

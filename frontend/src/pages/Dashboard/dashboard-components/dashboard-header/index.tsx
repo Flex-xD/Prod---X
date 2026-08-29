@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Timer, Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/custom-hooks/user-related-fetching/user-data';
+import { useLogoutMutation } from '@/custom-hooks/auth-mutation/logout';
 
 // ─── Spring preset (matches timer-page) ──────────────────────────────────────
 const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
@@ -13,6 +14,12 @@ const DashboardHeader = () => {
     const initials = username.slice(0, 2).toUpperCase();
 
     const [profileOpen, setProfileOpen] = useState(false);
+
+    const {mutateAsync:handleLogoutMutation}= useLogoutMutation();
+
+    const handleLogout = async () => {
+        await handleLogoutMutation()
+    }
 
     return (
         <header
@@ -171,7 +178,9 @@ const DashboardHeader = () => {
                                                 <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-slate-100 group-hover:bg-rose-100 transition-colors">
                                                     <LogOut className="w-3.5 h-3.5 text-slate-500 group-hover:text-rose-500 transition-colors" />
                                                 </div>
-                                                <span className="text-sm font-semibold text-slate-700 group-hover:text-rose-600 transition-colors">
+                                                <span className="text-sm font-semibold text-slate-700 group-hover:text-rose-600 transition-colors"
+                                                onClick={handleLogout}
+                                                >
                                                     Sign Out
                                                 </span>
                                             </motion.button>

@@ -23,18 +23,21 @@ const useCreateGroupProductivityTimer = (userId: string) => {
 
             return response.data;
         },
-        onMutate: async (newGroupTimer) => {
-            // ? I am optimistically updating the UI here
-            await queryClient.cancelQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
+        // onMutate: async (newGroupTimer) => {
+        //     // ? I am optimistically updating the UI here
+        //     await queryClient.cancelQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
 
-            const previous = await queryClient.getQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId));
+        //     const previous =  queryClient.getQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId));
 
-            // * Fix the type of old below 
-            await queryClient.setQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId), (old: any) => [...old, newGroupTimer])
-            return {
-                previous
-            };
-        },
+        //     // * Fix the type of old below 
+        //     await queryClient.setQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId), (old: IGroupTimer[] | undefined) => [
+        //         ...(old ?? []),
+        //         newGroupTimer
+        //     ])
+        //     return {
+        //         previous
+        //     };
+        // },
         onSettled: async () => {
 
             await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
@@ -52,8 +55,8 @@ const useCreateGroupProductivityTimer = (userId: string) => {
             return toast.success(data.message);
         },
         // * Fix the context type below here 
-        onError: async (error: Error | AxiosError, newGroupTimer, context: any) => {
-            await queryClient.setQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId), context.previous);
+        onError: async (error: Error | AxiosError) => {
+            // await queryClient.setQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId), context.previous);
             console.log(
                 "Error while creating group-productivity-timer:",
                 error

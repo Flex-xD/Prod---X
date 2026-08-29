@@ -13,7 +13,7 @@ const registerConnectionHandlers = async (io: Server) => {
 
         io.emit("user-status-changes", () => {
             markUserOnline(userId);
-            emitEvent("user.status.online", { isOnline: true });
+            emitEvent("user.status.online", { isOnline: true  , userId});
         })
 
 
@@ -25,6 +25,7 @@ const registerConnectionHandlers = async (io: Server) => {
                 const payload = { userId, isOnline: false, lastSeen: new Date() };
                 io.emit("user-status-changes" , payload);
                 emitEvent("user.status.offline", payload);
+                logger.info("user-status-changes and user.status.offline are emitted !");
             })
         })
     });

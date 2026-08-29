@@ -11,9 +11,9 @@ import { toast } from "sonner"
 export const useToggleTaskMutation = () => {
     const queryClient = useQueryClient();
     const userId = userAppStore((state) => state.user_id);
-    if (!userId) {
-        return toast.error("User ID not found !");
-    }
+    // if (!userId) {
+    //     return toast.error("User ID not found !");
+    // }
     return useMutation<ApiResponse<ITask>, Error | AxiosError, { taskId: string; isTaskPending: boolean }>({
         mutationFn: async ({ taskId, isTaskPending }) => {
             const endPoint = isTaskPending ? ENDPOINTS.TASKS_ENDPOINTS.MARK_TASK_DONE : ENDPOINTS.TASKS_ENDPOINTS.MARK_TASK_PENDING
@@ -30,7 +30,7 @@ export const useToggleTaskMutation = () => {
             toast.success(data.message);
             // await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS.BY_ID(taskId) });
             // ? see is you need to invalidate individual task or just today's tasks
-            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS.TODAYS_TASKS(userId) });
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS.TODAYS_TASKS(userId as string) });
         },
         onError: (error: Error | AxiosError) => {
             console.log("Error while updating task's status :", error);

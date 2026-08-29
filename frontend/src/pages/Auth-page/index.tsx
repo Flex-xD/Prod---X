@@ -14,6 +14,7 @@ import useLoginMutation from '@/custom-hooks/auth-mutation/login';
 import useRegisterMutation from '@/custom-hooks/auth-mutation/register';
 import type { IHandleLogin, IHandleRegiser } from './auth-components/Auth-Types';
 import { useLogoutMutation } from '@/custom-hooks/auth-mutation/logout';
+import { toast } from 'sonner';
 
 
 export default function AuthPage() {
@@ -26,13 +27,18 @@ export default function AuthPage() {
         confirmPassword: '',
     });
 
-    const { mutateAsync: handleGoogleAuth, isError: isGoogleAuthError } = useGoogleAuth();
-    const { mutateAsync: handleLoginAuth, isPending: isLoginAuthPending, isError: isLoginAuthError } = useLoginMutation();
-    const { mutateAsync: handleRegisterAuth, isPending: isRegisterAuthPending, isError: isRegisterAuthError } = useRegisterMutation();
+    const { mutateAsync: handleGoogleAuth } = useGoogleAuth();
+    const { mutateAsync: handleLoginAuth, isPending: isLoginAuthPending } = useLoginMutation();
+    const { mutateAsync: handleRegisterAuth, isPending: isRegisterAuthPending } = useRegisterMutation();
 
 
     // ? Add actual pending and error components
-    if (isGoogleAuthError || isLoginAuthError || isRegisterAuthError) return <div>Something went wrong...</div>
+    // if (isGoogleAuthError || isLoginAuthError || isRegisterAuthError) {
+    //     setTimeout(() => {
+    //         return toast.error("Try again . . . !");
+
+    //     }, 3000)
+    // }
     // if (isGoogleAuthPending || isLoginAuthPending || isRegisterAuthPending) return <div>Loading...</div>
 
     const handleInputChange = (field: string, value: string) => {

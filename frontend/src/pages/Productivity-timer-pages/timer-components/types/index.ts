@@ -28,7 +28,7 @@ export interface IGroupParticipant {
 }
 
 export interface IGroupTimer {
-    id: string;
+    _id: string;
     title: string;
     description: string;
     deadline: string;

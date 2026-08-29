@@ -10,10 +10,10 @@ import { ProtectedRoutes } from "./custom-components/protected-routes";
 import { PublicRoutes } from "./custom-components/public-routes";
 import ProfilePage from "./pages/Profile-page";
 import TimerPage from "./pages/Productivity-timer-pages";
-import { socketContext } from "./context/socket-context";
+import { socketContext, useSocketStatus } from "./context/socket-context";
 import socket from "./lib/socket.io";
 import { toast } from "sonner";
-import { usePresence } from "./context/user-presence-context";
+import { PresenceContext, usePresence } from "./context/user-presence-context";
 
 
 // * Have a single source of truth here for authentication right now there is !!accessToken and one is isAuthenticated. . .
@@ -21,13 +21,12 @@ import { usePresence } from "./context/user-presence-context";
 function App() {
   // console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
 
-  const isSocketConnected = useContext(socketContext);
-
+  const isSocketConnected = useSocketStatus();
 
   // ? Debug this , isUserOnline is showing false when connected
-  const {isUserOnline , seedOnlineUsers} = usePresence();
+  const {isUserOnline } = usePresence();
   
-  console.log("Is User Online : " , isUserOnline);
+  console.log("Is User Online : " , !!isUserOnline);
 
   console.log(`Socket Connection : ${JSON.stringify(isSocketConnected)}`);
 

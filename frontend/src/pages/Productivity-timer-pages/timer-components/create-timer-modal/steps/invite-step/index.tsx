@@ -24,13 +24,6 @@ const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => 
 
 
 
-
-    // ? Replace the dummySearchUsers with actual data from the backend
-    // if (!usersToInvite?.data.users) {
-    //     throw Error("No User found with this username and email !");
-    // }
-
-
     const filtered = usersToInvite?.data.users ?? usersToInvite?.data.users.filter(
         u =>
             u.username.toLowerCase().includes(query.toLowerCase()) &&

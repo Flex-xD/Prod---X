@@ -6,14 +6,13 @@ interface IPresenceContext {
     seedOnlineUsers: (userIds: string[]) => void;
 }
 
-const PresenceContext = createContext<IPresenceContext>({
+export const PresenceContext = createContext<IPresenceContext>({
     isUserOnline: () => false,
-    seedOnlineUsers: () => {},
+    seedOnlineUsers: () => { },
 });
 
 export const PresenceProvider = ({ children }: { children: ReactNode }) => {
     const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
-    console.log("OnlineIDS : " , onlineIds);
     const seedOnlineUsers = useCallback((userIds: string[]) => {
         setOnlineIds((prev) => new Set([...prev, ...userIds]));
     }, []);
@@ -29,12 +28,23 @@ export const PresenceProvider = ({ children }: { children: ReactNode }) => {
         }, [])
     );
 
-    console.log("OnlineIds : " ,onlineIds);
 
-    const isUserOnline = useCallback((userId: string) => onlineIds.has(userId), [onlineIds]);
+    const isUserOnline = useCallback(
+        (userId: string) => {
+            const result = onlineIds.has(userId);
 
+            console.log("Checking user:", userId);
+            console.log("Current online IDs:", [...onlineIds]);
+            console.log("Is online:", result);
+
+            return result;
+        },
+        [onlineIds]
+    ); 
+    console.log("OnlineIDS:", [...onlineIds]);
+    
     return (
-        <PresenceContext.Provider value={{ isUserOnline, seedOnlineUsers  }}>
+        <PresenceContext.Provider value={{ isUserOnline, seedOnlineUsers }}>
             {children}
         </PresenceContext.Provider>
     );

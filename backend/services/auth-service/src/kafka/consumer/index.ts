@@ -48,9 +48,9 @@ export const handleConsumer = async (topics: string[]) => {
 }
 
 
-const authEvents: string[] = ["user.status.online" , "user.status.offline"];
+const connectionEvents: string[] = ["user.status.online" , "user.status.offline"];
 
-export const events: string[] = [...authEvents];
+export const events: string[] = [...connectionEvents];
 // ? I have to add a disconnect function here 
 
 

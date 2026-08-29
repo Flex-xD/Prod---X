@@ -26,7 +26,7 @@ const TimerPage = () => {
 
     // * Currently I am getting apiResponse<timerType>
     const {data:activeGroupProductivityTimers} = useGetActiveGroupProductivityTimers();
-    const {data:activeProductivityTimers} = useGetProductivityTimer(userId ?? "");
+    // const {data:activeProductivityTimers} = useGetProductivityTimer(userId ?? "");
 
     // * Use the above actual data in use of the dummy data from the frontend
 
@@ -103,7 +103,7 @@ const TimerPage = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {dummyGroupTimers.map((timer, i) => (
                                             <GroupTimerCard
-                                                key={timer.id}
+                                                key={timer._id}
                                                 timer={timer}
                                                 index={i}
                                                 onClick={() => openGroup(timer)}

@@ -10,7 +10,8 @@ export const authService = {
         console.log("This is google user: ", googleUser);
         if (!user) {
             user = await User.create({
-                ...googleUser
+                ...googleUser , 
+                isOnline:true
             })
         }
         return user;
@@ -26,6 +27,7 @@ export const authService = {
             userTasks: [],
             userProductivityTimers: [],
             avatar: "",
+            isOnline:true
         })
         return user;
     },

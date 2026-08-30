@@ -20,7 +20,7 @@ export interface IGroupTimer extends mongoose.Document {
 
 export type TEventInvitationNotificationCreated = {
     username: string,
-    notifcation:INotification
+    notification:INotification
 }
 
 export interface INotification extends mongoose.Document {

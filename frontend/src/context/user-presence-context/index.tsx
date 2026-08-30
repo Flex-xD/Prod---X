@@ -33,10 +33,6 @@ export const PresenceProvider = ({ children }: { children: ReactNode }) => {
         (userId: string) => {
             const result = onlineIds.has(userId);
 
-            console.log("Checking user:", userId);
-            console.log("Current online IDs:", [...onlineIds]);
-            console.log("Is online:", result);
-
             return result;
         },
         [onlineIds]

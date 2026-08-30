@@ -1,7 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import kafka from "..";
 import { ApiError, logger } from "../../shared";
-import { handlers } from "./handlers";
+import { createHandlers } from "./handlers";
+import { Server } from "socket.io";
 
 const consumer = kafka.consumer({
     groupId: "socket-gateway"
@@ -18,19 +19,20 @@ export const connectConsumer = async () => {
 };
 
 
-export const handleConsumer = async (topics: string[]) => {
+export const handleConsumer = async (topics: string[] , io:Server) => {
     try {
         for (const topic of topics) {
-            await consumer.subscribe({ topic: topic, fromBeginning: true });
+            await consumer.subscribe({ topic: topic, fromBeginning: false });
         }
         await consumer.run({
             eachMessage: async ({ topic, message }) => {
                 if (!topic || !message) {
                     return;
                 }
+                const handlers = createHandlers(io);
                 const handler = handlers[topic as keyof typeof handlers];
                 logger.info(`This is the topic : ${topic}`);
-                logger.info(`This is the message : ${message}`);
+                logger.info(`This is the message : ${JSON.stringify(message)}`);
                 if (!handler) {
                     // ? should I return a response or throw a Error here 
                     throw ApiError(StatusCodes.CONFLICT ,                     "Topic didn't match handlers of notification-service consumer !");

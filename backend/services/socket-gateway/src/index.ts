@@ -18,7 +18,7 @@ export const io = new Server(server, {
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
     }
-})
+});
 
 app.use(express.json());
 app.use((err: any, req: Request, res: Response) => {
@@ -38,5 +38,5 @@ registerConnectionHandlers(io);
 
 server.listen(PORT, async () => {
     logger.info(`Socket-Gateway is running on PORT🔌 : ${PORT}`);
-    await initKafka();
+    await initKafka(io);
 })

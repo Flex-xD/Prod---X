@@ -11,10 +11,13 @@ const registerConnectionHandlers = async (io: Server) => {
         console.log(`user:${userId}`);
         socket.join(`user:${userId}`);
 
-        io.emit("user-status-changes", () => {
-            markUserOnline(userId);
-            emitEvent("user.status.online", { isOnline: true  , userId});
-        })
+        markUserOnline(userId);
+        const payload = { isOnline: true, userId }
+        io.emit("user-status-changes", payload)
+        emitEvent("user.status.online", payload);
+        // io.emit("user-status-changes", () => {
+
+        // })
 
 
         logger.info(`✅ socket connected --> userId:${userId} , socketId:${socket.id}`);
@@ -23,7 +26,7 @@ const registerConnectionHandlers = async (io: Server) => {
             logger.info(`🔌 socket disconnected --> userId:${userId} , reason:${reason}`);
             scheduleUserOffline(userId, () => {
                 const payload = { userId, isOnline: false, lastSeen: new Date() };
-                io.emit("user-status-changes" , payload);
+                io.emit("user-status-changes", payload);
                 emitEvent("user.status.offline", payload);
                 logger.info("user-status-changes and user.status.offline are emitted !");
             })

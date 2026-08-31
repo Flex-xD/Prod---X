@@ -4,16 +4,16 @@ import ProdXDashboard from "./pages/Dashboard";
 import ProdXLandingPage from "./pages/LandingPage";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { userAppStore } from "./store";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import { ProtectedRoutes } from "./custom-components/protected-routes";
 import { PublicRoutes } from "./custom-components/public-routes";
 import ProfilePage from "./pages/Profile-page";
 import TimerPage from "./pages/Productivity-timer-pages";
-import { socketContext, useSocketStatus } from "./context/socket-context";
+import { useSocketStatus } from "./context/socket-context";
 import socket from "./lib/socket.io";
 import { toast } from "sonner";
-import { PresenceContext, usePresence } from "./context/user-presence-context";
+import { usePresence } from "./context/user-presence-context";
 
 
 // * Have a single source of truth here for authentication right now there is !!accessToken and one is isAuthenticated. . .
@@ -24,9 +24,9 @@ function App() {
   const isSocketConnected = useSocketStatus();
 
   // ? Debug this , isUserOnline is showing false when connected
-  const {isUserOnline } = usePresence();
-  
-  console.log("Is User Online : " , !!isUserOnline);
+  const { isUserOnline } = usePresence();
+
+  console.log("Is User Online : ", !!isUserOnline);
 
   console.log(`Socket Connection : ${JSON.stringify(isSocketConnected)}`);
 
@@ -47,18 +47,27 @@ function App() {
     }
   }, [data, setIsAuthenticated]);
 
+  // * Let's see how many toast I will get this time
+  useEffect(() => {
+    const handleNotification = (payload: any) => {
+      toast.info(`You are invited to group-timer from ${payload.username}`)
+      console.log("Payload : " , payload);
+    };
+    
+    socket.on("invitation-notification" , handleNotification);
+    () => {
+      socket.off("invitation-notification" , handleNotification);
+    }
+  }, []);
+
   if (isPending) {
     return <div className="h-screen w-screen flex justify-center items-center">
       <Loader />
     </div>;
   }
 
-  // * Test this ASAP !
-  socket.on("invitation-notification", (payload: any) => {
-    console.log(`This is the payload : ${{payload}}`);
-    toast.info(`You are invited to group-timer from ${payload.username}`)
-  });
-  
+
+
   console.log("This is App.tsx : ", "data :", data, "ispending : ", isPending, "isError : ", isError);
   console.log("UserId in APP.tsx : ", user_id);
 

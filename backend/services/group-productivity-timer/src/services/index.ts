@@ -11,7 +11,7 @@ export const groupProductivityTimerServices = {
     createGroupProductivityTimerService: async (userId: mongoose.Types.ObjectId, data: TcreateGroupProductivityTimerInputForBody) => {
 
         // const user = await getUser(userId);
-
+        console.log("We are reaching this step ;");
         const groupProductivityTimer = new GroupTimer({
             title: data.title,
             body: data.description ? data.description : "",

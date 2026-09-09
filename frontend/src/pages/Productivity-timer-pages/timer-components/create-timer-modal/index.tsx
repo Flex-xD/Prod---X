@@ -41,7 +41,7 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
     const [form, setForm] = useState<ITimerForm>(EMPTY_FORM);
     const { seedOnlineUsers } = usePresence();
 
-    const userId = userAppStore((state) => state.user_id);
+    // const userId = userAppStore((state) => state.user_id);
 
     // ? DERIVED STATE
     const onlineInvitedUsersId = useMemo(() => {
@@ -59,8 +59,8 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
 
     // ? POST HOOKS
     // ! It is a bad practice to use ?? "" so fix it later on 
-    const { mutateAsync: createProductivityTimer } = useCreateProductivityTimerMutation(userId ?? "");
-    const { mutateAsync: handleCreateGroupTimer } = useCreateGroupProductivityTimer(userId ?? "");
+    const { mutateAsync: createProductivityTimer } = useCreateProductivityTimerMutation();
+    const { mutateAsync: handleCreateGroupTimer } = useCreateGroupProductivityTimer();
 
     // ? Handler function
     const handleSubmit = async () => {

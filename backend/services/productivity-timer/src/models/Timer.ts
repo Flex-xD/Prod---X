@@ -3,9 +3,10 @@ import mongoose, { Model, Schema } from "mongoose";
 export interface ITimer extends mongoose.Document {
     _id: mongoose.Types.ObjectId,
     title: string,
-    body: string,
+    description: string,
     // ? see if setting the below timer to Date is good or find a way to set it to time 
     specifiedTime: Number,
+    isActive:boolean
     deadline: Date,
     completedTime: number | null,
     status: "pending" | "done";
@@ -17,7 +18,7 @@ const timerSchema = new mongoose.Schema<ITimer>({
         type: String,
         required: true,
     },
-    body: {
+    description: {
         type: String,
         required: false,
     },
@@ -25,6 +26,11 @@ const timerSchema = new mongoose.Schema<ITimer>({
         type: Number,
         required: true,
     },
+    isActive:{
+        type:Boolean ,
+        required:true , 
+        default:true
+    } ,
     deadline: {
         type: Date,
         required: true,

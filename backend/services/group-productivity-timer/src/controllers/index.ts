@@ -49,16 +49,24 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
 
 })
 
+export const submitProductivityForGroupTimer = asyncHandler (async (req:Request , res:Response) => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId ) throw ApiError(StatusCodes.UNAUTHORIZED , "Uauthorized access !");
+    // ? MAIN OBJECTIVE : 
+    // * I have to submit the productivity of individual user for the group-timer and also has to decide ranks based on that 
+})
+
 export const getActiveGroupProductivityTimer = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
-    const data = groupProductivityTimerServices.getUsersActiveGroupProductivityTimers(toObjectId(userId));
+    const data = await groupProductivityTimerServices.getUsersActiveGroupProductivityTimers(toObjectId(userId));
 
     return sendResponse(res , {
         statusCode:StatusCodes.OK ,
         message:"Users's Active Group-Timers fetched successfully !" ,
         success:true  ,
-        data:(await data).activeGroupProductivityTimers
+        // ? here I am returing the group-timers as well as their length
+        data:data
     })
 })

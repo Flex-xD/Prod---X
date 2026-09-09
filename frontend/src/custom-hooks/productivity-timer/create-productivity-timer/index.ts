@@ -1,16 +1,17 @@
 import ENDPOINTS from "@/constants/api-endpoints"
 import { QUERY_KEYS } from "@/constants/query-keys"
 import type { ITimerForm } from "@/pages/Productivity-timer-pages/timer-components/types"
+import { userAppStore } from "@/store"
 import type { ApiResponse } from "@/types/api-response"
 import apiClient from "@/utils/Axios-client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {  type AxiosError } from "axios"
-import { useId } from "react"
 import { toast } from "sonner"
 
 
-const useCreateProductivityTimerMutation = (userId:string) => {
+const useCreateProductivityTimerMutation = () => {
     const queryClient = useQueryClient();
+    const userId = userAppStore((state) => state.user_id) ?? "";
     // ? invalidate the queries when the useQueryClientWillBeFetched
     return useMutation<ApiResponse<ITimerForm>, Error | AxiosError, ITimerForm>({
         mutationFn: async (data) => {

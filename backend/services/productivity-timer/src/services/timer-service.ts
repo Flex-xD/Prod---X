@@ -12,7 +12,7 @@ import { int } from "zod";
 export const productivityTimerServices = {
     createProductivityTimer: async (userId: Types.ObjectId, data: TcreateProductivityTimerInputForBody) => {
 
-        const { title, body, deadline, specifiedTime } = data;
+        const { title, description, deadline, specifiedTime } = data;
 
         logger.info("Creating productivity timer for user ⏱️")
 
@@ -20,11 +20,12 @@ export const productivityTimerServices = {
 
         const productivityTimer = new Timer({
             title,
-            body: body ? body : "",
+            description: description ?? "",
             specifiedTime,
             deadline,
             author: userId,
             isCompleted: false,
+            isActive:true ,
             completedTime: 0
         });
 
@@ -73,6 +74,7 @@ export const productivityTimerServices = {
         if (productivityDuration > remainingTimer) {
             // ? Changing the status here from 'pending' to 'done'
             productivityTimer.status = 'done';
+            productivityTimer.isActive = false;
             await emitEvent("productive.timer.completed", {
                 userId,
                 productivityTimerId,
@@ -101,8 +103,8 @@ export const productivityTimerServices = {
             ]
         };
 
-        const activeProductivityTimers = await Timer.find(filter).sort({createdAt:-1});
-
+        const activeProductivityTimers = await Timer.find(filter).sort({createdAt:-1}).populate('author' , "username avatar isOnline");
+        console.log("activeTimers : " , activeProductivityTimers);
         // ? Hard coded value is a bad practice
         if (activeProductivityTimers.length == 5) {
             throw ApiError(StatusCodes.BAD_REQUEST , "User already have maximum productivity-timers !");
@@ -110,6 +112,6 @@ export const productivityTimerServices = {
 
         // * If it is empty array , send the message in the controller 
 
-        return { activeProductivityTimers };
+        return activeProductivityTimers;
     }
 }

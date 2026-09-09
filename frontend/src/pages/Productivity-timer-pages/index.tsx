@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { Pill, SectionDivider } from './timer-components/ui';
 import type { IGroupTimer, IProductivityTimer, ViewMode } from './timer-components/types';
-import { dummyGroupTimers, dummyIndividualTimers, MAX_INDIVIDUAL_TIMERS, sp } from './timer-components/constants';
+import {  MAX_INDIVIDUAL_TIMERS, sp } from './timer-components/constants';
 import TimerPageHeader from './timer-components/timer-page-header';
 import EmptyGroupState from './timer-components/empty-group-state';
 import GroupTimerCard from './timer-components/group-timer-card';
@@ -12,9 +12,9 @@ import IndividualTimerCard from './timer-components/individual-timer-card';
 import IndividualTimerDetail from './timer-components/individual-timer-detail';
 import GroupTimerDetail from './timer-components/group-timer-detail';
 import CreateTimerModal from './timer-components/create-timer-modal';
-import useGetProductivityTimer from '@/custom-hooks/productivity-timer/get-productivity-timer';
 import { userAppStore } from '@/store';
 import useGetActiveGroupProductivityTimers from '@/custom-hooks/group-productivity-timer/get-group-productivity-timer';
+import useGetActiveProductivityTimer from '@/custom-hooks/productivity-timer/get-productivity-timer';
 
 const TimerPage = () => {
     const [showModal, setShowModal] = useState(false);
@@ -22,17 +22,24 @@ const TimerPage = () => {
     const [selectedInd, setSelectedInd] = useState<IProductivityTimer | null>(null);
     const [selectedGrp, setSelectedGrp] = useState<IGroupTimer | null>(null);
 
-    const userId = userAppStore((state) => state.user_id);
+    // const userId = userAppStore((state) => state.user_id);
 
     // * Currently I am getting apiResponse<timerType>
     const {data:activeGroupProductivityTimers} = useGetActiveGroupProductivityTimers();
-    // const {data:activeProductivityTimers} = useGetProductivityTimer(userId ?? "");
+    console.log("activeGroupProductivityTimers : " , activeGroupProductivityTimers);
+
+    const {data:activeProducitivityTimers , } = useGetActiveProductivityTimer();
+    console.log("Productivity-Timer : " , activeProducitivityTimers?.data);
+
+    const activeProducitivityTimersLength = activeGroupProductivityTimers?.data ? activeGroupProductivityTimers?.data.length : 0;
+
 
     // * Use the above actual data in use of the dummy data from the frontend
 
     console.log("This is the data of the activeGroupProductivityTimers : " , activeGroupProductivityTimers?.data);
 
-    const canCreate = dummyIndividualTimers.length < MAX_INDIVIDUAL_TIMERS;
+    const canCreate = activeProducitivityTimersLength < MAX_INDIVIDUAL_TIMERS;
+
 
     const handleBack = () => {
         setView('dashboard');
@@ -87,12 +94,12 @@ const TimerPage = () => {
                                         <h2 className="text-base font-black text-slate-900">Group Timers</h2>
                                         <p className="text-xs text-slate-400 font-medium mt-0.5">Created or joined sessions</p>
                                     </div>
-                                    <Pill color={dummyGroupTimers.length > 0 ? 'rose' : 'slate'}>
-                                        {dummyGroupTimers.length} active
+                                    <Pill color={ activeGroupProductivityTimers &&activeGroupProductivityTimers?.data?.length > 0 ? 'rose' : 'slate'}>
+                                        {activeGroupProductivityTimers?.data.length} active
                                     </Pill>
                                 </div>
 
-                                {dummyGroupTimers.length === 0 ? (
+                                {activeGroupProductivityTimers?.data.length === 0 ? (
                                     <div
                                         className="rounded-3xl bg-white overflow-hidden"
                                         style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.05)' }}
@@ -101,7 +108,7 @@ const TimerPage = () => {
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {dummyGroupTimers.map((timer, i) => (
+                                        {activeGroupProductivityTimers?.data.map((timer, i) => (
                                             <GroupTimerCard
                                                 key={timer._id}
                                                 timer={timer}
@@ -121,20 +128,21 @@ const TimerPage = () => {
                                     <div>
                                         <h2 className="text-base font-black text-slate-900">Your Focus Sessions</h2>
                                         <p className="text-xs text-slate-400 font-medium mt-0.5">
-                                            {dummyIndividualTimers.length}/{MAX_INDIVIDUAL_TIMERS} slots used
+                                            {activeProducitivityTimers?.data.length}/{MAX_INDIVIDUAL_TIMERS} slots used
                                         </p>
                                     </div>
                                 </div>
 
                                 <CapacityTracker
-                                    used={dummyIndividualTimers.length}
+                                // ! I am using 0 here just for now, I have to fix that
+                                    used={activeProducitivityTimersLength}
                                     max={MAX_INDIVIDUAL_TIMERS}
                                 />
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {dummyIndividualTimers.map((timer, i) => (
+                                    {activeProducitivityTimers?.data.map((timer, i) => (
                                         <IndividualTimerCard
-                                            key={timer.id}
+                                            key={timer._id}
                                             timer={timer}
                                             index={i}
                                             onClick={() => openIndividual(timer)}
@@ -146,7 +154,7 @@ const TimerPage = () => {
                                         <motion.button
                                             initial={{ opacity: 0, y: 18 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: dummyIndividualTimers.length * 0.07, ...sp }}
+                                            transition={{ delay: activeProducitivityTimersLength * 0.07, ...sp }}
                                             whileHover={{ y: -5, borderColor: '#7C3AED' }}
                                             whileTap={{ scale: 0.97 }}
                                             onClick={() => setShowModal(true)}

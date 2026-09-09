@@ -10,14 +10,22 @@ export interface IUser {
 }
 
 export interface IProductivityTimer {
-    id: string;
+    _id: string;
     title: string;
-    description: string;
-    deadline: string;
+    description?: string;
     specifiedTime: number;
-    productivityDone: number;
     isActive: boolean;
+    deadline: string;
+    status: string;
+    author: {
+        _id: string;
+        username: string;
+        avatar: string;
+        isOnline: boolean;
+    };
+    completedTime: number;
     createdAt: string;
+    updatedAt: string;
 }
 
 export interface IGroupParticipant {
@@ -33,6 +41,9 @@ export interface IGroupTimer {
     description: string;
     deadline: string;
     specifiedTime: number;
+    invitedUsersId: string[]
+    status: 'pending' | 'done'
+    isActive: boolean
     participants: IGroupParticipant[];
     author: IUser;
     isJoined: boolean;
@@ -46,10 +57,10 @@ export interface ITimerForm {
 }
 
 export interface IGroupTimerForm {
-    title:string , 
-    description:string , 
-    deadline:string , 
+    title: string,
+    description: string,
+    deadline: string,
     // ? Guesss what this specifiedTime could be 
-    specifiedTime:number , 
-    invitedUsersId:string[]
+    specifiedTime: number,
+    invitedUsersId: string[]
 }

@@ -5,7 +5,6 @@ import { TcreateGroupProductivityTimerInputForBody } from "../schemas";
 import GroupTimer from "../shared/models/GroupTimer";
 import { emitEvent } from "../kafka/producer";
 import User from "../shared/models/User";
-import { userInfo } from "os";
 
 export const groupProductivityTimerServices = {
     createGroupProductivityTimerService: async (userId: mongoose.Types.ObjectId, data: TcreateGroupProductivityTimerInputForBody) => {
@@ -17,6 +16,7 @@ export const groupProductivityTimerServices = {
             body: data.description ? data.description : "",
             deadline: data.deadline,
             invitedUsersId: data.invitedUsersId,
+            description:data.description ,
             participants: [],
             specifiedTime: data.specifiedTime,
             author: userId,
@@ -48,7 +48,8 @@ export const groupProductivityTimerServices = {
         }
 
 
-        const activeGroupProductivityTimers = await GroupTimer.find(filter).sort({createdAt:-1});
+        const activeGroupProductivityTimers = await GroupTimer.find(filter).sort({createdAt:-1}).populate('author' , "username avatar isOnline");
+        console.log("These are activeTimers : " , activeGroupProductivityTimers);
 
         if (activeGroupProductivityTimers.length == 0) {
             throw ApiError(StatusCodes.NOT_FOUND, "User has not created or joined any group-productivity-timers yet !");
@@ -59,11 +60,8 @@ export const groupProductivityTimerServices = {
             throw ApiError(StatusCodes.BAD_REQUEST, "User already have maximum number of timers !");
         }
 
-        const totalGroupTimers = activeGroupProductivityTimers.length;
+        // const totalGroupTimers = activeGroupProductivityTimers.length;
 
-        return {
-            activeGroupProductivityTimers,
-            totalGroupTimers
-        }
+        return activeGroupProductivityTimers;
     }
 }

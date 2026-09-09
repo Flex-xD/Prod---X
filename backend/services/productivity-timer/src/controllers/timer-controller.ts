@@ -10,12 +10,13 @@ export const createProductivityTimer = asyncHandler(async (req: Request, res: Re
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
-    const { title, body, deadline, specifiedTime } = req.body;
+    const { title, description, deadline, specifiedTime } = req.body.data;
+    console.log(req.body);
     if (!title || !specifiedTime || !deadline) {
         throw ApiError(StatusCodes.BAD_REQUEST, "Title , specified time and deadline are required !");
     }
 
-    const productivityTimer = await productivityTimerServices.createProductivityTimer(toObjectId(userId), { title, body, deadline, specifiedTime } as TcreateProductivityTimerInputForBody);
+    const productivityTimer = await productivityTimerServices.createProductivityTimer(toObjectId(userId), { title, description, deadline, specifiedTime } as TcreateProductivityTimerInputForBody);
     logger.info(`Sending Response to client ✅ with userid: ${userId}`);
 
     await emitEvent("productivityTimer.created", {
@@ -86,14 +87,14 @@ export const getActiveUsersProductivityTimers = asyncHandler(async (req: Request
         throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized Access !");
     }
 
-    const { activeProductivityTimers } = await productivityTimerServices.getActiveUsersProductivityTimer(toObjectId(userId));
+    const activeProductivityTimers  = await productivityTimerServices.getActiveUsersProductivityTimer(toObjectId(userId));
 
     if (activeProductivityTimers.length === 0) {
         return sendResponse(res, {
             statusCode: StatusCodes.OK,
             success: true,
             message: "User has not created any Productivity Timer yet !",
-            data: null
+            data: []
         })
     }
 

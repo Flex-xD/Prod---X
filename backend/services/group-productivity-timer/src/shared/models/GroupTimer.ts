@@ -1,4 +1,4 @@
-import mongoose, { Model, Schema } from "mongoose";
+import mongoose, { Model, ObjectId, Schema } from "mongoose";
 
 
 export interface IGroupTimer extends mongoose.Document {
@@ -17,6 +17,7 @@ export interface IGroupTimer extends mongoose.Document {
         userId: mongoose.Types.ObjectId,
         completedTime: number
     }[];
+    ranks:Map<number  , {userId:ObjectId , totalProductivityTime:number}>;
     isActive:boolean
 }
 

@@ -49,10 +49,36 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
 
 })
 
+// ! to submit productivity for group timer
+type submitProductivityForGroupTimer = {
+    groupTimerId:string ,
+    productivityTime:number
+}
+
 export const submitProductivityForGroupTimer = asyncHandler (async (req:Request , res:Response) => {
     const userId = req.headers["x-user-id"] as string;
     if (!userId ) throw ApiError(StatusCodes.UNAUTHORIZED , "Uauthorized access !");
     // ? MAIN OBJECTIVE : 
+
+    // ! see if I should pass the groupTimerId through query or req.body
+    const {groupTimerId ,productivityTime}:submitProductivityForGroupTimer = req.body;
+
+    if (!groupTimerId) {
+        throw ApiError(StatusCodes.NOT_FOUND , "Group Timer not found !");
+    }
+
+    if (!productivityTime) {
+        throw ApiError(StatusCodes.BAD_REQUEST , "Have some productivity time first !");
+    }
+
+    const data = await groupProductivityTimerServices.submitProductivityForGroupTimer(toObjectId(userId) , toObjectId(userId));
+
+    return sendResponse(res , {
+        statusCode:StatusCodes.OK , 
+        message:"Productivity submitted !" , 
+        data:null , 
+        success:true
+    });
     // * I have to submit the productivity of individual user for the group-timer and also has to decide ranks based on that 
 })
 

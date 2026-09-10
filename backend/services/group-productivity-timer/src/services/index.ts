@@ -16,7 +16,7 @@ export const groupProductivityTimerServices = {
             body: data.description ? data.description : "",
             deadline: data.deadline,
             invitedUsersId: data.invitedUsersId,
-            description:data.description ,
+            description: data.description,
             participants: [],
             specifiedTime: data.specifiedTime,
             author: userId,
@@ -34,6 +34,12 @@ export const groupProductivityTimerServices = {
 
         return groupProductivityTimer;
     },
+    submitProductivityForGroupTimer: async (userId:mongoose.Types.ObjectId , groupTimerId:mongoose.Types.ObjectId) => {
+        const groupTimer = await GroupTimer.findById(groupTimerId);
+        // * MAIN OBJECTIVE :
+        // ! I have to update a single participants productivityTime in the GroupTimer and also make ranks according to them in the timer 
+        // ? check point 
+    },
     getUsersActiveGroupProductivityTimers: async (userId: mongoose.Types.ObjectId) => {
         const filter = {
             isActive: true,
@@ -48,8 +54,8 @@ export const groupProductivityTimerServices = {
         }
 
 
-        const activeGroupProductivityTimers = await GroupTimer.find(filter).sort({createdAt:-1}).populate('author' , "username avatar isOnline");
-        console.log("These are activeTimers : " , activeGroupProductivityTimers);
+        const activeGroupProductivityTimers = await GroupTimer.find(filter).sort({ createdAt: -1 }).populate('author', "username avatar isOnline");
+        console.log("These are activeTimers : ", activeGroupProductivityTimers);
 
         if (activeGroupProductivityTimers.length == 0) {
             throw ApiError(StatusCodes.NOT_FOUND, "User has not created or joined any group-productivity-timers yet !");

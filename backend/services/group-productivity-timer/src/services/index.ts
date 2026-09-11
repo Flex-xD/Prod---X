@@ -34,7 +34,7 @@ export const groupProductivityTimerServices = {
 
         return groupProductivityTimer;
     },
-    submitProductivityForGroupTimer: async (userId:mongoose.Types.ObjectId , groupTimerId:mongoose.Types.ObjectId) => {
+    submitProductivityForGroupTimer: async (userId: mongoose.Types.ObjectId, groupTimerId: mongoose.Types.ObjectId) => {
         const groupTimer = await GroupTimer.findById(groupTimerId);
         // * MAIN OBJECTIVE :
         // ! I have to update a single participants productivityTime in the GroupTimer and also make ranks according to them in the timer 
@@ -69,5 +69,29 @@ export const groupProductivityTimerServices = {
         // const totalGroupTimers = activeGroupProductivityTimers.length;
 
         return activeGroupProductivityTimers;
-    }
+    },
+    respondToInvitation: async (
+        groupTimerId: mongoose.Types.ObjectId,
+        userId: mongoose.Types.ObjectId,
+        status: "accepted" | "declined"
+    ) => {
+        const groupTimer = await GroupTimer.findById(groupTimerId);
+        if (!groupTimer) throw ApiError(StatusCodes.NOT_FOUND, "Group timer not found !");
+
+        if (status === "accepted") {
+            await GroupTimer.findByIdAndUpdate(groupTimerId, {
+                $pull: { invitedUsersId: userId },
+                $addToSet: { participants: userId },
+            });
+            await User.findByIdAndUpdate(userId, {
+                $addToSet: { userGroupProductivityTimer: groupTimerId },
+            });
+        } else {
+            await GroupTimer.findByIdAndUpdate(groupTimerId, {
+                $pull: { invitedUsersId: userId },
+            });
+        }
+
+        return groupTimer;
+    },
 }

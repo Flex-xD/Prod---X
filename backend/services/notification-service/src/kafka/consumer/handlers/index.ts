@@ -2,9 +2,10 @@ import mongoose, { Mongoose } from "mongoose"
 import { TgroupProductivityTimerForConsumer } from ".."
 import pLimit from "p-limit";
 import axios from "axios"
-import { ApiError, logger } from "../../../shared";
+import { ApiError, logger, toObjectId } from "../../../shared";
 import { StatusCodes } from "http-status-codes";
 import { INotification } from "../../../model/Notification";
+import { notificationServices } from "../../../service";
 
 type TEventGroupTimerCreated = {
     userId: string,
@@ -29,7 +30,8 @@ export const handlers = {
                     from: userId,
                     topic: `Invitation for Group-productivity-timer  :${groupProductivityTimer.title}`,
                     message: `You have been invited to a group-productivity-timer by ${groupProductivityTimer.author}`,
-                    notificationType: "group-timer-request"
+                    notificationType: "group-timer-request" , 
+                    invitation: { groupTimerId: groupProductivityTimer._id, timerName: groupProductivityTimer.title }
                 },
                 {
                     headers: {
@@ -56,9 +58,9 @@ export const handlers = {
                     logger.info(`Sending API request to : /send-notification/${notificationReceivingUserId}`)
 
                     const response = await axios.post("http://localhost:3000/api/v1/notification/send-notification", {
-                        notificationReceivingUserId , 
-                        notificationId:notification._id , 
-                        userId:notification.from
+                        notificationReceivingUserId,
+                        notificationId: notification._id,
+                        userId: notification.from
                     }, {
                         headers: {
                             "Content-Type": "application/json",
@@ -73,5 +75,15 @@ export const handlers = {
             })
 
         }
-    }
+    },
+    "group.timer.invitation.responded": async ({ notificationId, userId, status }: {
+        notificationId: string, userId: string, status: "accepted" | "declined"
+    }) => {
+        logger.info(`Updating invitation response: ${notificationId} -> ${status}`);
+        await notificationServices.updateInvitationResponse(
+            toObjectId(notificationId),
+            toObjectId(userId),
+            status
+        );
+    },
 }

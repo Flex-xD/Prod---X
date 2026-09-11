@@ -37,5 +37,55 @@ export const notificationServices = {
         notificationReceivingUser.notifications.push(notificationId);
         await notificationReceivingUser.save()
         return notification;
-    }
+    },
+    getNotificationsForUser: async (userId: mongoose.Types.ObjectId, page = 1, limit = 15) => {
+        const filter = { to: userId };
+
+        const [notifications, total, unreadCount] = await Promise.all([
+            Notification.find(filter)
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .populate("from", "username avatar")
+                .lean(),
+            Notification.countDocuments(filter),
+            Notification.countDocuments({ to: userId, readBy: { $ne: userId } }),
+        ]);
+
+        return {
+            notifications,
+            hasMore: page * limit < total,
+            unreadCount,
+        };
+    },
+
+    markAsRead: async (notificationId: mongoose.Types.ObjectId, userId: mongoose.Types.ObjectId) => {
+        return Notification.findByIdAndUpdate(
+            notificationId,
+            { $addToSet: { readBy: userId } },
+            { new: true }
+        );
+    },
+
+    markAllAsRead: async (userId: mongoose.Types.ObjectId) => {
+        return Notification.updateMany(
+            { to: userId, readBy: { $ne: userId } },
+            { $addToSet: { readBy: userId } }
+        );
+    },
+
+    updateInvitationResponse: async (
+        notificationId: mongoose.Types.ObjectId,
+        userId: mongoose.Types.ObjectId,
+        status: "accepted" | "declined"
+    ) => {
+        await Notification.updateOne(
+            { _id: notificationId, "invitationResponses.userId": userId },
+            { $set: { "invitationResponses.$.status": status } }
+        );
+        await Notification.updateOne(
+            { _id: notificationId, "invitationResponses.userId": { $ne: userId } },
+            { $push: { invitationResponses: { userId, status } } }
+        );
+    },
 }

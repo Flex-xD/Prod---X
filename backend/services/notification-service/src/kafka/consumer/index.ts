@@ -31,6 +31,7 @@ export const connectConsumer = async () => {
 
 // * TYPE FOR THE GroupProductivityTimer via value
 export type TgroupProductivityTimerForConsumer = {
+    _id:string
     title: string,
     body: string,
     deadline: Date,

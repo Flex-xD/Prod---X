@@ -4,27 +4,35 @@ const ENDPOINTS = {
     AUTH_ENDPOINTS: {
         REGISTER: `${BASE_URL}/auth/register`,
         LOGIN: `${BASE_URL}/auth/login`,
-        GOOGLE_AUTH: `${BASE_URL}/auth/google-auth` , 
-        LOGOUT:`${BASE_URL}/auth/logout` , 
-    } , 
-    TASKS_ENDPOINTS:{
-        CREATE_TASK:`${BASE_URL}/task/create-task`, 
-        GET_TODAYS_TASKS:`${BASE_URL}/task/todays-tasks` , 
-        MARK_TASK_DONE:`${BASE_URL}/task/done` , 
-        MARK_TASK_PENDING:`${BASE_URL}/task/pending` , 
-    } , 
-    USER_ENDPOINTS:{
-        USER_DATA:`${BASE_URL}/user/user-data` , 
-        USERS_TO_SHOW:(query:string) => `${BASE_URL}/user/users-to-invite?query=${query}`
+        GOOGLE_AUTH: `${BASE_URL}/auth/google-auth`,
+        LOGOUT: `${BASE_URL}/auth/logout`,
+    },
+    TASKS_ENDPOINTS: {
+        CREATE_TASK: `${BASE_URL}/task/create-task`,
+        GET_TODAYS_TASKS: `${BASE_URL}/task/todays-tasks`,
+        MARK_TASK_DONE: `${BASE_URL}/task/done`,
+        MARK_TASK_PENDING: `${BASE_URL}/task/pending`,
+    },
+    USER_ENDPOINTS: {
+        USER_DATA: `${BASE_URL}/user/user-data`,
+        USERS_TO_SHOW: (query: string) => `${BASE_URL}/user/users-to-invite?query=${query}`
 
-    } , 
-    PRODUCTIVITY_TIMER:{
-        CREATE_PRODUCTIVITY_TIMER:`${BASE_URL}/productivity-timer/create-timer` , 
-        GET_ACTIVE_PRODUCTIVITY_TIMERS:`${BASE_URL}/productivity-timer/active-productivity-timers`
-    } , 
-    GROUP_PRODUCTITIVTY_TIMER:{
-        CREATE_GROUP_PRODUCTIVITY_TIMER:`${BASE_URL}/group-productivity-timer/create-group-timer` ,
-        GET_USERS_ACTIVE_GROUP_PRODUCTIVITY_TIMERS:`${BASE_URL}/group-productivity-timer/active-group-timers` , 
+    },
+    PRODUCTIVITY_TIMER: {
+        CREATE_PRODUCTIVITY_TIMER: `${BASE_URL}/productivity-timer/create-timer`,
+        GET_ACTIVE_PRODUCTIVITY_TIMERS: `${BASE_URL}/productivity-timer/active-productivity-timers`
+    },
+    GROUP_PRODUCTITIVTY_TIMER: {
+        CREATE_GROUP_PRODUCTIVITY_TIMER: `${BASE_URL}/group-productivity-timer/create-group-timer`,
+        GET_USERS_ACTIVE_GROUP_PRODUCTIVITY_TIMERS: `${BASE_URL}/group-productivity-timer/active-group-timers`,
+    },
+    NOTIFICATION_ENDPOINTS: {
+        GET_NOTIFICATIONS: (userId: string, page: number) => `/notification/${userId}?page=${page}&limit=15`,
+        MARK_AS_READ: (notificationId: string) => `/notification/${notificationId}/read`,
+        MARK_ALL_AS_READ: (userId: string) => `/notification/read-all/${userId}`,
+    },
+    GROUP_TIMER_INVITATION_ENDPOINTS: {
+        RESPOND: `/group-productivity-timer/respond-invitation`,
     }
 
 }

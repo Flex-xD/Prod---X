@@ -4,8 +4,8 @@ import { Zap, Timer, Bell, ChevronDown, User, Settings, LogOut } from 'lucide-re
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/custom-hooks/user-related-fetching/user-data';
 import { useLogoutMutation } from '@/custom-hooks/auth-mutation/logout';
+import NotificationCenter from '@/pages/Notification';
 
-// ─── Spring preset (matches timer-page) ──────────────────────────────────────
 const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
 
 const DashboardHeader = () => {
@@ -15,7 +15,7 @@ const DashboardHeader = () => {
 
     const [profileOpen, setProfileOpen] = useState(false);
 
-    const {mutateAsync:handleLogoutMutation}= useLogoutMutation();
+    const { mutateAsync: handleLogoutMutation } = useLogoutMutation();
 
     const handleLogout = async () => {
         await handleLogoutMutation()
@@ -59,20 +59,7 @@ const DashboardHeader = () => {
                 <div className="flex items-center gap-2.5">
 
                     {/* Notification bell */}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.93 }}
-                        className="relative w-10 h-10 rounded-2xl flex items-center justify-center transition-colors"
-                        style={{ background: '#f8fafc', border: '1px solid rgba(0,0,0,0.06)' }}
-                        title="Notifications — coming soon"
-                    >
-                        <Bell className="w-4.5 h-4.5 text-slate-500 w-[18px] h-[18px]" />
-                        {/* Unread dot */}
-                        <span
-                            className="absolute top-2 right-2 w-2 h-2 rounded-full bg-violet-500"
-                            style={{ boxShadow: '0 0 0 2px white' }}
-                        />
-                    </motion.button>
+                    <NotificationCenter />                    
 
                     {/* Timer CTA */}
                     <Link to="/timer">
@@ -179,7 +166,7 @@ const DashboardHeader = () => {
                                                     <LogOut className="w-3.5 h-3.5 text-slate-500 group-hover:text-rose-500 transition-colors" />
                                                 </div>
                                                 <span className="text-sm font-semibold text-slate-700 group-hover:text-rose-600 transition-colors"
-                                                onClick={handleLogout}
+                                                    onClick={handleLogout}
                                                 >
                                                     Sign Out
                                                 </span>

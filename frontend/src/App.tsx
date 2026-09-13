@@ -14,13 +14,15 @@ import { useSocketStatus } from "./context/socket-context";
 import socket from "./lib/socket.io";
 import { toast } from "sonner";
 import { usePresence } from "./context/user-presence-context";
+import {  useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEYS } from "./constants/query-keys";
 
 
 // * Have a single source of truth here for authentication right now there is !!accessToken and one is isAuthenticated. . .
 
 function App() {
   // console.log("isAuthenticated : ", userAppStore((state) => state.isAuthenticated));
-
+  const queryClient = useQueryClient();
   const isSocketConnected = useSocketStatus();
 
   // ? Debug this , isUserOnline is showing false when connected
@@ -36,6 +38,20 @@ function App() {
   const user_id = userAppStore((state) => state.user_id);
 
   const { data, isPending, isError } = useUserData();
+
+  useEffect(() => {
+  const handleNotification = (payload: any) => {
+    toast.info(`You are invited to a group-timer by ${payload.username}`);
+    if (user_id) {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notificationKeys.list(user_id) });
+    }
+  };
+
+  socket.on("invitation-notification", handleNotification);
+  return () => {
+    socket.off("invitation-notification", handleNotification);
+  };
+}, [user_id, queryClient]);
 
   useEffect(() => {
     if (data?.success) {

@@ -11,7 +11,7 @@ export const QUERY_KEYS = {
         BY_ID: (userId: string) => ["profile", userId] as const,
         FOLLOWERS: (userId: string) => ["profile", userId, "followers"] as const,
         FOLLOWING: (userId: string) => ["profile", userId, "following"] as const,
-        USERS_TO_SHOW:(query:string) => ["users_to_show" , query]
+        USERS_TO_SHOW: (query: string) => ["users_to_show", query]
     },
     PRODUCTIVITY_TIMER: {
         ALL: ["productivity-timer"] as const,
@@ -20,10 +20,14 @@ export const QUERY_KEYS = {
     }
     ,
     GROUP_PRODUCTIVITY_TIMER: {
-        USER_GROUP_TIMER:(groupProductivityTimerId:string) => ["group-productivity-timer"  , groupProductivityTimerId] ,
-        ACTIVE_GROUP_TIMERS:(userId:string) => ["active-group-timers"  , userId]
+        USER_GROUP_TIMER: (groupProductivityTimerId: string) => ["group-productivity-timer", groupProductivityTimerId],
+        ACTIVE_GROUP_TIMERS: (userId: string) => ["active-group-timers", userId]
     }
     ,
+    notificationKeys: {
+        all: ["notifications"] as const,
+        list: (userId: string) => ["all", "list", userId] as const,
+    },
 
     // ? The key's below are from my last full-stack project
     BLOGS: {

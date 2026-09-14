@@ -14,15 +14,15 @@ const sp = { type: "spring", damping: 26, stiffness: 300 } as const;
 
 const InvitationNotificationItem = ({ notification, index }: Props) => {
     const user_id = userAppStore((state) => state.user_id) ?? "";
-    const { mutate: respond, isPending, variables } = useRespondToInvitationMutation(user_id);
+    const { mutate: handleResponseMutation, isPending , variables } = useRespondToInvitationMutation(user_id);
 
     const myResponse = notification.invitationResponses?.find((r) => r.userId === user_id);
     const status: InvitationStatus = myResponse?.status ?? "pending";
     const isUnread = !notification.readBy?.includes(user_id);
 
-    const handleRespond = (nextStatus: "accepted" | "declined") => {
+    const handleResponse = (nextStatus: "accepted" | "declined") => {
         if (!notification.invitation) return;
-        respond({
+        handleResponseMutation({
             groupTimerId: notification.invitation.groupTimerId,
             notificationId: notification._id,
             status: nextStatus,
@@ -72,7 +72,7 @@ const InvitationNotificationItem = ({ notification, index }: Props) => {
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     disabled={isPending}
-                                    onClick={() => handleRespond("accepted")}
+                                    onClick={() => handleResponse("accepted")}
                                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-white transition-opacity disabled:opacity-60"
                                     style={{ background: "linear-gradient(135deg,#7C3AED,#4F46E5)", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
                                 >
@@ -82,7 +82,7 @@ const InvitationNotificationItem = ({ notification, index }: Props) => {
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     disabled={isPending}
-                                    onClick={() => handleRespond("declined")}
+                                    onClick={() => handleResponse("declined")}
                                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-opacity disabled:opacity-60"
                                     style={{ background: "white", color: "#64748b", border: "1.5px solid rgba(0,0,0,0.08)" }}
                                 >

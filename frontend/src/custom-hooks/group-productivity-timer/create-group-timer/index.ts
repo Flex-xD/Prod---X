@@ -42,6 +42,7 @@ const useCreateGroupProductivityTimer = () => {
         onSettled: async () => {
 
             await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
         },
         onSuccess: async (data) => {
             let failedMessage;

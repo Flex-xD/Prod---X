@@ -2,10 +2,12 @@ export const USER_ROUTES = [
     "/user" ,
     "/task",
     "/group-productivity-timer", 
-    "/productivity-timer"
+    "/productivity-timer" , 
+    "/notification"
 ];
 
 export const INTERNAL_ROUTES = [
-    "/notification",
+    "/notification/create-notification",
+    "/notification/send-notification"
 ];
 

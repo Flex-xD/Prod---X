@@ -3,6 +3,8 @@ import axiosClient from "@/utils/Axios-client";
 import ENDPOINTS from "@/constants/api-endpoints";
 import { QUERY_KEYS } from "@/constants/query-keys";
 
+
+// * I have to add onErrors later on to both the mutations
 export const useMarkAsReadMutation = (userId: string) => {
     const queryClient = useQueryClient();
     return useMutation({

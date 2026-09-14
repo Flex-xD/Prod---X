@@ -14,7 +14,11 @@ const createNotificationSchema = z.object({
     topic: z.string(),
     message: z.string(),
     from: zObjectId,
-    to: zObjectId.array()
+    to: zObjectId.array() ,
+    invitation: z.object({
+        groupTimerId: zObjectId,
+        timerName: z.string(),
+    }).optional(),
 })
 
 
@@ -24,7 +28,11 @@ export type TypeCreateNotification = {
     topic: string,
     message: string,
     from: mongoose.Types.ObjectId,
-    to: mongoose.Types.ObjectId[]
+    to: mongoose.Types.ObjectId[] , 
+    invitation:{
+        groupTimerId:mongoose.Types.ObjectId , 
+        timerName:string
+    }
 }
 
 const createNotificationSchemaForBody = z.object({

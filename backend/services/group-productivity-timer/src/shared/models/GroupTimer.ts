@@ -12,6 +12,7 @@ export interface IGroupTimer extends mongoose.Document {
     author: mongoose.Types.ObjectId
     invitedUsersId: mongoose.Types.ObjectId[]
     participants: mongoose.Types.ObjectId[]
+    declinedUsers:mongoose.Types.ObjectId[]
     participantsCompletedTime:
     {
         userId: mongoose.Types.ObjectId,
@@ -50,11 +51,17 @@ const groupTimerSchema = new mongoose.Schema<IGroupTimer>({
         index: true,
     },
     invitedUsersId: [{
+        ref:'User' ,
         type: mongoose.Schema.Types.ObjectId
     }],
     participants: [{
+        ref:'User' ,
         type: mongoose.Types.ObjectId
     }],
+    declinedUsers:[{
+        ref:'User' , 
+        type:mongoose.Types.ObjectId
+    }] ,
     participantsCompletedTime: [
         {
             participantId: mongoose.Types.ObjectId,

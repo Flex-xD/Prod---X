@@ -4,7 +4,6 @@ import mongoose, { get } from "mongoose";
 import { notificationServices } from "../service";
 import { StatusCodes } from "http-status-codes";
 import { emitEvent } from "../kafka/producer";
-import { TypeCreateNotification } from "../schema";
 
 interface IAuthRequest extends Request {
     userId?: mongoose.Types.ObjectId
@@ -15,7 +14,7 @@ interface IAuthRequest extends Request {
 export const createNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
     // console.info("This is the req.headers of notification-service : " , req.headers);
     console.info("Creating notification . . .")
-    const { topic, message, to, notificationType, from: userId } = req.body;
+    const { topic, message, to, notificationType, from: userId , invitation} = req.body;
     // const { userId } = req;
     if (!userId) {
         throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
@@ -25,7 +24,7 @@ export const createNotification = asyncHandler(async (req: IAuthRequest, res: Re
 
     // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
 
-    const notification = await notificationServices.createNotification({ topic, message, to, notificationType, from: toObjectId(userId) });
+    const notification = await notificationServices.createNotification({ topic, message, to, notificationType, from: toObjectId(userId)  , invitation});
 
     // ? Emitting the notification.created event
     await emitEvent("notification.created", {
@@ -53,7 +52,7 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
     // ? req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
 
     logger.info(`Forwaring the data to the notification-servive...`)
-    const notification: TypeCreateNotification = await notificationServices.sendNotification(notificationReceivingUserId, notificationId);
+    const notification = await notificationServices.sendNotification(notificationReceivingUserId, notificationId);
     const user = await getUser(userId);
     // ? Emitting the notification.created event
     await emitEvent("invitation.notification.created", {

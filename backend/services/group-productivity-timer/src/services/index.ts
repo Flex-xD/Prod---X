@@ -80,7 +80,12 @@ export const groupProductivityTimerServices = {
 
         if (status === "accepted") {
             await GroupTimer.findByIdAndUpdate(groupTimerId, {
-                $pull: { invitedUsersId: userId },
+                $pull: {
+                    invitedUsersId: userId,
+                    // ? Also see if it should be here or not
+                    declinedUsers: userId
+                }
+                ,
                 $addToSet: { participants: userId },
             });
             await User.findByIdAndUpdate(userId, {
@@ -89,6 +94,9 @@ export const groupProductivityTimerServices = {
         } else {
             await GroupTimer.findByIdAndUpdate(groupTimerId, {
                 $pull: { invitedUsersId: userId },
+                // ? Updating the user if he declined
+                // ? check weather this should be here or not
+                $push: { declinedUsers: userId }
             });
         }
 

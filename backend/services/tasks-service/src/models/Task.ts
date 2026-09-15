@@ -1,5 +1,10 @@
 import mongoose, { Schema, Model, Document, Types } from "mongoose";
 
+interface IPointsForTask {
+    taskCreated:1 , 
+    taskCompleted:2 , 
+}
+
 interface ITask extends Document {
     _id:Types.ObjectId ;
     title: string;
@@ -8,6 +13,7 @@ interface ITask extends Document {
     status: "pending" | "done";
     createdAt: Date;
     updatedAt: Date;
+    points?:IPointsForTask , 
     // Virtual field (populated later)
     // ? should I even have this field below ?
     authorDetails?: {
@@ -41,6 +47,10 @@ const taskSchema = new Schema<ITask>(
             enum: ["pending",  "done"] as const,
             default: "pending",
         },
+        points:{
+            type:Number  , 
+            defualt:0 , 
+        }
     },
     {
         timestamps: true,

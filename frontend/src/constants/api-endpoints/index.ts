@@ -19,12 +19,17 @@ const ENDPOINTS = {
 
     },
     PRODUCTIVITY_TIMER: {
-        CREATE_PRODUCTIVITY_TIMER: `${BASE_URL}/productivity-timer/create-timer`,
-        GET_ACTIVE_PRODUCTIVITY_TIMERS: `${BASE_URL}/productivity-timer/active-productivity-timers`
+        CREATE_PRODUCTIVITY_TIMER: "/productivity-timer/create-timer",
+        GET_ACTIVE_PRODUCTIVITY_TIMERS: "/productivity-timer/active-productivity-timers",
+        GET_EXPIRED_PRODUCTIVITY_TIMERS: "/productivity-timer/expired-productivity-timers",
+        SUBMIT_PRODUCTIVITY: "/productivity-timer/submit-productivity",
     },
     GROUP_PRODUCTITIVTY_TIMER: {
-        CREATE_GROUP_PRODUCTIVITY_TIMER: `${BASE_URL}/group-productivity-timer/create-group-timer`,
-        GET_USERS_ACTIVE_GROUP_PRODUCTIVITY_TIMERS: `${BASE_URL}/group-productivity-timer/active-group-timers`,
+        CREATE_GROUP_PRODUCTIVITY_TIMER: "/group-productivity-timer/create-group-timer",
+        GET_USERS_ACTIVE_GROUP_PRODUCTIVITY_TIMERS: "/group-productivity-timer/active-group-timers",
+        GET_EXPIRED_GROUP_PRODUCTIVITY_TIMERS: "/group-productivity-timer/expired-group-timers",
+        GET_PENDING_INVITES: "/group-productivity-timer/pending-invites",
+        SUBMIT_GROUP_PRODUCTIVITY: "/group-productivity-timer/submit-productivity",
     },
     NOTIFICATION_ENDPOINTS: {
         GET_NOTIFICATIONS: (userId: string, page: number) => `/notification/${userId}?page=${page}&limit=15`,

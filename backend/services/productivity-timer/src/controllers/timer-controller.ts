@@ -5,7 +5,6 @@ import { StatusCodes } from "http-status-codes";
 import { TcreateProductivityTimerInputForBody } from "../schemas/timer-schema";
 import { productivityTimerServices } from "../services/timer-service";
 
-
 export const createProductivityTimer = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
@@ -36,17 +35,18 @@ export const createProductivityTimer = asyncHandler(async (req: Request, res: Re
 
 export type TgetProductivityTimeRequestBody = {
     productivityDuration: number,
-    productivityTimerId: mongoose.Types.ObjectId
+    productivityTimerId:mongoose.Types.ObjectId
 }
 
 export const submitProductivityTime = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
-    const { productivityDuration, productivityTimerId }: TgetProductivityTimeRequestBody = req.body;
-
+    const { productivityDuration, productivityTimerId } = req.body;
+    
     if (!productivityTimerId) {
         throw ApiError(StatusCodes.BAD_GATEWAY, "No productivity-timer id found !");
     };
+    const objectTimerId = toObjectId(productivityTimerId);
 
     if (!productivityDuration || productivityDuration == 0) {
         let message = "No productivity duration found !";
@@ -58,7 +58,8 @@ export const submitProductivityTime = asyncHandler(async (req: Request, res: Res
     }
 
     const updatedProductivityTimer = await productivityTimerServices.submitProductivityTime(toObjectId(userId), {
-        productivityDuration, productivityTimerId
+        productivityDuration,
+        productivityTimerId: objectTimerId, 
     });
 
     let message = "Productivity Timer's time period updated successfully !";
@@ -87,7 +88,7 @@ export const getActiveUsersProductivityTimers = asyncHandler(async (req: Request
         throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized Access !");
     }
 
-    const activeProductivityTimers  = await productivityTimerServices.getActiveUsersProductivityTimer(toObjectId(userId));
+    const activeProductivityTimers = await productivityTimerServices.getActiveUsersProductivityTimer(toObjectId(userId));
 
     if (activeProductivityTimers.length === 0) {
         return sendResponse(res, {
@@ -105,3 +106,17 @@ export const getActiveUsersProductivityTimers = asyncHandler(async (req: Request
         data: activeProductivityTimers
     })
 })
+
+export const getExpiredProductivityTimers = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized Access !");
+
+    const timers = await productivityTimerServices.getExpiredUsersProductivityTimer(toObjectId(userId));
+
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Expired productivity timers fetched",
+        data: timers,
+    });
+});

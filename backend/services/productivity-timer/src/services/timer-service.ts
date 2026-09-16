@@ -7,111 +7,71 @@ import { TgetProductivityTimeRequestBody } from "../controllers/timer-controller
 import User from "../shared/models/User";
 import { int } from "zod";
 
-// * Implement Redis caching later on
-
 export const productivityTimerServices = {
     createProductivityTimer: async (userId: Types.ObjectId, data: TcreateProductivityTimerInputForBody) => {
+        const activeCount = await Timer.countDocuments({ author: userId, status: "pending" });
+        if (activeCount >= 5) {
+            throw ApiError(StatusCodes.BAD_REQUEST, "You already have the maximum number of active productivity timers !");
+        }
 
         const { title, description, deadline, specifiedTime } = data;
-
-        logger.info("Creating productivity timer for user ⏱️")
-
-        // ? I can try to convert these fetched variables strings into their specified types like number or dates , I have to see first
-
         const productivityTimer = new Timer({
             title,
             description: description ?? "",
             specifiedTime,
             deadline,
             author: userId,
-            isCompleted: false,
-            isActive:true ,
-            completedTime: 0
+            isActive: true,
+            completedTime: 0,
         });
 
         await Promise.all([
             productivityTimer.save(),
-            User.findByIdAndUpdate(userId, {
-                $push: {
-                    userProductivityTimer: productivityTimer._id
-                }
-            })
-        ])
-
-        logger.info(`Productivity timer created with id: ${productivityTimer._id} for user ${userId}`);
+            User.findByIdAndUpdate(userId, { $push: { userProductivityTimer: productivityTimer._id } }),
+        ]);
 
         return productivityTimer;
     },
 
     submitProductivityTime: async (userId: Types.ObjectId, data: TgetProductivityTimeRequestBody) => {
         const user = await getUser(userId);
-        if (!user) {
-            throw ApiError(StatusCodes.NOT_FOUND, "User not found !");
-        }
-
         const { productivityDuration, productivityTimerId } = data;
 
         const productivityTimer = await Timer.findById(productivityTimerId);
-
-        // * Check later on wether if I don't allowed the certain actions from the frontend , then is it still a good practice to keep check here
-
-        if (!productivityTimer) {
-            throw ApiError(StatusCodes.NOT_FOUND, "Productivity Timer not found !");
-        }
-
-        // ? I think I don't need to check this condition as user will not be able to edit the productivity-timer after it is either marked completed or has reached deadline
-
-        if (productivityTimer.status == "done") {
+        if (!productivityTimer) throw ApiError(StatusCodes.NOT_FOUND, "Productivity Timer not found !");
+        if (productivityTimer.status === "done") {
             throw ApiError(StatusCodes.CONFLICT, "Productivity Timer is already completed !");
         }
-
         if (Date.now() > productivityTimer.deadline.getTime()) {
-            throw ApiError(StatusCodes.CONFLICT, "Productivity Timer has hit the deadline !")
+            throw ApiError(StatusCodes.CONFLICT, "Productivity Timer has hit the deadline !");
         }
 
-        const remainingTimer = productivityTimer.specifiedTime as number - productivityTimer.completedTime!
+        const remainingTime = (productivityTimer.specifiedTime as number) * 60 - (productivityTimer.completedTime ?? 0);
 
-        if (productivityDuration > remainingTimer) {
-            // ? Changing the status here from 'pending' to 'done'
-            productivityTimer.status = 'done';
+        productivityTimer.completedTime = (productivityTimer.completedTime ?? 0) + productivityDuration;
+
+
+        if (productivityDuration >= remainingTime) {
+            productivityTimer.status = "done";
             productivityTimer.isActive = false;
-            await emitEvent("productive.timer.completed", {
-                userId,
-                productivityTimerId,
-                productivityTimer
-            });
+            await emitEvent("productive.timer.completed", { userId, productivityTimerId, productivityTimer });
         }
 
-        productivityTimer.completedTime! += productivityDuration;
-
-        await Promise.all([
-            productivityTimer.save(),
-            user.save()
-        ])
-
-        // ? utilize this event on the other relevant service
-
-
+        await Promise.all([productivityTimer.save(), user.save()]);
         return productivityTimer;
     },
 
-    getActiveUsersProductivityTimer: async (userId:mongoose.Types.ObjectId) => {
-        const filter = {
-            $and: [
-                { isActive: true },
-                { author: userId }
-            ]
-        };
+    getActiveUsersProductivityTimer: async (userId: mongoose.Types.ObjectId) => {
+        const now = new Date();
+        return Timer.find({ author: userId, deadline: { $gte: now } })
+            .sort({ createdAt: -1 })
+            .populate("author", "username avatar isOnline");
+    },
 
-        const activeProductivityTimers = await Timer.find(filter).sort({createdAt:-1}).populate('author' , "username avatar isOnline");
-        console.log("activeTimers : " , activeProductivityTimers);
-        // ? Hard coded value is a bad practice
-        if (activeProductivityTimers.length == 5) {
-            throw ApiError(StatusCodes.BAD_REQUEST , "User already have maximum productivity-timers !");
-        }
-
-        // * If it is empty array , send the message in the controller 
-
-        return activeProductivityTimers;
-    }
+    getExpiredUsersProductivityTimer: async (userId: mongoose.Types.ObjectId) => {
+        const now = new Date();
+        return Timer.find({ author: userId, deadline: { $lt: now } })
+            .sort({ deadline: -1 })
+            .populate("author", "username avatar isOnline");
+    },
 }

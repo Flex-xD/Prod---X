@@ -4,6 +4,7 @@ import { Avatar, Pill, SlimBar } from '../../ui';
 import { RANK_CONFIG, sp } from '../../constants';
 import { formatSeconds, progressPercent } from '../../utils';
 import type { IGroupParticipant, IGroupTimer } from '../../types';
+import { userAppStore } from '@/store';
 
 interface LeaderboardRowProps {
     participant: IGroupParticipant;
@@ -14,8 +15,10 @@ interface LeaderboardRowProps {
 }
 
 const LeaderboardRow = ({ participant, position, specifiedTime }: LeaderboardRowProps) => {
+    const userId = userAppStore((state) => state.user_id);
     const pct = progressPercent(participant.productivityDone, specifiedTime);
-    const isMe = participant.user.id === 'me';
+    console.log("This is the participant : " , participant);
+    const isMe = participant.user._id == userId;
     const rank = RANK_CONFIG[position];
     const RankIcon = rank?.icon ?? CheckCircle2;
 
@@ -48,7 +51,7 @@ const LeaderboardRow = ({ participant, position, specifiedTime }: LeaderboardRow
                 </div>
 
                 <Avatar
-                    initials={participant.user.initials}
+                    initials={participant.user.username.split(' ')[0][0]}
                     idx={position + 1}
                     size="md"
                     isOnline={participant.user.isOnline}

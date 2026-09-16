@@ -14,16 +14,15 @@ export const QUERY_KEYS = {
         USERS_TO_SHOW: (query: string) => ["users_to_show", query]
     },
     PRODUCTIVITY_TIMER: {
-        ALL: ["productivity-timer"] as const,
-        ACTIVE_PRODUCTIVIY_TIMERS: (userId: string) => ["active-productivity-timer", userId] as const,
-        BY_ID: (productivityTimerId: string) => ["productivity-timer", productivityTimerId] as const
-    }
-    ,
+        ACTIVE_PRODUCTIVIY_TIMERS: (userId: string) => ["productivity-timer", "active", userId],
+        EXPIRED_PRODUCTIVITY_TIMERS: (userId: string) => ["productivity-timer", "expired", userId],
+    },
     GROUP_PRODUCTIVITY_TIMER: {
-        USER_GROUP_TIMER: (groupProductivityTimerId: string) => ["group-productivity-timer", groupProductivityTimerId],
-        ACTIVE_GROUP_TIMERS: (userId: string) => ["active-group-timers", userId]
-    }
-    ,
+        ACTIVE_GROUP_TIMERS: (userId: string) => ["group-productivity-timer", "active", userId],
+        EXPIRED_GROUP_TIMERS: (userId: string) => ["group-productivity-timer", "expired", userId],
+        PENDING_INVITES: (userId: string) => ["group-productivity-timer", "pending-invites", userId],
+    },
+
     notificationKeys: {
         all: ["notifications"] as const,
         list: (userId: string) => ["all", "list", userId] as const,

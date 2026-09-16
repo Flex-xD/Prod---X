@@ -639,7 +639,7 @@ const GroupTimerDetail = ({
                             (participant, index) => (
                                 <LeaderboardRow
                                     key={
-                                        participant.user._id
+                                        index
                                     }
                                     participant={participant}
                                     position={index}

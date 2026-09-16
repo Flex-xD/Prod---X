@@ -47,38 +47,12 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
 
 })
 
-// ! to submit productivity for group timer
-type submitProductivityForGroupTimer = {
-    groupTimerId: string,
-    productivityTime: number
-}
 
-export const submitProductivityForGroupTimer = asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.headers["x-user-id"] as string;
-    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Uauthorized access !");
-    // ? MAIN OBJECTIVE : 
+type TSubmitProductivityForGroupTimerBody = {
+    groupTimerId: string;
+    productivityDuration: number; 
+};
 
-    // ! see if I should pass the groupTimerId through query or req.body
-    const { groupTimerId, productivityTime }: submitProductivityForGroupTimer = req.body;
-
-    if (!groupTimerId) {
-        throw ApiError(StatusCodes.NOT_FOUND, "Group Timer not found !");
-    }
-
-    if (!productivityTime) {
-        throw ApiError(StatusCodes.BAD_REQUEST, "Have some productivity time first !");
-    }
-
-    const data = await groupProductivityTimerServices.submitProductivityForGroupTimer(toObjectId(userId), toObjectId(userId));
-
-    return sendResponse(res, {
-        statusCode: StatusCodes.OK,
-        message: "Productivity submitted !",
-        data: null,
-        success: true
-    });
-    // * I have to submit the productivity of individual user for the group-timer and also has to decide ranks based on that 
-})
 
 export const getActiveGroupProductivityTimer = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
@@ -90,7 +64,6 @@ export const getActiveGroupProductivityTimer = asyncHandler(async (req: Request,
         statusCode: StatusCodes.OK,
         message: "Users's Active Group-Timers fetched successfully !",
         success: true,
-        // ? here I am returing the group-timers as well as their length
         data: data
     })
 });
@@ -130,3 +103,57 @@ export const respondToGroupTimerInvitation = asyncHandler(async (req: Request, r
         data: null,
     });
 });
+
+export const submitProductivityForGroupTimer = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
+
+    const { groupTimerId, productivityDuration }: TSubmitProductivityForGroupTimerBody = req.body;
+
+    if (!groupTimerId) throw ApiError(StatusCodes.BAD_REQUEST, "groupTimerId is required !");
+    if (!productivityDuration || productivityDuration <= 0) {
+        throw ApiError(StatusCodes.BAD_REQUEST, "productivityDuration must be a positive number of seconds !");
+    }
+
+    const updated = await groupProductivityTimerServices.submitProductivityForGroupTimer(
+        toObjectId(userId),
+        toObjectId(groupTimerId),
+        productivityDuration
+    );
+
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Productivity submitted !",
+        data: updated,
+    });
+});
+
+export const getExpiredGroupProductivityTimer = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
+
+    const data = await groupProductivityTimerServices.getUsersExpiredGroupProductivityTimers(toObjectId(userId));
+
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        message: "Expired group timers fetched !",
+        success: true,
+        data,
+    });
+});
+
+export const getPendingGroupTimerInvites = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
+
+    const data = await groupProductivityTimerServices.getPendingInvitesForUser(toObjectId(userId));
+
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        message: "Pending invites fetched !",
+        success: true,
+        data,
+    });
+});
+

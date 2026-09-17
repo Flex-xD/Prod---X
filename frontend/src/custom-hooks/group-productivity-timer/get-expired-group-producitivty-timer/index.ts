@@ -6,16 +6,16 @@ import type { ApiResponse } from "@/types/api-response";
 import apiClient from "@/utils/Axios-client";
 import { useQuery } from "@tanstack/react-query";
 
-const useGetActiveGroupProductivityTimers = () => {
+const useGetExpiredGroupProductivityTimers = () => {
     const userId = userAppStore((state) => state.user_id) ?? "";
     return useQuery({
-        queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId),
+        queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.EXPIRED_GROUP_TIMERS(userId),
         queryFn: async () => {
-            const response = await apiClient.get(ENDPOINTS.GROUP_PRODUCTITIVTY_TIMER.GET_USERS_ACTIVE_GROUP_PRODUCTIVITY_TIMERS);
+            const response = await apiClient.get(ENDPOINTS.GROUP_PRODUCTITIVTY_TIMER.GET_EXPIRED_GROUP_PRODUCTIVITY_TIMERS);
             return response.data as ApiResponse<IGroupTimer[]>;
         },
         enabled: !!userId,
     });
 };
 
-export default useGetActiveGroupProductivityTimers;
+export default useGetExpiredGroupProductivityTimers;

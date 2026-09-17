@@ -8,9 +8,7 @@ import { userAppStore } from '@/store';
 
 interface LeaderboardRowProps {
     participant: IGroupParticipant;
-    /** Position in the sorted list (0-based) */
     position: number;
-    /** Total goal minutes for this group timer */
     specifiedTime: IGroupTimer['specifiedTime'];
 }
 

@@ -40,3 +40,5 @@ export const progressPercent = (done: number, total: number): number =>
  */
 export const getAvatarColors = (idx: number): [string, string] =>
     AVATAR_COLORS[idx % AVATAR_COLORS.length];
+
+export const isExpired = (deadline: string): boolean => new Date(deadline).getTime() < Date.now();

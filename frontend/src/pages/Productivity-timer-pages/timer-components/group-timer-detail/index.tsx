@@ -9,6 +9,7 @@ import {
     Pause,
     Send,
     Users,
+    AlertTriangle, // CHANGED: added for the expired-state banner
 } from "lucide-react";
 
 import {
@@ -24,10 +25,14 @@ import {
     formatSeconds,
     formatMinutes,
     progressPercent,
+    isExpired,
 } from "../utils";
 
 import type { IGroupTimer } from "../types";
 import LeaderboardRow from "./leaderboard-row";
+import { userAppStore } from "@/store";
+import { useStopwatch } from "@/custom-hooks/use-stop-watch";
+import useSubmitGroupProductivityTimeMutation from "@/custom-hooks/group-productivity-timer/submit-productivity-timer";
 
 interface GroupTimerDetailProps {
     timer: IGroupTimer;
@@ -38,44 +43,30 @@ const GroupTimerDetail = ({
     timer,
     onBack,
 }: GroupTimerDetailProps) => {
-    const [isRunning, setIsRunning] = useState(false);
+    const currentUserId = userAppStore((state) => state.user_id) ?? "";
 
-    /*
-     * ---------------------------------------------------------
-     * Current user's participant data
-     * ---------------------------------------------------------
-     *
-     * Replace "me" with the actual authenticated user's ID.
-     */
+    const { elapsedSeconds, isRunning, start, pause, reset } = useStopwatch();
+    const [localOffset, setLocalOffset] = useState(0);
+    const { mutateAsync: submitGroupProductivity, isPending } = useSubmitGroupProductivityTimeMutation();
 
-    const currentUserId = "me";
+    const expired = isExpired(timer.deadline);
 
     const myParticipant = timer.participants?.find(
         (participant) =>
             participant.user?._id === currentUserId
     );
 
-    const myCompletedTime =
-        myParticipant?.productivityDone ?? 0;
+    const baseCompletedTime = (myParticipant?.productivityDone ?? 0) + localOffset;
+    const liveCompletedTime = baseCompletedTime + elapsedSeconds;
 
     const myProgress = progressPercent(
-        myCompletedTime,
+        liveCompletedTime,
         timer.specifiedTime
     );
 
-    /*
-     * ---------------------------------------------------------
-     * Sort participants according to productivity
-     * ---------------------------------------------------------
-     */
-
     const sortedParticipants = [
         ...(timer.participants ?? []),
-    ].sort(
-        (a, b) =>
-            (b.productivityDone ?? 0) -
-            (a.productivityDone ?? 0)
-    );
+    ].sort((a, b) => a.rank - b.rank);
 
     const participantCount =
         timer.participants?.length ?? 0;
@@ -83,29 +74,9 @@ const GroupTimerDetail = ({
     const invitedCount =
         timer.invitedUsersId?.length ?? 0;
 
-    /*
-     * ---------------------------------------------------------
-     * Description
-     * ---------------------------------------------------------
-     *
-     * Backend has description, but it may be:
-     *
-     * description: ""
-     * description: null
-     * description: undefined
-     *
-     * In all those cases, show a fallback.
-     */
-
     const description =
         timer.description?.trim() ||
         "No description provided";
-
-    /*
-     * ---------------------------------------------------------
-     * Deadline
-     * ---------------------------------------------------------
-     */
 
     const formattedDeadline = new Date(
         timer.deadline
@@ -115,14 +86,18 @@ const GroupTimerDetail = ({
         year: "numeric",
     });
 
-    /*
-     * ---------------------------------------------------------
-     * Timer state
-     * ---------------------------------------------------------
-     */
-
-    const isPending = timer.status === "pending";
+    const isPendingStatus = timer.status === "pending";
     const isActive = timer.isActive;
+
+    const handleSubmit = async () => {
+        if (elapsedSeconds === 0) return;
+        await submitGroupProductivity({
+            groupTimerId: timer._id,
+            productivityDuration: elapsedSeconds,
+        });
+        setLocalOffset((prev) => prev + elapsedSeconds);
+        reset();
+    };
 
     return (
         <motion.div
@@ -224,7 +199,28 @@ const GroupTimerDetail = ({
                                     Group Timer
                                 </span>
 
-                                {isActive && (
+                                {/*  expired badge takes priority over live/inactive */}
+                                {expired ? (
+                                    <span
+                                        className="
+                                            flex
+                                            items-center
+                                            gap-1.5
+                                            text-xs
+                                            font-bold
+                                            text-rose-300
+                                            bg-rose-400/10
+                                            border
+                                            border-rose-300/20
+                                            px-2
+                                            py-0.5
+                                            rounded-full
+                                        "
+                                    >
+                                        <AlertTriangle className="w-3 h-3" />
+                                        Expired
+                                    </span>
+                                ) : isActive ? (
                                     <span
                                         className="
                                             flex
@@ -247,9 +243,7 @@ const GroupTimerDetail = ({
 
                                         Live
                                     </span>
-                                )}
-
-                                {!isActive && (
+                                ) : (
                                     <span
                                         className="
                                             text-xs
@@ -260,6 +254,7 @@ const GroupTimerDetail = ({
                                         Inactive
                                     </span>
                                 )}
+
                             </div>
 
                             {/* Title */}
@@ -303,10 +298,9 @@ const GroupTimerDetail = ({
                                         rounded-full
                                         text-xs
                                         font-bold
-                                        ${
-                                            isPending
-                                                ? "bg-amber-400/10 text-amber-200"
-                                                : "bg-emerald-400/10 text-emerald-200"
+                                        ${isPendingStatus
+                                            ? "bg-amber-400/10 text-amber-200"
+                                            : "bg-emerald-400/10 text-emerald-200"
                                         }
                                     `}
                                 >
@@ -368,9 +362,7 @@ const GroupTimerDetail = ({
                             label="My Time"
                             value={
                                 myParticipant
-                                    ? formatSeconds(
-                                          myCompletedTime
-                                      )
+                                    ? formatSeconds(liveCompletedTime)
                                     : "0m"
                             }
                         />
@@ -407,6 +399,7 @@ const GroupTimerDetail = ({
                         >
                             <span>Your Progress</span>
 
+                            {/* was myProgress computed off the stale server value; now off the live one */}
                             <span>
                                 {myProgress}%
                             </span>
@@ -423,102 +416,131 @@ const GroupTimerDetail = ({
 
                     {/* ───────────── Actions ───────────── */}
 
-                    <div className="flex gap-3">
-
-                        <MagBtn
-                            onClick={() =>
-                                setIsRunning(
-                                    (running) => !running
-                                )
-                            }
+                    {expired ? (
+                        <div
                             className="
-                                flex-1
-                                py-3.5
-                                rounded-2xl
-                                font-bold
-                                text-sm
                                 flex
                                 items-center
-                                justify-center
                                 gap-2
-                                transition-all
+                                py-3.5
+                                px-4
+                                rounded-2xl
+                                text-sm
+                                font-bold
+                                text-rose-200
                             "
                             style={{
-                                background: isRunning
-                                    ? "rgba(239,68,68,0.15)"
-                                    : "white",
-
-                                color: isRunning
-                                    ? "#fca5a5"
-                                    : "#be123c",
-
-                                border: isRunning
-                                    ? "1px solid rgba(239,68,68,0.3)"
-                                    : "none",
-
-                                boxShadow: isRunning
-                                    ? "none"
-                                    : "0 4px 16px rgba(0,0,0,0.15)",
+                                background: "rgba(239,68,68,0.12)",
+                                border: "1px solid rgba(239,68,68,0.25)",
                             }}
                         >
-                            {isRunning ? (
-                                <>
-                                    <Pause className="w-4 h-4" />
-                                    Pause
-                                </>
-                            ) : (
-                                <>
-                                    <Play className="w-4 h-4" />
-                                    Start Productivity
-                                </>
-                            )}
-                        </MagBtn>
+                            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                            This session's deadline has passed — you can no longer log time here.
+                        </div>
+                    ) : (
+                        <div className="flex gap-3">
 
-                        <AnimatePresence>
-                            {isRunning && (
-                                <motion.button
-                                    initial={{
-                                        opacity: 0,
-                                        scale: 0.7,
-                                    }}
-                                    animate={{
-                                        opacity: 1,
-                                        scale: 1,
-                                    }}
-                                    exit={{
-                                        opacity: 0,
-                                        scale: 0.7,
-                                    }}
-                                    transition={sp}
-                                    whileTap={{
-                                        scale: 0.93,
-                                    }}
-                                    className="
-                                        px-5
-                                        py-3.5
-                                        rounded-2xl
-                                        font-bold
-                                        text-sm
-                                        flex
-                                        items-center
-                                        gap-2
-                                        text-white
-                                    "
-                                    style={{
-                                        background:
-                                            "linear-gradient(135deg,#10b981,#059669)",
+                            <MagBtn
+                                onClick={() =>
+                                    isRunning ? pause() : start()
+                                }
+                                className="
+                                    flex-1
+                                    py-3.5
+                                    rounded-2xl
+                                    font-bold
+                                    text-sm
+                                    flex
+                                    items-center
+                                    justify-center
+                                    gap-2
+                                    transition-all
+                                "
+                                style={{
+                                    background: isRunning
+                                        ? "rgba(239,68,68,0.15)"
+                                        : "white",
 
-                                        boxShadow:
-                                            "0 8px 24px rgba(16,185,129,0.45)",
-                                    }}
-                                >
-                                    <Send className="w-4 h-4" />
-                                    Submit
-                                </motion.button>
-                            )}
-                        </AnimatePresence>
+                                    color: isRunning
+                                        ? "#fca5a5"
+                                        : "#be123c",
 
-                    </div>
+                                    border: isRunning
+                                        ? "1px solid rgba(239,68,68,0.3)"
+                                        : "none",
+
+                                    boxShadow: isRunning
+                                        ? "none"
+                                        : "0 4px 16px rgba(0,0,0,0.15)",
+                                }}
+                            >
+                                {isRunning ? (
+                                    <>
+                                        <Pause className="w-4 h-4" />
+                                        Pause
+                                    </>
+                                ) : (
+                                    <>
+                                        <Play className="w-4 h-4" />
+                                        {/* CHANGED: says "Resume" if there's already unsent elapsed time */}
+                                        {elapsedSeconds > 0 ? "Resume" : "Start Productivity"}
+                                    </>
+                                )}
+                            </MagBtn>
+
+                            <AnimatePresence>
+                                {/*  was gated on `isRunning`, now gated on elapsedSeconds > 0
+                                    so the Submit button stays visible even while paused, as long as
+                                    there's unsent time on the stopwatch. */}
+                                {elapsedSeconds > 0 && (
+                                    <motion.button
+                                        initial={{
+                                            opacity: 0,
+                                            scale: 0.7,
+                                        }}
+                                        animate={{
+                                            opacity: 1,
+                                            scale: 1,
+                                        }}
+                                        exit={{
+                                            opacity: 0,
+                                            scale: 0.7,
+                                        }}
+                                        transition={sp}
+                                        whileTap={{
+                                            scale: 0.93,
+                                        }}
+                                        disabled={isPending}
+                                        onClick={handleSubmit}
+                                        className="
+                                            px-5
+                                            py-3.5
+                                            rounded-2xl
+                                            font-bold
+                                            text-sm
+                                            flex
+                                            items-center
+                                            gap-2
+                                            text-white
+                                            disabled:opacity-60
+                                        "
+                                        style={{
+                                            background:
+                                                "linear-gradient(135deg,#10b981,#059669)",
+
+                                            boxShadow:
+                                                "0 8px 24px rgba(16,185,129,0.45)",
+                                        }}
+                                    >
+                                        <Send className="w-4 h-4" />
+                                        {/*  shows the actual amount being submitted + pending state */}
+                                        {isPending ? "Submitting..." : `Submit ${formatSeconds(elapsedSeconds)}`}
+                                    </motion.button>
+                                )}
+                            </AnimatePresence>
+
+                        </div>
+                    )}
 
                 </div>
             </div>
@@ -635,20 +657,13 @@ const GroupTimerDetail = ({
                 {sortedParticipants.length > 0 ? (
                     <div className="p-4 space-y-2">
 
-                        {sortedParticipants.map(
-                            (participant, index) => (
-                                <LeaderboardRow
-                                    key={
-                                        index
-                                    }
-                                    participant={participant}
-                                    position={index}
-                                    specifiedTime={
-                                        timer.specifiedTime
-                                    }
-                                />
-                            )
-                        )}
+                        {sortedParticipants.map((participant) => (
+                            <LeaderboardRow
+                                key={participant.user._id}
+                                participant={participant}
+                                specifiedTime={timer.specifiedTime}
+                            />
+                        ))}
 
                     </div>
                 ) : (

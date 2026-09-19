@@ -4,11 +4,13 @@ import {
     Users,
     Trophy,
     Calendar,
-    Flame,
     Clock,
     UserPlus,
     Timer,
-} from "lucide-react";
+    Check,
+    X,
+    AlertTriangle,
+} from "lucide-react"; 
 
 import { Avatar, SlimBar } from "../ui";
 import { sp } from "../constants";
@@ -17,23 +19,30 @@ import {
     progressPercent,
     formatMinutes,
     formatSeconds,
+    isExpired, 
 } from "../utils";
 
 import type { IGroupTimer } from "../types";
-
+import { userAppStore } from "@/store"; 
+import useRespondToInvitationMutation from "@/custom-hooks/notification/response-invitation"; 
 interface GroupTimerCardProps {
     timer: IGroupTimer;
     index: number;
     onClick: () => void;
+    isPendingInvite?: boolean; 
 }
 
 const GroupTimerCard = ({
     timer,
     index,
     onClick,
+    isPendingInvite = false, 
 }: GroupTimerCardProps) => {
 
-    const currentUserId = "me";
+    const currentUserId = userAppStore((state) => state.user_id) ?? "";
+    const { mutate: respondToInvitation, isPending: isResponding } =
+        useRespondToInvitationMutation(currentUserId);
+    const expired = isExpired(timer.deadline);
 
     const myParticipant = timer.participants?.find(
         (participant) =>
@@ -85,6 +94,75 @@ const GroupTimerCard = ({
     const description =
         timer.description?.trim() ||
         "No description provided";
+
+    if (isPendingInvite) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.07, ...sp }}
+                className="relative bg-white rounded-3xl overflow-hidden p-5"
+                style={{
+                    boxShadow: "0 2px 16px rgba(0,0,0,0.06)",
+                    border: "1.5px solid #ddd6fe",
+                }}
+            >
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-black text-violet-500 uppercase tracking-widest">
+                        Invitation
+                    </span>
+                </div>
+
+                <h4 className="font-black text-slate-900 text-sm">{timer.title}</h4>
+
+                <p className="text-slate-400 text-xs mt-0.5" title={description}>
+                    {description}
+                </p>
+
+                <p className="text-slate-400 text-xs mt-1.5">
+                    Invited by <span className="font-bold text-slate-600">@{timer.author?.username ?? "someone"}</span>
+                    {" · "}goal {formatMinutes(timer.specifiedTime)}
+                    {" · "}due {formattedDeadline}
+                </p>
+
+                <div className="flex gap-2 mt-4">
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        disabled={isResponding}
+                        onClick={() =>
+                            respondToInvitation({
+                                groupTimerId: timer._id,
+                                notificationId: "", // ? see note below — no notification context here
+                                status: "accepted",
+                            })
+                        }
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-white disabled:opacity-60"
+                        style={{ background: "linear-gradient(135deg,#7C3AED,#4F46E5)" }}
+                    >
+                        <Check className="w-3.5 h-3.5" />
+                        {isResponding ? "..." : "Accept"}
+                    </motion.button>
+
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        disabled={isResponding}
+                        onClick={() =>
+                            respondToInvitation({
+                                groupTimerId: timer._id,
+                                notificationId: "",
+                                status: "declined",
+                            })
+                        }
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-slate-500 disabled:opacity-60"
+                        style={{ background: "white", border: "1.5px solid rgba(0,0,0,0.08)" }}
+                    >
+                        <X className="w-3.5 h-3.5" />
+                        {isResponding ? "..." : "Decline"}
+                    </motion.button>
+                </div>
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div
@@ -171,9 +249,9 @@ const GroupTimerCard = ({
 
                     <div className="flex-1 min-w-0 pt-0.5">
 
-                        {/* Title + Live */}
+                        {/* Title + Live/Expired */}
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
 
                             <h4
                                 className="
@@ -186,7 +264,29 @@ const GroupTimerCard = ({
                                 {timer.title}
                             </h4>
 
-                            {isLive && (
+                            {/* CHANGED: expired badge takes priority over the Live badge */}
+                            {expired ? (
+                                <span
+                                    className="
+                                        flex
+                                        items-center
+                                        gap-1
+                                        text-[10px]
+                                        font-bold
+                                        text-rose-600
+                                        bg-rose-50
+                                        px-1.5
+                                        py-0.5
+                                        rounded-full
+                                        border
+                                        border-rose-100
+                                        flex-shrink-0
+                                    "
+                                >
+                                    <AlertTriangle className="w-2.5 h-2.5" />
+                                    Expired
+                                </span>
+                            ) : isLive && (
                                 <span
                                     className="
                                         flex
@@ -250,10 +350,9 @@ const GroupTimerCard = ({
                                 className={`
                                     text-xs
                                     font-bold
-                                    ${
-                                        timer.status === "pending"
-                                            ? "text-amber-500"
-                                            : "text-emerald-500"
+                                    ${timer.status === "pending"
+                                        ? "text-amber-500"
+                                        : "text-emerald-500"
                                     }
                                 `}
                             >

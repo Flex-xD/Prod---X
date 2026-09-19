@@ -4,6 +4,7 @@ import {
     Clock,
     Target,
     Calendar,
+    AlertTriangle, 
 } from "lucide-react";
 
 import { SlimBar } from "../ui";
@@ -14,6 +15,7 @@ import {
     formatMinutes,
     progressPercent,
     getAvatarColors,
+    isExpired, 
 } from "../utils";
 
 import type { IProductivityTimer } from "../types";
@@ -39,6 +41,7 @@ const IndividualTimerCard = ({
 
     const [c1, c2] = getAvatarColors(index);
 
+    const expired = isExpired(timer.deadline);
 
     const description =
         timer.description?.trim() ||
@@ -104,7 +107,7 @@ const IndividualTimerCard = ({
                 }}
             />
 
-            {timer.isActive && (
+            {timer.isActive && !expired && (
                 <div className="absolute top-4 right-4">
                     <span className="relative flex h-2.5 w-2.5">
                         <span
@@ -163,52 +166,75 @@ const IndividualTimerCard = ({
 
                     <div className="flex-1 min-w-0 pt-0.5">
 
-                        <div className="flex items-center gap-2">
-    <h4
-        className="
-            font-black
-            text-slate-900
-            text-sm
-            truncate
-        "
-    >
-        {timer.title}
-    </h4>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h4
+                                className="
+                                    font-black
+                                    text-slate-900
+                                    text-sm
+                                    truncate
+                                "
+                            >
+                                {timer.title}
+                            </h4>
 
-    {timer.status === "pending" && (
-        <span
-            className="
-                flex-shrink-0
-                text-[10px]
-                font-bold
-                text-amber-600
-                bg-amber-50
-                px-1.5
-                py-0.5
-                rounded-full
-            "
-        >
-            Pending
-        </span>
-    )}
+                            {expired ? (
+                                <span
+                                    className="
+                                        flex-shrink-0
+                                        flex
+                                        items-center
+                                        gap-1
+                                        text-[10px]
+                                        font-bold
+                                        text-rose-600
+                                        bg-rose-50
+                                        px-1.5
+                                        py-0.5
+                                        rounded-full
+                                    "
+                                >
+                                    <AlertTriangle className="w-2.5 h-2.5" />
+                                    Expired
+                                </span>
+                            ) : (
+                                <>
+                                    {timer.status === "pending" && (
+                                        <span
+                                            className="
+                                                flex-shrink-0
+                                                text-[10px]
+                                                font-bold
+                                                text-amber-600
+                                                bg-amber-50
+                                                px-1.5
+                                                py-0.5
+                                                rounded-full
+                                            "
+                                        >
+                                            Pending
+                                        </span>
+                                    )}
 
-    {timer.isActive && (
-        <span
-            className="
-                flex-shrink-0
-                text-[10px]
-                font-bold
-                text-emerald-600
-                bg-emerald-50
-                px-1.5
-                py-0.5
-                rounded-full
-            "
-        >
-            Active
-        </span>
-    )}
-</div>
+                                    {timer.isActive && (
+                                        <span
+                                            className="
+                                                flex-shrink-0
+                                                text-[10px]
+                                                font-bold
+                                                text-emerald-600
+                                                bg-emerald-50
+                                                px-1.5
+                                                py-0.5
+                                                rounded-full
+                                            "
+                                        >
+                                            Active
+                                        </span>
+                                    )}
+                                </>
+                            )}
+                        </div>
 
                         <p
                             className="

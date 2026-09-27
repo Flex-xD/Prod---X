@@ -7,7 +7,7 @@ import ENDPOINTS from "@/constants/api-endpoints";
 
 const useGetNotifications = (userId: string, page: number = 1) => {
     return useQuery<ApiResponse<IGetNotificationsData>>({
-        queryKey:QUERY_KEYS.notificationKeys.all,
+        queryKey: [...QUERY_KEYS.notificationKeys.list(userId), page],
         queryFn: async () => {
             const response = await axiosClient.get(ENDPOINTS.NOTIFICATION_ENDPOINTS.GET_NOTIFICATIONS(userId, page));
             return response.data;

@@ -14,7 +14,7 @@ const sp = { type: "spring", damping: 26, stiffness: 300 } as const;
 
 const InvitationNotificationItem = ({ notification, index }: Props) => {
     const user_id = userAppStore((state) => state.user_id) ?? "";
-    const { mutate: handleResponseMutation, isPending , variables } = useRespondToInvitationMutation(user_id);
+    const { mutate: handleResponseMutation, isPending, variables } = useRespondToInvitationMutation(user_id);
 
     const myResponse = notification.invitationResponses?.find((r) => r.userId === user_id);
     const status: InvitationStatus = myResponse?.status ?? "pending";
@@ -24,7 +24,6 @@ const InvitationNotificationItem = ({ notification, index }: Props) => {
         if (!notification.invitation) return;
         handleResponseMutation({
             groupTimerId: notification.invitation.groupTimerId,
-            notificationId: notification._id,
             status: nextStatus,
         });
     };

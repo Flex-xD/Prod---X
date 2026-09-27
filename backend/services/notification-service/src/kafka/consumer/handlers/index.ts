@@ -76,14 +76,14 @@ export const handlers = {
 
         }
     },
-    "group.timer.invitation.responded": async ({ notificationId, userId, status }: {
-        notificationId: string, userId: string, status: "accepted" | "declined"
-    }) => {
-        logger.info(`Updating invitation response: ${notificationId} -> ${status}`);
-        await notificationServices.updateInvitationResponse(
-            toObjectId(notificationId),
-            toObjectId(userId),
-            status
-        );
-    },
+    "group.timer.invitation.responded": async ({ groupTimerId, userId, status }: {
+    groupTimerId: string, userId: string, status: "accepted" | "declined"
+}) => {
+    logger.info(`Updating invitation response for groupTimer ${groupTimerId} -> ${status}`);
+    await notificationServices.updateInvitationResponseByGroupTimer(
+        toObjectId(groupTimerId),
+        toObjectId(userId),
+        status
+    );
+},
 }

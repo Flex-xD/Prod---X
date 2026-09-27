@@ -16,63 +16,16 @@ export const QUERY_KEYS = {
     PRODUCTIVITY_TIMER: {
         ACTIVE_PRODUCTIVIY_TIMERS: (userId: string) => ["productivity-timer", "active", userId],
         EXPIRED_PRODUCTIVITY_TIMERS: (userId: string) => ["productivity-timer", "expired", userId],
+        COMPLETED_PRODUCTIVITY_TIMERS: (userId: string) => ["productivity-timer", "completed", userId], // CHANGED
     },
     GROUP_PRODUCTIVITY_TIMER: {
         ACTIVE_GROUP_TIMERS: (userId: string) => ["group-productivity-timer", "active", userId],
         EXPIRED_GROUP_TIMERS: (userId: string) => ["group-productivity-timer", "expired", userId],
+        COMPLETED_GROUP_TIMERS: (userId: string) => ["group-productivity-timer", "completed", userId], // CHANGED
         PENDING_INVITES: (userId: string) => ["group-productivity-timer", "pending-invites", userId],
     },
-
     notificationKeys: {
         all: ["notifications"] as const,
-        list: (userId: string) => ["all", "list", userId] as const,
-    },
-
-    // ? The key's below are from my last full-stack project
-    BLOGS: {
-        ALL: ["blogs"] as const,
-        BY_ID: (blogId: string) => ["blogs", "id", blogId] as const,
-        BY_USER: (userId: string) => ["blogs", "user", userId] as const,
-        FEED: (userId: string, page?: number, limit?: number, query?: string) =>
-            query
-                ? ["blogs", "feed", userId, page, limit, query] as const
-                : ["blogs", "feed", userId, page, limit] as const,
-        FOLLOWING: (userId: string, page?: number, limit?: number) =>
-            ["blogs", "following", userId, page, limit] as const,
-        SAVED: (userId: string) => ["blogs", "saved", userId] as const,
-        POPULAR: (page: number, limit: number) => ["blogs", "popular", page, limit],
-    },
-
-    // Comments
-    COMMENTS: {
-        ALL_COMMENTS: ["comments"],
-        USER_COMMENTS: (userId: string) => ["comments", "user", userId],
-        BY_BLOG: (blogId: string) => ["comments", "blog", blogId] as const,
-    },
-
-    SOCIAL: {
-        FOLLOWING_STATUS: (targetUserId: string) => ["social", "following-status", targetUserId] as const,
-        SUGGESTIONS: (userId: string) => ["social", "suggestions", userId] as const, // follow suggestions
-        MUTUALS: (userId: string) => ["social", "mutuals", userId] as const, // mutual followers with a user
-        TRENDING: ["social", "trending"] as const
-    },
-
-    LIKES: {
-        ALL: ["likes"] as const,
-        PERSONAL_LIKES: (userId: string, blogId: string) => ["likes", userId, blogId],
-    }
-    ,
-    CONTENT: {
-        ENHANCEMENT: ["content", "enhancement"] as const, // AI content enhancement
-    },
-    USERS: {
-        SEARCH: (userId: string, page: number, limit: number, query: string) => [
-            "users",
-            "search",
-            userId,
-            page,
-            limit,
-            query,
-        ],
+        list: (userId: string) => ["notifications", "list", userId] as const,
     }
 };

@@ -53,6 +53,7 @@ const IndividualTimerCard = ({
         day: "numeric",
         month: "short",
     });
+    
 
     return (
         <motion.div

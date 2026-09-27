@@ -1,90 +1,81 @@
-import ENDPOINTS from "@/constants/api-endpoints"
-import { QUERY_KEYS } from "@/constants/query-keys"
-import type { IGroupTimer, IGroupTimerForm } from "@/pages/Productivity-timer-pages/timer-components/types"
-import { userAppStore } from "@/store"
-import type { ApiResponse } from "@/types/api-response"
-import apiClient from "@/utils/Axios-client"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { type AxiosError } from "axios"
-import { toast } from "sonner"
-
+import ENDPOINTS from "@/constants/api-endpoints";
+import { QUERY_KEYS } from "@/constants/query-keys";
+import type { IGroupTimer, IGroupTimerForm } from "@/pages/Productivity-timer-pages/timer-components/types";
+import { userAppStore } from "@/store";
+import type { ApiResponse } from "@/types/api-response";
+import apiClient from "@/utils/Axios-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type AxiosError } from "axios";
+import { toast } from "sonner";
 
 const useCreateGroupProductivityTimer = () => {
     const userId = userAppStore((state) => state.user_id) ?? "";
     const queryClient = useQueryClient();
-    return useMutation<ApiResponse<IGroupTimer>, Error | AxiosError, IGroupTimerForm>({
+    const queryKey = QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId);
+
+    return useMutation<
+        ApiResponse<IGroupTimer>,
+        Error | AxiosError,
+        IGroupTimerForm,
+        { previous?: ApiResponse<IGroupTimer[]> }
+    >({
         mutationFn: async (data) => {
-            const response = await apiClient.post(ENDPOINTS.GROUP_PRODUCTITIVTY_TIMER.CREATE_GROUP_PRODUCTIVITY_TIMER, {
-                data
-            });
+            const response = await apiClient.post(ENDPOINTS.GROUP_PRODUCTITIVTY_TIMER.CREATE_GROUP_PRODUCTIVITY_TIMER, { data });
 
-            if (!response.data.data) {
-                return toast.error("Productivity-timer creation failed !");
+            if (!response.data?.data) {
+                throw new Error(response.data?.message || "Group-Timer creation failed !");
             }
-
             return response.data;
         },
-        // onMutate: async (newGroupTimer) => {
-        //     // ? I am optimistically updating the UI here
-        //     await queryClient.cancelQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
 
-        //     const previous =  queryClient.getQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId));
+        onMutate: async (newTimerForm) => {
+            await queryClient.cancelQueries({ queryKey });
+            const previous = queryClient.getQueryData<ApiResponse<IGroupTimer[]>>(queryKey);
 
-        //     // * Fix the type of old below 
-        //     await queryClient.setQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId), (old: IGroupTimer[] | undefined) => [
-        //         ...(old ?? []),
-        //         newGroupTimer
-        //     ])
-        //     return {
-        //         previous
-        //     };
-        // },
-        onSettled: async () => {
+            const optimisticTimer: IGroupTimer = {
+                _id: `temp-${Date.now()}`,
+                title: newTimerForm.title,
+                description: newTimerForm.description,
+                deadline: newTimerForm.deadline,
+                specifiedTime: newTimerForm.specifiedTime,
+                invitedUsersId: newTimerForm.invitedUsersId,
+                status: "pending",
+                isActive: true,
+                participants: [{
+                    user: { _id: userId, username: "You", avatar: "", isOnline: true },
+                    productivityDone: 0, isCurrentlyActive: false, rank: 1,
+                    hasCompleted: false, archived: false,
+                }],
+                author: { _id: userId, username: "You", avatar: "", isOnline: true },
+                isJoined: true,
+            };
 
-            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
+            queryClient.setQueryData(queryKey, (old?: ApiResponse<IGroupTimer[]>) => ({
+                ...(old ?? { statusCode: 200, success: true, message: "", data: [] }),
+                data: [optimisticTimer, ...(old?.data ?? [])],
+            }));
+
+            return { previous };
         },
-        onSuccess: async (data) => {
-            let failedMessage;
-            if (!data?.success) {
-                failedMessage = data?.message || "Group-Timer creation failed !"
-                toast.error(failedMessage);
-                throw Error(failedMessage);
+        onError: (error, _vars, context) => {
+            if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+
+            let message = "Group-productivity-timer creation failed!";
+            if ((error as AxiosError).isAxiosError && (error as AxiosError).response) {
+                const responseData = (error as AxiosError).response?.data as { message?: string };
+                message = responseData?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
             }
-            console.log("Timer created successfully : ", data.data);
-
-
-            return toast.success(data.message);
-        },
-        // * Fix the context type below here 
-        onError: async (error: Error | AxiosError) => {
-            // await queryClient.setQueryData(QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId), context.previous);
-            console.log(
-                "Error while creating group-productivity-timer:",
-                error
-            );
-
-            let message =
-                "Group-productivity-timer creation failed!";
-
-            if (
-                (error as AxiosError).isAxiosError &&
-                (error as AxiosError).response
-            ) {
-
-                const responseData =
-                    (error as AxiosError)
-                        .response?.data as {
-                            message?: string;
-                        };
-
-                message =
-                    responseData?.message ||
-                    message;
-            }
-
             toast.error(message);
-        }
-    })
-}
+        },
+        onSuccess: (data) => {
+            if (data?.success) toast.success(data.message);
+        },
+        onSettled: async () => {
+            await queryClient.invalidateQueries({ queryKey });
+        },
+    });
+};
 
 export default useCreateGroupProductivityTimer;

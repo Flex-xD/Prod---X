@@ -2,15 +2,8 @@ import { StatusCodes } from "http-status-codes";
 import Notification from "../model/Notification";
 import { TypeCreateNotification } from "../schema";
 import { ApiError, getUser, logger } from "../shared";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 
-
-// ! AS OF NOW , I AM CURRENLTY MAKING THIS SERVICE SUITABLE FOR SENDING INVITATION OF THE GROUP-PRODUCTIVITY-TIMER FROM THE ADMIN TO OTHER USERS INVITED AND WILL ADD OR MAKE IT MORE PRONE FOR OTHER THINGS
-
-
-// ? I am able to send notification but user has to accept it for which I will create a invitation accepting API !
-
-// ? In the frontend, in the notifications area there will be the invitation notification and people can accept or reject it (I will call accepting and rejecting api from there on !);
 
 export const notificationServices = {
     // The service layer exist so your business logic can survice without https
@@ -41,7 +34,7 @@ export const notificationServices = {
     getNotificationsForUser: async (userId: mongoose.Types.ObjectId, page = 1, limit = 15) => {
         const filter = { to: userId };
 
-        const [notifications, total, unreadCount] = await Promise.all([
+        const [rawNotifications, total, unreadCount] = await Promise.all([
             Notification.find(filter)
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * limit)
@@ -51,6 +44,15 @@ export const notificationServices = {
             Notification.countDocuments(filter),
             Notification.countDocuments({ to: userId, readBy: { $ne: userId } }),
         ]);
+
+
+        const notifications = rawNotifications.filter((n) => {
+            if (n.notificationType !== "group-timer-request") return true;
+            const myResponse = n.invitationResponses?.find(
+                (r: any) => r.userId.toString() === userId.toString()
+            );
+            return !myResponse || myResponse.status === "pending";
+        });
 
         return {
             notifications,
@@ -74,18 +76,29 @@ export const notificationServices = {
         );
     },
 
-    updateInvitationResponse: async (
-        notificationId: mongoose.Types.ObjectId,
+    updateInvitationResponseByGroupTimer: async (
+        groupTimerId: mongoose.Types.ObjectId,
         userId: mongoose.Types.ObjectId,
         status: "accepted" | "declined"
     ) => {
-        await Notification.updateOne(
-            { _id: notificationId, "invitationResponses.userId": userId },
+        const updateExisting = await Notification.updateOne(
+            {
+                "invitation.groupTimerId": groupTimerId,
+                to: userId,
+                "invitationResponses.userId": userId,
+            },
             { $set: { "invitationResponses.$.status": status } }
         );
-        await Notification.updateOne(
-            { _id: notificationId, "invitationResponses.userId": { $ne: userId } },
-            { $push: { invitationResponses: { userId, status } } }
-        );
+
+        if (updateExisting.matchedCount === 0) {
+            await Notification.updateOne(
+                {
+                    "invitation.groupTimerId": groupTimerId,
+                    to: userId,
+                    "invitationResponses.userId": { $ne: userId },
+                },
+                { $push: { invitationResponses: { userId, status } } }
+            );
+        }
     },
 }

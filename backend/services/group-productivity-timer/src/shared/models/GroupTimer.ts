@@ -5,6 +5,8 @@ export interface IGroupParticipant {
     productivityDone: number;
     isCurrentlyActive: boolean;
     rank: number;
+    hasCompleted: boolean; // ? true once productivityDone reaches specifiedTime (in seconds)
+    archived: boolean;     // ? true once THIS user manually moves it to their Completed tab
 }
 
 export interface IGroupTimer extends mongoose.Document {
@@ -13,18 +15,20 @@ export interface IGroupTimer extends mongoose.Document {
     description: string;
     specifiedTime: number;
     deadline: Date;
-    status: "pending" | "done";
+    status: "pending" | "done"; 
     author: mongoose.Types.ObjectId;
     invitedUsersId: mongoose.Types.ObjectId[];
     participants: IGroupParticipant[];
     isActive: boolean;
 }
 
-export const groupParticipantSchema = new mongoose.Schema<IGroupParticipant>({
+const groupParticipantSchema = new mongoose.Schema<IGroupParticipant>({
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     productivityDone: { type: Number, default: 0 },
     isCurrentlyActive: { type: Boolean, default: false },
     rank: { type: Number, default: 0 },
+    hasCompleted: { type: Boolean, default: false },
+    archived: { type: Boolean, default: false },
 }, { _id: false });
 
 const groupTimerSchema = new mongoose.Schema<IGroupTimer>({

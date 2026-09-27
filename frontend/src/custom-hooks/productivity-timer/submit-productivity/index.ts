@@ -10,12 +10,14 @@ import { toast } from "sonner";
 
 interface ISubmitProductivityPayload {
     productivityTimerId: string;
-    productivityDuration: number;
+    productivityDuration: number; 
 }
 
 const useSubmitProductivityTimeMutation = () => {
     const queryClient = useQueryClient();
     const userId = userAppStore((state) => state.user_id) ?? "";
+    const activeKey = QUERY_KEYS.PRODUCTIVITY_TIMER.ACTIVE_PRODUCTIVIY_TIMERS(userId);
+    const completedKey = QUERY_KEYS.PRODUCTIVITY_TIMER.COMPLETED_PRODUCTIVITY_TIMERS(userId);
 
     return useMutation<ApiResponse<IProductivityTimer>, Error | AxiosError, ISubmitProductivityPayload>({
         mutationFn: async (payload) => {
@@ -28,7 +30,28 @@ const useSubmitProductivityTimeMutation = () => {
                 return;
             }
             toast.success(data.message);
-            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTIVITY_TIMER.ACTIVE_PRODUCTIVIY_TIMERS(userId) });
+
+            const updatedTimer = data.data;
+
+            queryClient.setQueryData(activeKey, (old?: ApiResponse<IProductivityTimer[]>) => {
+                if (!old) return old;
+                if (updatedTimer.status === "done") {
+                    return { ...old, data: old.data.filter((t) => t._id !== updatedTimer._id) };
+                }
+                return { ...old, data: old.data.map((t) => (t._id === updatedTimer._id ? updatedTimer : t)) };
+            });
+
+            if (updatedTimer.status === "done") {
+                queryClient.setQueryData(completedKey, (old?: ApiResponse<IProductivityTimer[]>) => ({
+                    ...(old ?? { statusCode: 200, success: true, message: "", data: [] }),
+                    data: [updatedTimer, ...(old?.data.filter((t) => t._id !== updatedTimer._id) ?? [])],
+                }));
+            }
+
+            await queryClient.invalidateQueries({ queryKey: activeKey });
+            if (updatedTimer.status === "done") {
+                await queryClient.invalidateQueries({ queryKey: completedKey });
+            }
         },
         onError: (error: Error | AxiosError) => {
             let message = "Failed to submit productivity time !";

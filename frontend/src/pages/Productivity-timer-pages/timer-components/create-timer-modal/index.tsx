@@ -8,11 +8,12 @@ import InviteStep from './steps/invite-step';
 import DetailsStep from './steps';
 import useCreateProductivityTimerMutation from '@/custom-hooks/productivity-timer/create-productivity-timer';
 import useCreateGroupProductivityTimer from '@/custom-hooks/group-productivity-timer/create-group-timer';
-import { userAppStore } from '@/store';
 import { usePresence } from '@/context/user-presence-context';
 
 interface CreateTimerModalProps {
     onClose: () => void;
+    canCreateIndividual: boolean;
+    canCreateGroup: boolean;
 }
 
 const EMPTY_FORM: ITimerForm = {
@@ -34,7 +35,7 @@ const STEP_SUBS = (inviteCount: number, timerType: TimerType): Record<ModalStep,
     'fill-details': timerType === 'group' ? 'Group session' : 'Solo session',
 });
 
-const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
+const CreateTimerModal = ({ onClose, canCreateIndividual, canCreateGroup }: CreateTimerModalProps) => {
     const [step, setStep] = useState<ModalStep>('type-select');
     const [timerType, setTimerType] = useState<TimerType>('individual');
     const [invitedUsers, setInvitedUsers] = useState<IUser[]>([]);
@@ -208,7 +209,7 @@ const CreateTimerModal = ({ onClose }: CreateTimerModalProps) => {
                 <div className="p-6 max-h-[68vh] overflow-y-auto">
                     <AnimatePresence mode="wait">
                         {step === 'type-select' && (
-                            <TypeSelectStep key="type-select" onSelect={handleTypeSelect} />
+                            <TypeSelectStep key="type-select" onSelect={handleTypeSelect} canCreateIndividual={false} canCreateGroup={false} />
                         )}
                         {step === 'invite-users' && (
                             <InviteStep

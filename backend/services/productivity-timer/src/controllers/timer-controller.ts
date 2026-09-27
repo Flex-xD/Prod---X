@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import { ApiError, asyncHandler, emitEvent, logger, sendResponse, toObjectId } from "../shared";
 import { StatusCodes } from "http-status-codes";
 import { TcreateProductivityTimerInputForBody } from "../schemas/timer-schema";
@@ -10,113 +10,66 @@ export const createProductivityTimer = asyncHandler(async (req: Request, res: Re
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
     const { title, description, deadline, specifiedTime } = req.body.data;
-    console.log(req.body);
     if (!title || !specifiedTime || !deadline) {
         throw ApiError(StatusCodes.BAD_REQUEST, "Title , specified time and deadline are required !");
     }
 
-    const productivityTimer = await productivityTimerServices.createProductivityTimer(toObjectId(userId), { title, description, deadline, specifiedTime } as TcreateProductivityTimerInputForBody);
+    const productivityTimer = await productivityTimerServices.createProductivityTimer(
+        toObjectId(userId), { title, description, deadline, specifiedTime } as TcreateProductivityTimerInputForBody
+    );
     logger.info(`Sending Response to client ✅ with userid: ${userId}`);
 
-    await emitEvent("productivityTimer.created", {
-        userId: userId,
-        productivityTimerId: productivityTimer._id,
-        productivityTimer
-    })
+    await emitEvent("productivityTimer.created", { userId, productivityTimerId: productivityTimer._id, productivityTimer });
 
     return sendResponse(res, {
-        statusCode: StatusCodes.CREATED,
-        success: true,
-        message: "Productivity Timer created successfully !",
-        data: productivityTimer
-    })
-
+        statusCode: StatusCodes.CREATED, success: true,
+        message: "Productivity Timer created successfully !", data: productivityTimer,
+    });
 });
 
-export type TgetProductivityTimeRequestBody = {
-    productivityDuration: number,
-    productivityTimerId:mongoose.Types.ObjectId
-}
+export type TgetProductivityTimeRequestBody = { productivityDuration: number; productivityTimerId: mongoose.Types.ObjectId };
 
 export const submitProductivityTime = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
-    const { productivityDuration, productivityTimerId } = req.body;
-    
-    if (!productivityTimerId) {
-        throw ApiError(StatusCodes.BAD_GATEWAY, "No productivity-timer id found !");
-    };
-    const objectTimerId = toObjectId(productivityTimerId);
 
-    if (!productivityDuration || productivityDuration == 0) {
-        let message = "No productivity duration found !";
-        if (productivityDuration == 0) {
-            message = "No producitivty done !"
-        }
+    const { productivityDuration, productivityTimerId } = req.body as { productivityDuration: number; productivityTimerId: string };
 
-        throw ApiError(StatusCodes.BAD_GATEWAY, message);
+    if (!productivityTimerId) throw ApiError(StatusCodes.BAD_REQUEST, "No productivity-timer id found !");
+    if (!productivityDuration || productivityDuration <= 0) {
+        throw ApiError(StatusCodes.BAD_REQUEST, "productivityDuration must be a positive number of seconds !");
     }
 
     const updatedProductivityTimer = await productivityTimerServices.submitProductivityTime(toObjectId(userId), {
-        productivityDuration,
-        productivityTimerId: objectTimerId, 
+        productivityDuration, productivityTimerId: toObjectId(productivityTimerId),
     });
 
-    let message = "Productivity Timer's time period updated successfully !";
+    const message = updatedProductivityTimer.status === "done"
+        ? `Congratulations! "${updatedProductivityTimer.title}" is complete 🎉`
+        : "Productivity time submitted !";
 
-    if (updatedProductivityTimer.status = 'done') {
-        message = `Congratulation , Your productivity timer named ${updatedProductivityTimer.title} is completed now !`
-    }
+    await emitEvent("getProductivityTime.durationUpdated", { userId, productivityTimerId, updatedProductivityTimer });
 
-    await emitEvent("getProductivityTime.durationUpdated", {
-        userId,
-        productivityTimerId,
-        updatedProductivityTimer
-    })
-
-    return sendResponse(res, {
-        statusCode: StatusCodes.OK,
-        success: true,
-        message: message,
-        data: updatedProductivityTimer
-    })
-})
+    return sendResponse(res, { statusCode: StatusCodes.OK, success: true, message, data: updatedProductivityTimer });
+});
 
 export const getActiveUsersProductivityTimers = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
-    if (!userId) {
-        throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized Access !");
-    }
-
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized Access !");
     const activeProductivityTimers = await productivityTimerServices.getActiveUsersProductivityTimer(toObjectId(userId));
-
-    if (activeProductivityTimers.length === 0) {
-        return sendResponse(res, {
-            statusCode: StatusCodes.OK,
-            success: true,
-            message: "User has not created any Productivity Timer yet !",
-            data: []
-        })
-    }
-
-    return sendResponse(res, {
-        statusCode: StatusCodes.OK,
-        success: true,
-        message: "Active Productivity Timers fetched successfully",
-        data: activeProductivityTimers
-    })
-})
+    return sendResponse(res, { statusCode: StatusCodes.OK, success: true, message: "Active Productivity Timers fetched successfully", data: activeProductivityTimers });
+});
 
 export const getExpiredProductivityTimers = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized Access !");
-
     const timers = await productivityTimerServices.getExpiredUsersProductivityTimer(toObjectId(userId));
+    return sendResponse(res, { statusCode: StatusCodes.OK, success: true, message: "Expired productivity timers fetched", data: timers });
+});
 
-    return sendResponse(res, {
-        statusCode: StatusCodes.OK,
-        success: true,
-        message: "Expired productivity timers fetched",
-        data: timers,
-    });
+export const getCompletedProductivityTimers = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized Access !");
+    const timers = await productivityTimerServices.getCompletedUsersProductivityTimer(toObjectId(userId));
+    return sendResponse(res, { statusCode: StatusCodes.OK, success: true, message: "Completed productivity timers fetched", data: timers });
 });

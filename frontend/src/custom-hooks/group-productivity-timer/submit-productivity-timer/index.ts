@@ -10,12 +10,13 @@ import { toast } from "sonner";
 
 interface ISubmitGroupProductivityPayload {
     groupTimerId: string;
-    productivityDuration: number; 
+    productivityDuration: number;
 }
 
 const useSubmitGroupProductivityTimeMutation = () => {
     const queryClient = useQueryClient();
     const userId = userAppStore((state) => state.user_id) ?? "";
+    const activeKey = QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId);
 
     return useMutation<ApiResponse<IGroupTimer>, Error | AxiosError, ISubmitGroupProductivityPayload>({
         mutationFn: async (payload) => {
@@ -28,7 +29,14 @@ const useSubmitGroupProductivityTimeMutation = () => {
                 return;
             }
             toast.success(data.message);
-            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
+
+            const updatedTimer = data.data;
+            queryClient.setQueryData(activeKey, (old?: ApiResponse<IGroupTimer[]>) => {
+                if (!old) return old;
+                return { ...old, data: old.data.map((t) => (t._id === updatedTimer._id ? updatedTimer : t)) };
+            });
+
+            await queryClient.invalidateQueries({ queryKey: activeKey });
         },
         onError: (error: Error | AxiosError) => {
             let message = "Failed to submit productivity time !";

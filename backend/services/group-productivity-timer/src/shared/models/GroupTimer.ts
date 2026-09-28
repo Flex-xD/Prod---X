@@ -2,6 +2,7 @@ import mongoose, { Model, Schema } from "mongoose";
 
 export interface IGroupParticipant {
     user: mongoose.Types.ObjectId;
+    username:String ,
     productivityDone: number;
     isCurrentlyActive: boolean;
     rank: number;
@@ -24,6 +25,7 @@ export interface IGroupTimer extends mongoose.Document {
 
 const groupParticipantSchema = new mongoose.Schema<IGroupParticipant>({
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    username:{type:String} ,
     productivityDone: { type: Number, default: 0 },
     isCurrentlyActive: { type: Boolean, default: false },
     rank: { type: Number, default: 0 },

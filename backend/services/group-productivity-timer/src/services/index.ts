@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { ApiError } from "../shared";
+import { ApiError, getUser } from "../shared";
 import mongoose from "mongoose";
 import { TcreateGroupProductivityTimerInputForBody } from "../schemas";
 import GroupTimer, { IGroupParticipant } from "../shared/models/GroupTimer";
@@ -26,6 +26,7 @@ export const groupProductivityTimerServices = {
         userId: mongoose.Types.ObjectId,
         data: TcreateGroupProductivityTimerInputForBody
     ) => {
+        const user = await User.findById(userId).select("username");
         const activeSlots = await countActiveGroupSlots(userId);
         if (activeSlots >= MAX_GROUP_TIMERS) {
             throw ApiError(StatusCodes.BAD_REQUEST, "You already have the maximum number of active group timers !");
@@ -39,6 +40,7 @@ export const groupProductivityTimerServices = {
             participants: [{
                 user: userId, productivityDone: 0, isCurrentlyActive: false,
                 rank: 1, hasCompleted: false, archived: false,
+                username:user?.username
             }],
             specifiedTime: data.specifiedTime,
             author: userId,
@@ -55,6 +57,10 @@ export const groupProductivityTimerServices = {
         userId: mongoose.Types.ObjectId,
         status: "accepted" | "declined"
     ) => {
+        const user = await User.findById(userId).select("username");
+        if (!user) {
+            throw ApiError(StatusCodes.NOT_FOUND , "User not found !");
+        }
         const groupTimer = await GroupTimer.findById(groupTimerId);
         if (!groupTimer) throw ApiError(StatusCodes.NOT_FOUND, "Group timer not found !");
 
@@ -69,6 +75,7 @@ export const groupProductivityTimerServices = {
             groupTimer.participants.push({
                 user: userId, productivityDone: 0, isCurrentlyActive: false,
                 rank: groupTimer.participants.length + 1, hasCompleted: false, archived: false,
+                username:user?.username
             });
             recomputeRanks(groupTimer.participants);
 

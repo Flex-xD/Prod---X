@@ -2,7 +2,7 @@ import { kafka } from "..";
 import { logger } from "../../shared";
 
 const consumer = kafka.consumer({
-    groupId:"analytics-servie"
+    groupId:"dashboard-servie"
 });
 
 export const connectConsumer = async () => {

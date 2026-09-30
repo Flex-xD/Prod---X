@@ -5,6 +5,7 @@ import { TcreateGroupProductivityTimerInputForBody } from "../schemas";
 import GroupTimer, { IGroupParticipant } from "../shared/models/GroupTimer";
 import { emitEvent } from "../kafka/producer";
 import User from "../shared/models/User";
+import { title } from "process";
 
 const MAX_GROUP_TIMERS = 5;
 
@@ -130,9 +131,14 @@ export const groupProductivityTimerServices = {
         await groupTimer.save();
 
         await emitEvent("group.timer.participant.updated", {
+            submittedBy:userId,
             groupTimerId: groupTimer._id.toString(),
             recipients: [groupTimer.author.toString(), ...groupTimer.participants.map((p) => p.user.toString())],
             participants: groupTimer.participants,
+            productivityDuration , 
+            title:groupTimer.title ,  
+            deadline:groupTimer.deadline , 
+            specifiedTime:groupTimer.specifiedTime
         });
 
         return groupTimer;

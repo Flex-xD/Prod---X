@@ -48,7 +48,7 @@ export const submitProductivityTime = asyncHandler(async (req: Request, res: Res
         ? `Congratulations! "${updatedProductivityTimer.title}" is complete 🎉`
         : "Productivity time submitted !";
 
-    await emitEvent("getProductivityTime.durationUpdated", { userId, productivityTimerId, updatedProductivityTimer });
+    await emitEvent("getProductivityTime.durationUpdated", { userId, productivityTimerId, updatedProductivityTimer  , productivityDuration});
 
     return sendResponse(res, { statusCode: StatusCodes.OK, success: true, message, data: updatedProductivityTimer });
 });

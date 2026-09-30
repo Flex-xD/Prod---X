@@ -1,8 +1,6 @@
-import { connectConsumer, events, handleConsumer } from "../../kafka/consumer";
-import { connectProducer } from "../../kafka/producer";
+import { connectConsumer, handleConsumer } from "../../kafka/consumer";
 
 export const initKafka = async () => {
-    await connectProducer()
-    await connectConsumer()
-    await handleConsumer(events);
-}
+    await connectConsumer();
+    await handleConsumer();
+};

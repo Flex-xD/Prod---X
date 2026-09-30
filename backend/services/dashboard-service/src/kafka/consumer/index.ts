@@ -1,44 +1,47 @@
 import { kafka } from "..";
 import { logger } from "../../shared";
+import { handlers } from "./handlers";
 
-const consumer = kafka.consumer({
-    groupId:"dashboard-servie"
-});
+const consumer = kafka.consumer({ groupId: "dashboard-service" });
 
 export const connectConsumer = async () => {
     try {
         await consumer.connect();
-        logger.info("✅ kafka consumer is connected ! --> [ analytic-service ]");
+        logger.info("✅ kafka consumer is connected ! --> [ dashboard-service ]");
     } catch (error) {
-        logger.error("❌ kafka consumer connection failed : --> [ analytic-service ] " , {error});
-        process.exit(1); 
+        logger.error("❌ kafka consumer connection failed --> [ dashboard-service ] : ", { error });
+        process.exit(1);
     }
-}
+};
 
-export const handleConsumer = async (topics:string[]) => {
+const TOPICS = [
+    "task.created",
+    "task.completed",
+    "productivityTimer.created",
+    "getProductivityTime.durationUpdated",
+    "group.timer.created",
+    "group.timer.participant.updated",
+];
+
+export const handleConsumer = async () => {
     try {
-        for (const topic of topics) {
-            await consumer.subscribe({topic:topic , fromBeginning:true});
+        for (const topic of TOPICS) {
+            await consumer.subscribe({ topic, fromBeginning: false });
         }
         await consumer.run({
-            eachMessage:async ({topic , message}) => {
-                console.log(`Message received from topic ${topic}: ${message.value}`);
-                const key = message.key?.toString();
-                const value = message.value?.toString();
-                logger.info("This is the KEY : ", key , "and this is value : " , value , "of topic : " , topic);
-            }
-        })
+            eachMessage: async ({ topic, message }) => {
+                if (!message.value) return;
+                const handler = handlers[topic];
+                if (!handler) return;
+                try {
+                    const parsed = JSON.parse(message.value.toString());
+                    await handler(parsed);
+                } catch (error) {
+                    logger.error(`❌ Failed handling ${topic} event : `, { error });
+                }
+            },
+        });
     } catch (error) {
-        logger.error("❌ kafka consumer connection failed : " , {error});
+        logger.error("❌ Consumer run failed : ", { error });
     }
-}
-
-
-const authEvents:string[] = ["user.register" , "user.login" , "user.google-auth" , "user.logout"];
-const taskEvents:string[] = ["task.created" , "task.completed" , "task.updated" , "task.deleted"];
-const timerEvents:string[] = ["timer.created" , "timer.started" , "timer.paused" , "timer.resumed" , "timer.submitted" , "timer.updated" , "timer.deleted"];
-
-export const events:string[] = [...authEvents , ...taskEvents , ...timerEvents];
-// ? I have to add a disconnect function here 
-
-
+};

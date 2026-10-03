@@ -49,7 +49,7 @@ const LeaderboardRow = ({ participant, specifiedTime }: LeaderboardRowProps) => 
                 </div>
 
                 <Avatar
-                    initials={participant.user.username.split(' ')[0][0]}
+                    initials={participant.username.split(' ')[0][0]}
                     idx={participant.rank}
                     size="md"
                     isOnline={participant.user.isOnline}

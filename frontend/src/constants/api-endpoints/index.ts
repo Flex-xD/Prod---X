@@ -22,7 +22,7 @@ const ENDPOINTS = {
         CREATE_PRODUCTIVITY_TIMER: "/productivity-timer/create-timer",
         GET_ACTIVE_PRODUCTIVITY_TIMERS: "/productivity-timer/active-productivity-timers",
         GET_EXPIRED_PRODUCTIVITY_TIMERS: "/productivity-timer/expired-productivity-timers",
-        GET_COMPLETED_PRODUCTIVITY_TIMERS: "/productivity-timer/completed-productivity-timers", 
+        GET_COMPLETED_PRODUCTIVITY_TIMERS: "/productivity-timer/completed-productivity-timers",
         SUBMIT_PRODUCTIVITY: "/productivity-timer/submit-productivity",
     },
     GROUP_PRODUCTITIVTY_TIMER: {
@@ -32,7 +32,7 @@ const ENDPOINTS = {
         GET_COMPLETED_GROUP_PRODUCTIVITY_TIMERS: "/group-productivity-timer/completed-group-timers",
         GET_PENDING_INVITES: "/group-productivity-timer/pending-invites",
         SUBMIT_GROUP_PRODUCTIVITY: "/group-productivity-timer/submit-productivity",
-        ARCHIVE_GROUP_TIMER: "/group-productivity-timer/archive", 
+        ARCHIVE_GROUP_TIMER: "/group-productivity-timer/archive",
     },
     NOTIFICATION_ENDPOINTS: {
         GET_NOTIFICATIONS: (userId: string, page: number) => `/notification/${userId}?page=${page}&limit=15`,
@@ -41,7 +41,19 @@ const ENDPOINTS = {
     },
     GROUP_TIMER_INVITATION_ENDPOINTS: {
         RESPOND: `/group-productivity-timer/respond-invitation`,
-    }
+    },
+    DASHBOARD_ENDPOINTS: {
+        GET_SUMMARY: "/dashboard/summary",
+        GET_WEEKLY_GRAPH: "/dashboard/weekly-graph",
+        GET_CALENDAR: (weeks: number = 53) => `/dashboard/calendar?weeks=${weeks}`,
+        GET_AI_TIP: "/dashboard/ai-tip",
+        GET_ACTIVITY_MESSAGE: "/dashboard/activity-message",
+    },
+    PROFILE_ENDPOINTS: {
+        GET_PROFILE: "/profile",
+        UPDATE_USERNAME: "/profile/username",
+        UPDATE_AVATAR: "/profile/avatar",
+    },
 
 }
 

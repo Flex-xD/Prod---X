@@ -1,11 +1,8 @@
-
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import taskService from "../services/task-service";
-import { CreateTaskInput, taskSchemaType } from "../schema/task-schema";
-import { ApiError, asyncHandler, emitEvent, getUser, IAuthRequest, sendResponse, toObjectId } from "../shared";
-// import mongoose, { ObjectId } from "mongoose";
-// import Task from "../models/Task";
+import { CreateTaskInput } from "../schema/task-schema";
+import { ApiError, asyncHandler, emitEvent, IAuthRequest, sendResponse, toObjectId } from "../shared";
 
 
 export const createTask = asyncHandler(async (req: IAuthRequest, res: Response) => {

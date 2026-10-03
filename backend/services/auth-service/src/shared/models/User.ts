@@ -14,7 +14,8 @@ export interface IUser extends mongoose.Document {
     provider:"local" | "google" ,
     refreshTokens:mongoose.Types.ObjectId[]
     notifications:mongoose.Types.ObjectId[];
-    isOnline?:boolean
+    isOnline?:boolean;
+    avatarPublicId?: string
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -72,7 +73,8 @@ const userSchema = new mongoose.Schema<IUser>({
     isOnline:{
         type:boolean , 
         
-    }
+    } , 
+    avatarPublicId: { type: String, required: false },
 } , {
     timestamps:true
 })

@@ -1,80 +1,50 @@
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { CheckSquare, Clock, Users, Award, Zap } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import type { IPointsCardProps, IPointsBreakdown } from './points-card-types';
+import { motion } from 'framer-motion';
+import { Clock, Timer, Users, Flame } from 'lucide-react';
+import type { IProfileStats } from '@/types/user';
 
-const iconMap: Record<IPointsBreakdown['iconName'], React.ReactNode> = {
-    CheckSquare: <CheckSquare className="w-3.5 h-3.5" />,
-    Clock: <Clock className="w-3.5 h-3.5" />,
-    Users: <Users className="w-3.5 h-3.5" />,
-};
+interface FocusSummaryCardProps {
+    stats: IProfileStats;
+}
 
-const PointsCard = ({ totalPoints, rank, breakdown }: IPointsCardProps) => {
-    // useInView — bars only animate when the card scrolls into view
-    // This is critical: if bars animated on mount while offscreen, it's wasted paint
-    const ref = useRef<HTMLDivElement>(null);
-    const isInView = useInView(ref, { once: true, margin: '-40px' });
+const formatHours = (seconds: number) => (seconds / 3600).toFixed(1);
+
+const FocusSummaryCard = ({ stats }: FocusSummaryCardProps) => {
+    const totalFocusSeconds = stats.individualTimers.totalFocusSeconds + stats.groupTimers.totalFocusSeconds;
+
+    const items = [
+        { icon: Clock, label: 'Total Focus Time', value: `${formatHours(totalFocusSeconds)}h`, color: '#7C3AED' },
+        { icon: Timer, label: 'Individual Sessions', value: `${stats.individualTimers.completed + stats.individualTimers.active}`, color: '#3B82F6' },
+        { icon: Users, label: 'Group Sessions', value: `${stats.groupTimers.completed + stats.groupTimers.active}`, color: '#EC4899' },
+        { icon: Flame, label: 'Longest Streak', value: `${stats.streakData.longestStreak}d`, color: '#F97316' },
+    ];
 
     return (
-        <div
-            ref={ref}
-            className="fade-up-card bg-white/75 backdrop-blur-sm rounded-3xl border border-white/70 shadow-xl shadow-violet-100/30 p-6"
-            style={{ animationDelay: '0.3s' }}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1, type: 'spring', damping: 28, stiffness: 280 }}
+            className="rounded-3xl bg-white p-6"
+            style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.05)' }}
         >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-amber-50">
-                        <Award className="w-4 h-4 text-amber-600" />
-                    </div>
-                    <div>
-                        <h2 className="text-sm font-semibold text-slate-700 leading-tight">Productivity Points</h2>
-                        <p className="text-[11px] text-slate-400 mt-0.5 tabular-nums">{totalPoints.toLocaleString()} total earned</p>
-                    </div>
-                </div>
-                <Badge className="bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-50 font-semibold text-xs gap-1">
-                    <Zap className="w-3 h-3 fill-amber-500 text-amber-500" />
-                    Rank #{rank}
-                </Badge>
-            </div>
+            <h3 className="font-black text-slate-900 text-base mb-5">Focus Summary</h3>
 
-            {/* Breakdown bars */}
-            <div className="space-y-5">
-                {breakdown.map((item, i) => (
-                    <div key={item.label}>
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                                <span className="text-slate-300">{iconMap[item.iconName]}</span>
-                                {item.label}
-                            </div>
-                            <span className="text-xs font-bold text-slate-700 tabular-nums">
-                                +{item.points.toLocaleString()} pts
-                            </span>
+            <div className="grid grid-cols-2 gap-4">
+                {items.map(({ icon: Icon, label, value, color }, i) => (
+                    <motion.div
+                        key={label}
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15 + i * 0.05 }}
+                        className="p-4 rounded-2xl" style={{ background: '#f8fafc' }}
+                    >
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2" style={{ background: `${color}18` }}>
+                            <Icon className="w-4.5 h-4.5" style={{ color }} />
                         </div>
-
-                        {/* Track */}
-                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                            {/*
-                motion.div only used here — progress bars are THE high-value animation moment.
-                animate is gated on isInView so it only runs when visible in the viewport.
-              */}
-                            <motion.div
-                                className={`h-full ${item.color} rounded-full`}
-                                initial={{ width: 0 }}
-                                animate={{ width: isInView ? `${item.pct}%` : 0 }}
-                                transition={{
-                                    delay: i * 0.12,
-                                    duration: 0.7,
-                                    ease: [0.25, 0.46, 0.45, 0.94], // custom cubic-bezier — feels more physical
-                                }}
-                            />
-                        </div>
-                    </div>
+                        <div className="text-xl font-black text-slate-900">{value}</div>
+                        <div className="text-xs font-semibold text-slate-400 mt-0.5">{label}</div>
+                    </motion.div>
                 ))}
             </div>
-        </div>
+        </motion.div>
     );
 };
 
-export default PointsCard;
+export default FocusSummaryCard;

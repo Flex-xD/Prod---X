@@ -87,7 +87,7 @@ const taskService = {
             }
         })
 
-        await emitEvent("task.status.updated", {
+        await emitEvent("task.completed", {
             taskId
         });
 
@@ -111,7 +111,7 @@ const taskService = {
             }
         })
 
-        await emitEvent("task.status.updated", {
+        await emitEvent("task.incompleted", {
             taskId
         });
 

@@ -48,7 +48,8 @@ export const respondToGroupTimerInvitation = asyncHandler(async (req: Request, r
 
     await groupProductivityTimerServices.respondToInvitation(toObjectId(groupTimerId), toObjectId(userId), status);
 
-    await emitEvent("group.timer.invitation.responded", {
+    // ? changes group.timer.invitation.responded -- > group.timer.participant.updated
+    await emitEvent("group.timer.participant.updated", {
         groupTimerId,
         userId,
         status,

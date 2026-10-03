@@ -209,7 +209,7 @@ const CreateTimerModal = ({ onClose, canCreateIndividual, canCreateGroup }: Crea
                 <div className="p-6 max-h-[68vh] overflow-y-auto">
                     <AnimatePresence mode="wait">
                         {step === 'type-select' && (
-                            <TypeSelectStep key="type-select" onSelect={handleTypeSelect} canCreateIndividual={false} canCreateGroup={false} />
+                            <TypeSelectStep key="type-select" onSelect={handleTypeSelect} canCreateIndividual={canCreateIndividual} canCreateGroup={canCreateGroup} />
                         )}
                         {step === 'invite-users' && (
                             <InviteStep

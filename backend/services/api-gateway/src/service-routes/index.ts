@@ -3,7 +3,9 @@ export const USER_ROUTES = [
     "/task",
     "/group-productivity-timer", 
     "/productivity-timer" , 
-    "/notification"
+    "/notification" ,
+    "/dashboard" , 
+    "/profile" ,
 ];
 
 export const INTERNAL_ROUTES = [

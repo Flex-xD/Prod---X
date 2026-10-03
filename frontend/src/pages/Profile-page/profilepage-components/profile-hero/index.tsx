@@ -1,237 +1,132 @@
-import { useState, useRef } from 'react';
-import { AnimatePresence, motion, type Variants } from 'framer-motion';
-import { Camera, Pencil, Check, X, Users, Zap, LogOut } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import type { IProfileHeroProps, IProfileEditPayload } from './profile-hero-types';
+import { useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Camera, Check, X, Pencil, Loader2 } from 'lucide-react';
+import useUpdateAvatarMutation from '@/custom-hooks/profile/update-avatar';
+import type { IUser } from '@/pages/Productivity-timer-pages/timer-components/types';
+import useUpdateUsernameMutation from '@/custom-hooks/profile/update-user-name';
 
-// Framer variants defined OUTSIDE the component — stable references, no recreation on render
-const swapVariants: Variants = {
-    initial: { opacity: 0, y: 6 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.18, ease: 'easeOut' } },
-    exit: { opacity: 0, y: -6, transition: { duration: 0.12, ease: 'easeIn' } },
-};
+interface ProfileHeroProps {
+    user: IUser;
+    currentStreak: number;
+}
 
-const overlayVariants: Variants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.15 } },
-    exit: { opacity: 0, transition: { duration: 0.12 } },
-};
+const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
 
-const ProfileHero = ({
-    username,
-    email,
-    avatarUrl,
-    friendsCount,
-    productivityPoints,
-    onSave,
-    onLogout , 
-    isLogoutPending
-}: IProfileHeroProps) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [editUsername, setEditUsername] = useState(username);
-    const [editAvatarPreview, setEditAvatarPreview] = useState('');
-    const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
+const ProfileHero = ({ user, currentStreak }: ProfileHeroProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [draftUsername, setDraftUsername] = useState(user.username);
 
-    const displayAvatar = isEditing && editAvatarPreview ? editAvatarPreview : avatarUrl;
+    const { mutate: updateAvatar, isPending: isUploadingAvatar } = useUpdateAvatarMutation();
+    const { mutate: updateUsername, isPending: isSavingUsername } = useUpdateUsernameMutation();
 
-    const handleStartEdit = () => {
-        setEditUsername(username);
-        setEditAvatarPreview('');
-        setEditAvatarFile(null);
-        setIsEditing(true);
-    };
+    const initials = user.username.slice(0, 2).toUpperCase();
 
-    const handleSave = () => {
-
-        const payload: IProfileEditPayload = {
-            username: editUsername.trim() || username,
-            avatarFile: editAvatarFile,
-            avatarPreview: editAvatarPreview,
-        };
-        onSave(payload);
-        setIsEditing(false);
-    };
-
-    const handleLogout = () => {
-        console.log("Logging out the current user !");
-        onLogout();
-    }
-
-    const handleCancel = () => {
-        setEditAvatarPreview('');
-        setEditAvatarFile(null);
-        setIsEditing(false);
-    };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        setEditAvatarFile(file);
-        const reader = new FileReader();
-        reader.onload = (ev) => setEditAvatarPreview(ev.target?.result as string);
-        reader.readAsDataURL(file);
+        if (file.size > 5 * 1024 * 1024) return; // 5MB guard, matches backend limit
+        updateAvatar(file);
+        e.target.value = "";
+    };
+
+    const handleSaveUsername = () => {
+        const trimmed = draftUsername.trim();
+        if (!trimmed || trimmed === user.username) {
+            setIsEditingName(false);
+            return;
+        }
+        updateUsername({ username: trimmed }, { onSuccess: () => setIsEditingName(false) });
     };
 
     return (
-        // Card entrance handled by parent CSS — no motion.div wrapper needed here
-        <div className="fade-up-card bg-white/75 backdrop-blur-md rounded-3xl border border-white/70 shadow-xl shadow-violet-100/30 overflow-hidden">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ...sp }}
+            className="relative rounded-3xl overflow-hidden text-white"
+            style={{ background: 'linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)', boxShadow: '0 24px 72px rgba(79,46,220,0.4)' }}
+        >
+            <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.22), transparent)' }} />
+            <div className="absolute bottom-0 -left-12 w-56 h-56 rounded-full" style={{ background: 'radial-gradient(circle, rgba(192,132,252,0.16), transparent)' }} />
 
-            {/* Banner — pure CSS, no JS needed */}
-            <div className="h-32 bg-linear-to-r from-violet-500 via-purple-500 to-indigo-500 relative overflow-hidden">
-                {/* Subtle pattern overlay */}
-                <div className="absolute inset-0 opacity-[0.07]"
-                    style={{
-                        backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-                        backgroundSize: '24px 24px',
-                    }}
-                />
-                {/* Soft orb for depth */}
-                <div className="absolute -top-10 -right-10 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
-                <div className="absolute -bottom-8 left-16 w-32 h-32 bg-indigo-300/20 rounded-full blur-xl" />
-            </div>
-
-            <div className="px-6 pb-6">
-                {/* Avatar + action row */}
-                <div className="flex items-end justify-between -mt-12 mb-5">
-                    <div className="relative">
-                        {/* Avatar — CSS transition only, no motion wrapper */}
-                        <div className="transition-transform duration-200 ease-out hover:scale-[1.03]">
-                            <Avatar className="w-24 h-24 ring-4 ring-white shadow-lg shadow-violet-100/50">
-                                <AvatarImage src={displayAvatar} />
-                                <AvatarFallback className="bg-linear-to-br from-violet-500 to-purple-600 text-white text-2xl font-bold select-none">
-                                    {username.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-                        </div>
-
-                        {/* Camera overlay */}
-                        <AnimatePresence>
-                            {isEditing && (
-                                <motion.button
-                                    variants={overlayVariants}
-                                    initial="initial"
-                                    animate="animate"
-                                    exit="exit"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-full cursor-pointer"
-                                >
-                                    <Camera className="w-5 h-5 text-white" />
-                                    <span className="text-white text-[9px] mt-0.5 font-medium tracking-wide">CHANGE</span>
-                                </motion.button>
-                            )}
-                        </AnimatePresence>
-
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleFileChange}
-                        />
+            <div className="relative z-10 p-8 flex flex-col sm:flex-row items-center sm:items-end gap-6">
+                {/* Avatar */}
+                <div className="relative flex-shrink-0">
+                    <div
+                        className="w-28 h-28 rounded-3xl flex items-center justify-center text-3xl font-black text-white overflow-hidden"
+                        style={{ background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', boxShadow: '0 12px 32px rgba(124,58,237,0.45)' }}
+                    >
+                        {user.avatar ? (
+                            <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+                        ) : (
+                            initials
+                        )}
                     </div>
 
-                    {/* Edit / Save+Cancel — AnimatePresence swap */}
-                    <AnimatePresence mode="wait">
-                        {!isEditing ? (
-                            <motion.div key="edit" variants={swapVariants} initial="initial" animate="animate" exit="exit">
-                                <Button
-                                    onClick={handleStartEdit}
-                                    variant="outline"
-                                    size="sm"
-                                    className="rounded-xl border-violet-200 text-violet-700 hover:bg-violet-50 hover:border-violet-300 gap-1.5 font-medium text-xs transition-all duration-150"
-                                >
-                                    <Pencil className="w-3 h-3" />
-                                    Edit Profile
-                                </Button>
-                                <Button
-                                    onClick={handleLogout}
-                                    variant="outline"
-                                    size="sm"
-                                    className="rounded-xl border-violet-200 text-violet-700 hover:bg-violet-50 hover:border-violet-300 gap-1.5 font-medium text-xs transition-all duration-150"
-                                >
-                                    <LogOut className="w-3 h-3" />
-                                    Logout
-                                </Button>
-                            </motion.div>
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingAvatar}
+                        className="absolute -bottom-2 -right-2 w-9 h-9 rounded-2xl flex items-center justify-center disabled:opacity-70"
+                        style={{ background: 'white', boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }}
+                    >
+                        {isUploadingAvatar ? (
+                            <Loader2 className="w-4 h-4 text-violet-600 animate-spin" />
                         ) : (
-                            <motion.div key="actions" variants={swapVariants} initial="initial" animate="animate" exit="exit" className="flex gap-2">
-                                <Button
-                                    onClick={handleCancel}
-                                    variant="outline"
-                                    size="sm"
-                                    className="rounded-xl border-slate-200 text-slate-500 hover:bg-slate-50 gap-1.5 text-xs transition-all duration-150"
-                                >
-                                    <X className="w-3 h-3" />
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={handleSave}
-                                    size="sm"
-                                    className="rounded-xl bg-linear-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white gap-1.5 shadow-md shadow-violet-200/60 text-xs transition-all duration-150"
-                                >
-                                    <Check className="w-3 h-3" />
-                                    Save
-                                </Button>
-                            </motion.div>
+                            <Camera className="w-4 h-4 text-violet-600" />
                         )}
-                    </AnimatePresence>
+                    </motion.button>
+
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
                 </div>
 
-                {/* Username + email */}
-                <div className="space-y-1">
-                    <AnimatePresence mode="wait">
-                        {isEditing ? (
-                            <motion.div
-                                key="input"
-                                variants={swapVariants}
-                                initial="initial"
-                                animate="animate"
-                                exit="exit"
-                            >
-                                <Input
-                                    value={editUsername}
-                                    onChange={(e) => setEditUsername(e.target.value)}
-                                    className="text-lg font-bold text-slate-800 border-violet-200 focus-visible:ring-violet-400/50 rounded-xl max-w-xs bg-white/90 h-9"
-                                    placeholder="username"
-                                    autoFocus
-                                />
-                            </motion.div>
-                        ) : (
-                            <motion.h1
-                                key="display"
-                                variants={swapVariants}
-                                initial="initial"
-                                animate="animate"
-                                exit="exit"
-                                className="text-2xl font-bold text-slate-800 tracking-tight"
-                            >
-                                @{username}
-                            </motion.h1>
+                {/* Identity */}
+                <div className="flex-1 min-w-0 text-center sm:text-left">
+                    {isEditingName ? (
+                        <div className="flex items-center gap-2 justify-center sm:justify-start">
+                            <input
+                                autoFocus
+                                value={draftUsername}
+                                onChange={(e) => setDraftUsername(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSaveUsername()}
+                                className="text-2xl font-black bg-white/10 rounded-xl px-3 py-1.5 outline-none border border-white/20 focus:border-violet-300 text-white max-w-[220px]"
+                                maxLength={24}
+                            />
+                            <motion.button whileTap={{ scale: 0.9 }} onClick={handleSaveUsername} disabled={isSavingUsername}
+                                className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.25)' }}>
+                                {isSavingUsername ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 text-emerald-300" />}
+                            </motion.button>
+                            <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setDraftUsername(user.username); setIsEditingName(false); }}
+                                className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.2)' }}>
+                                <X className="w-4 h-4 text-rose-300" />
+                            </motion.button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 justify-center sm:justify-start">
+                            <h1 className="text-2xl font-black text-white">{user.username}</h1>
+                            <motion.button whileTap={{ scale: 0.9 }} onClick={() => setIsEditingName(true)}
+                                className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                                <Pencil className="w-3.5 h-3.5 text-indigo-300" />
+                            </motion.button>
+                        </div>
+                    )}
+
+                    <p className="text-indigo-300 text-sm font-medium mt-1">{user.email}</p>
+
+                    <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
+                        <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.12)' }}>
+                            {user.provider === 'google' ? 'Google Account' : 'ProdX Account'}
+                        </span>
+                        {currentStreak > 0 && (
+                            <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: 'rgba(249,115,22,0.2)', color: '#fdba74' }}>
+                                🔥 {currentStreak} day streak
+                            </span>
                         )}
-                    </AnimatePresence>
-
-                    <p className="text-slate-400 text-sm">{email}</p>
-
-                    {/* Pills — pure CSS hover */}
-                    <div className="flex items-center gap-2.5 pt-3 flex-wrap">
-                        <div className="flex items-center gap-1.5 text-sm text-slate-600 bg-slate-50 hover:bg-violet-50 hover:text-violet-700 transition-colors duration-150 cursor-pointer px-3 py-1.5 rounded-full border border-slate-200 hover:border-violet-200">
-                            <Users className="w-3.5 h-3.5" />
-                            <span className="font-semibold">{friendsCount}</span>
-                            <span className="text-slate-400 text-xs">friends</span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 text-sm bg-amber-50 border border-amber-200/80 text-amber-700 px-3 py-1.5 rounded-full cursor-default">
-                            <Zap className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                            <span className="font-bold">{productivityPoints.toLocaleString()}</span>
-                            <span className="text-amber-500/70 text-xs font-medium">pts</span>
-                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

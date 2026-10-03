@@ -8,6 +8,7 @@ import cors from "cors";
 import { initKafka } from "./utils/init-kafka";
 import { logger } from "./shared/utils/winston-logger";
 import cookieParser from "cookie-parser";
+import profileRouter from "./routes/profile-routes";
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
-
+app.use("/api/v1/profile", profileRouter);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user" , userRoutes);
 

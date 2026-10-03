@@ -23,7 +23,16 @@ app.use(cors({
 }));
 
 app.use(cookieParser());
-app.use(express.json());
+
+// CHANGED: express.json() now skips multipart requests entirely, so the raw body stream
+// (and its multipart boundary) survives intact for the proxy handler to forward downstream.
+// Every other content type (application/json, no body, etc.) is handled exactly as before.
+app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.is("multipart/form-data")) {
+        return next();
+    }
+    return express.json()(req, res, next);
+});
 
 interface IAuthRequest extends Request {
     userId?: mongoose.Types.ObjectId
@@ -54,8 +63,10 @@ const services = {
     "/user": "http://localhost:5000/api/v1",
     "/auth": "http://localhost:5000/api/v1",
     "/group-productivity-timer": "http://localhost:9000/api/v1",
-    "/productivity-timer":"http://localhost:6000/api/v1" ,
+    "/productivity-timer": "http://localhost:6000/api/v1",
     "/notification": "http://localhost:10000/api/v1",
+    "/dashboard": "http://localhost:7000/api/v1",
+    "/profile": "http://localhost:5000/api/v1", // CHANGED: new — profile lives inside auth-service
 } as Record<string, string>;
 
 
@@ -80,21 +91,32 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
     const forwardUrl = targetUrl + urlPath;
     console.log("forward URL :", forwardUrl);
 
-    // ! there is this problem where the api-gateway is not able to recognize if it is a valid api end-point even if it matches the target service
+    // CHANGED: detect multipart requests so we know to forward the raw stream instead of
+    // the (now correctly-skipped, therefore empty/undefined) parsed JSON body.
+    const isMultipart = req.is("multipart/form-data");
 
-    try {        
-
+    try {
         const response = await axios({
             method: req.method,
             url: forwardUrl,
-            data: req.body,
-            params:req.query ,
+            // CHANGED: for multipart, `req` itself (the raw http.IncomingMessage) is passed
+            // as the body — axios streams it through as-is in Node, preserving the original
+            // multipart boundary and binary content. For everything else, behavior is unchanged.
+            data: isMultipart ? req : req.body,
+            params: req.query,
             headers: {
                 authorization: req.headers.authorization,
                 "x-user-id": userId?.toString(),
                 "x-service-key": req.headers["x-service-key"],
-                cookie: req.headers.cookie
+                cookie: req.headers.cookie,
+                // CHANGED: forward the original content-type (including the multipart boundary
+                // string) so the downstream service's multer can correctly parse it.
+                ...(isMultipart ? { "content-type": req.headers["content-type"] } : {}),
             },
+            // CHANGED: image uploads can exceed axios's conservative defaults — remove the cap
+            // rather than have large-but-valid avatar uploads silently truncate or error.
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
             validateStatus: () => true
         });
 

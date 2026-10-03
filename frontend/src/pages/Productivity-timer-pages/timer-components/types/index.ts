@@ -3,6 +3,8 @@ export type ModalStep = 'type-select' | 'invite-users' | 'fill-details';
 export type ViewMode = 'dashboard' | 'individual-detail' | 'group-detail';
 
 export interface IUser {
+    provider: string;
+    email: ReactNode;
     _id: string;
     username: string;
     avatar: string;
@@ -25,6 +27,7 @@ export interface IProductivityTimer {
 
 export interface IGroupParticipant {
     user: IUser;
+    username:String
     productivityDone: number;
     isCurrentlyActive: boolean;
     rank: number;

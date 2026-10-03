@@ -27,5 +27,15 @@ export const QUERY_KEYS = {
     notificationKeys: {
         all: ["notifications"] as const,
         list: (userId: string) => ["notifications", "list", userId] as const,
-    }
+    },
+    DASHBOARD: {
+        SUMMARY: (userId: string) => ["dashboard", "summary", userId],
+        WEEKLY_GRAPH: (userId: string) => ["dashboard", "weekly-graph", userId],
+        CALENDAR: (userId: string) => ["dashboard", "calendar", userId],
+        AI_TIP: (userId: string) => ["dashboard", "ai-tip", userId],
+        ACTIVITY_MESSAGE: (userId: string) => ["dashboard", "activity-message", userId],
+    }, 
+    PROFILE_PAGE: {
+    DATA: (userId: string) => ["profile-page", userId],
+},
 };

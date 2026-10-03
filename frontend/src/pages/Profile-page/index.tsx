@@ -1,77 +1,35 @@
-import { useState, useMemo } from 'react';
+import { Loader2 } from 'lucide-react';
+import DashboardHeader from '@/pages/Dashboard/dashboard-components/dashboard-header';
 import ProfileHero from './profilepage-components/profile-hero';
-import CollectionsRow from './profilepage-components/collections-row';
-import PointsCard from './profilepage-components/points-card';
+import FocusSummaryCard from './profilepage-components/points-card';
+import CategoryBreakdown from './profilepage-components/collections-row';
 import ActivityCalendar from './profilepage-components/activity-calendar';
-import {
-    collectionsData,
-    pointsBreakdown,
-    generateYearCalendarData,
-} from './profilepage-components/profile-dummy-data';
-import type { IProfileEditPayload } from './profilepage-components/profile-hero/profile-hero-types';
-import { useLogoutMutation } from '@/custom-hooks/auth-mutation/logout';
-
-const DUMMY_USER = {
-    username: 'alex_prodx',
-    email: 'alex@prodx.dev',
-    avatarUrl: '',
-    friendsCount: 24,
-    productivityPoints: 4820,
-    rank: 12,
-    totalHours: 287,
-};
+import useGetProfileData from '@/custom-hooks/profile/get-profile-data';
+import useGetCalendar from '@/custom-hooks/dashboard/get-calender';
 
 const ProfilePage = () => {
-    const [user, setUser] = useState(DUMMY_USER);
+    const { data: profile, isLoading } = useGetProfileData();
+    const { data: calendar } = useGetCalendar();
 
-    const {mutateAsync:logout , isPending:isLogoutPending} = useLogoutMutation();
-    const calendarData = useMemo(() => generateYearCalendarData(), []);
+    if (isLoading || !profile?.data) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
+            </div>
+        );
+    }
 
-    const handleProfileSave = (payload: IProfileEditPayload) => {
-        // TODO: wire up your updateProfile + uploadAvatar mutations here
-        setUser((prev) => ({
-            ...prev,
-            username: payload.username,
-            avatarUrl: payload.avatarPreview || prev.avatarUrl,
-        }));
-    };
+    const { user, stats } = profile.data;
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-50 via-violet-50/40 to-blue-50/40">
+        <div className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">
+            <DashboardHeader />
 
-            {/* Background decoration — pointer-events-none so it never blocks clicks */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden>
-                <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-violet-100/50 rounded-full blur-3xl" />
-                <div className="absolute top-1/2 -left-40 w-80 h-80 bg-blue-100/40 rounded-full blur-3xl" />
-                <div className="absolute -bottom-40 right-1/3 w-96 h-96 bg-purple-100/30 rounded-full blur-3xl" />
-            </div>
-
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-5">
-
-                <ProfileHero
-                    username={user.username}
-                    email={user.email}
-                    avatarUrl={user.avatarUrl}
-                    friendsCount={user.friendsCount}
-                    productivityPoints={user.productivityPoints}
-                    onSave={handleProfileSave}
-                    onLogout={logout}
-                    isLogoutPending={isLogoutPending}
-                />
-
-                <CollectionsRow collections={collectionsData} />
-
-                <PointsCard
-                    totalPoints={user.productivityPoints}
-                    rank={user.rank}
-                    breakdown={pointsBreakdown}
-                />
-
-                <ActivityCalendar
-                    data={calendarData}
-                    totalHours={user.totalHours}
-                />
-
+            <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+                <ProfileHero user={user} currentStreak={stats.streakData.currentStreak} />
+                <FocusSummaryCard stats={stats} />
+                <CategoryBreakdown stats={stats} />
+                <ActivityCalendar calendarData={calendar?.data ?? []} />
             </div>
         </div>
     );

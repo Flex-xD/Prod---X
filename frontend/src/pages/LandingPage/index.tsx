@@ -4,22 +4,19 @@ import HeroSection from "./landingPage-components/HeroSection";
 import LandingNavbar from "./landingPage-components/Navbar";
 import Testimonials from "./landingPage-components/Testimonial";
 import WorkingSection from "./landingPage-components/WorkingSection";
+import StorySection from "./landingPage-components/Story-section";
+import CtaSection from "./landingPage-components/CTA-Section";
 
 const ProdXLandingPage = () => {
-
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
-            {/* Navbar */}
+        <div className="bg-white">
             <LandingNavbar />
-            {/* Hero Section */}
             <HeroSection />
-            {/*  Features Section */}
+            <StorySection />
             <FeaturesSection />
-            {/* How It Works Section */}
             <WorkingSection />
-            {/* Testimonials Section */}
             <Testimonials />
-            {/* Footer */}
+            <CtaSection />
             <Footer />
         </div>
     );

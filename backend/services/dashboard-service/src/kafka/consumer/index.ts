@@ -17,6 +17,7 @@ export const connectConsumer = async () => {
 const TOPICS = [
     "task.created",
     "task.completed",
+    "task.incompleted",
     "productivityTimer.created",
     "getProductivityTime.durationUpdated",
     "group.timer.created",

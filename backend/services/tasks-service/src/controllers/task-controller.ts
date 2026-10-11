@@ -49,39 +49,34 @@ export const getTodaysTask = asyncHandler(async (req: IAuthRequest, res: Respons
     })
 
 });
-
 export const markTaskDone = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
-    if (!userId) { throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !"); };
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
     const { taskId } = req.body;
-
-    const taskToBeMarkDone = await taskService.markTaskDone(toObjectId(taskId));
+    const task = await taskService.markTaskDone(toObjectId(userId), toObjectId(taskId));
 
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
-        data: taskToBeMarkDone,
+        data: task,
         success: true,
-        message: "Task's status marked done"
-    })
-})
+        message: "Task's status marked done",
+    });
+});
 
 export const markTaskPending = asyncHandler(async (req: Request, res: Response) => {
-
     const userId = req.headers["x-user-id"] as string;
-    if (!userId) { throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !"); };
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
 
     const { taskId } = req.body;
-
-    const taskToBeMarkPending = await taskService.markTaskPending(toObjectId(taskId));
+    const task = await taskService.markTaskPending(toObjectId(userId), toObjectId(taskId));
 
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
-        data: taskToBeMarkPending,
+        data: task,
         success: true,
-        message: "Task's status marked pe nding"
-    }); 
-})
-
+        message: "Task's status marked pending",
+    });
+});
 // Each microservice should have it's kafka instance with the same brokers across all along , with independent producers and consumers
 // Fix this

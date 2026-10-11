@@ -1,10 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import User, { IUser } from "../../models/User";
 import { ApiError } from "../api-error";
-import { Types } from "mongoose";
+
+import { Request } from "express";
 
 
-export const getUser = async (userId: Types.ObjectId): Promise<IUser> => {
-    const user = await User.findById(userId).select("_id username avatar");
-    return user as IUser;
-}
+const getUserIdOrThrow = (req: Request): string => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
+    return userId;
+};

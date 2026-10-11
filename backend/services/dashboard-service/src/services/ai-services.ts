@@ -5,6 +5,7 @@ import { logger } from "../shared";
 import mongoose from "mongoose";
 import { FALLBACK_TIPS, systemPrompt } from "../constants";
 
+// ? PUT THE URL INTO ENV
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct:free";
 

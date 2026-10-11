@@ -1,200 +1,147 @@
 import { motion } from 'framer-motion';
+import { Flame, ArrowRight, Users, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Sparkles, Target, TrendingUp, Clock, Award, Zap, BookOpen, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import StreakPreview from '../StreakPreview';
+
+const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
 
 function HeroSection() {
     return (
-        <section className="pt-32 pb-20 overflow-hidden relative">
-            {/* BACKGROUND ELEMENTS */}
-            <div className="absolute inset-0 bg-linear-to-br from-white via-blue-50/50 to-purple-50/30"></div>
-            <div className="absolute top-20 right-20 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
-
-            <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative">
-                {/* LEFT CONTENT */}
+        <section
+            className="pt-36 pb-24 relative overflow-hidden"
+            style={{ background: 'linear-gradient(160deg,#f8f7ff 0%,#fdf4ff 35%,#f0f9ff 65%,#fafafa 100%)' }}
+        >
+            <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <motion.div
-                    initial={{ opacity: 0, y: 40 }}
+                    initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, ease: "easeOut" }}
-                    className="space-y-8"
+                    transition={{ duration: 0.6, ...sp }}
                 >
-                    <Badge className="px-4 py-2 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200 font-inter">
-                        🎓 Perfect for Students & Professionals
-                    </Badge>
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1, ...sp }}
+                        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-6"
+                        style={{ background: '#f5f3ff', border: '1px solid #ddd6fe' }}
+                    >
+                        <Flame className="w-3.5 h-3.5 text-violet-500" />
+                        <span className="text-xs font-bold text-violet-600">Built around one idea: don't break the chain</span>
+                    </motion.div>
 
-                    <h1 className="text-5xl lg:text-6xl font-bold font-poppins text-slate-900 leading-tight">
-                        Study Smarter,
-                        <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
-                            Achieve More
+                    <h1 className="text-5xl lg:text-6xl font-black leading-[1.05] text-slate-900 mb-6">
+                        Watch your progress.
+                        <span
+                            className="block mt-1"
+                            style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                        >
+                            Keep it going.
                         </span>
                     </h1>
 
-                    <p className="text-xl text-slate-600 font-inter leading-relaxed max-w-lg">
-                        Transform your learning journey with AI-powered study tools, focus timers, and progress tracking designed for academic success.
+                    <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-md mb-9">
+                        Every focus session, finished task, and group sprint lands on one streak you can actually
+                        see. Once it's visible, you stop wanting to let it drop.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <motion.div
-                            whileHover={{ scale: 1.03  }}
-                            transition={{duration:0.1 , ease:"easeIn"}}
-                            whileTap={{ scale: 0.98 }}
-                        >
-                            <Button className="bg-linear-to-r from-blue-600 to-purple-600 text-white px-8 py-6 rounded-xl text-lg font-inter font-medium hover:shadow-xl hover:shadow-blue-200/50 transition-all duration-300 flex items-center gap-2">
-                                <Zap className="w-5 h-5" />
-                                Start Free Trial
+                    <div className="flex flex-col sm:flex-row gap-3 mb-10">
+                        <Link to="/auth">
+                            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                <Button
+                                    className="px-7 py-6 rounded-2xl text-base font-bold text-white w-full sm:w-auto flex items-center gap-2"
+                                    style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', boxShadow: '0 10px 28px rgba(124,58,237,0.4)' }}
+                                >
+                                    Start your streak <ArrowRight className="w-4 h-4" />
+                                </Button>
+                            </motion.div>
+                        </Link>
+                        <a href="#how-it-works">
+                            <Button
+                                variant="outline"
+                                className="px-7 py-6 rounded-2xl text-base font-bold border-2 border-slate-200 hover:border-violet-300 hover:bg-violet-50/50 w-full sm:w-auto"
+                            >
+                                See how it works
                             </Button>
-                        </motion.div>
-                        <Button variant="outline" className="px-8 py-6 rounded-xl text-lg font-inter font-medium border-2 border-slate-300 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-300 flex items-center gap-2">
-                            <BookOpen className="w-5 h-5" />
-                            View Demo
-                        </Button>
+                        </a>
                     </div>
 
-                    {/* STATS */}
-                    <div className="flex items-center gap-8 pt-8">
-                        <div className="flex items-center gap-4">
-                            <div className="flex -space-x-3">
-                                {[1, 2, 3, 4].map((i) => (
-                                    <motion.div
-                                        key={i}
-                                        className="w-10 h-10 bg-linear-to-r from-blue-500 to-purple-500 rounded-full border-2 border-white shadow-lg"
-                                        initial={{ opacity: 0, scale: 0 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: i * 0.1 }}
-                                    />
-                                ))}
-                            </div>
-                            <div>
-                                <p className="text-slate-600 font-inter text-sm">
-                                    Join <span className="font-semibold text-slate-900">50,000+</span> learners
-                                </p>
-                                <div className="flex items-center gap-1">
-                                    <Sparkles className="w-4 h-4 text-yellow-500" />
-                                    <span className="text-xs text-slate-500">4.9/5 rating</span>
-                                </div>
-                            </div>
+                    <div className="flex items-center gap-6">
+                        <div className="flex -space-x-3">
+                            {['#7C3AED,#4F46E5', '#EC4899,#F43F5E', '#10B981,#0D9488', '#F59E0B,#EF4444'].map((grad, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, scale: 0 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.3 + i * 0.08, ...sp }}
+                                    className="w-9 h-9 rounded-full border-2 border-white"
+                                    style={{ background: `linear-gradient(135deg, ${grad})`, boxShadow: '0 4px 10px rgba(0,0,0,0.12)' }}
+                                />
+                            ))}
                         </div>
+                        <p className="text-sm font-semibold text-slate-500">
+                            Joined by people already on <span className="text-slate-900 font-black">30+ day streaks</span>
+                        </p>
                     </div>
                 </motion.div>
 
-                {/* RIGHT DASHBOARD */}
                 <motion.div
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.7, ease: "easeOut" }}
-                    className="relative h-[500px]"
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.15, ...sp }}
+                    className="relative rounded-3xl overflow-hidden text-white"
+                    style={{
+                        background: 'linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)',
+                        boxShadow: '0 32px 80px rgba(79,46,220,0.42)',
+                    }}
                 >
-                    {/*  Dashboard Card */}
-                    <motion.div
-                        className="absolute inset-0 bg-white rounded-3xl shadow-2xl border border-slate-200/80 backdrop-blur-sm p-8"
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                        <div className="space-y-6">
-                            {/* Header */}
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h3 className="font-poppins font-bold text-slate-900 text-lg">Study Dashboard</h3>
-                                    <p className="text-slate-500 text-sm font-inter">Computer Science Major</p>
-                                </div>
-                                <Badge className="bg-green-100 text-green-700 hover:bg-green-200">
-                                    <TrendingUp className="w-3 h-3 mr-1" />
-                                    +12% this week
-                                </Badge>
-                            </div>
+                    <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.22), transparent)' }} />
+                    <div className="absolute bottom-0 -left-10 w-48 h-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(192,132,252,0.16), transparent)' }} />
 
-                            {/* Stats Grid */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-blue-50 rounded-2xl p-4">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Clock className="w-4 h-4 text-blue-600" />
-                                        <span className="text-sm font-inter font-medium text-blue-700">Focus Time</span>
-                                    </div>
-                                    <div className="text-2xl font-bold font-poppins text-slate-900">4.2h</div>
-                                    <div className="text-xs text-slate-500">Today</div>
-                                </div>
-                                <div className="bg-purple-50 rounded-2xl p-4">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Target className="w-4 h-4 text-purple-600" />
-                                        <span className="text-sm font-inter font-medium text-purple-700">Tasks Done</span>
-                                    </div>
-                                    <div className="text-2xl font-bold font-poppins text-slate-900">8/10</div>
-                                    <div className="text-xs text-slate-500">Daily goal</div>
-                                </div>
-                            </div>
-
-                            {/* Progress Bars */}
-                            <div className="space-y-4">
-                                <div>
-                                    <div className="flex justify-between text-sm font-inter mb-2">
-                                        <span className="text-slate-700">Algorithms</span>
-                                        <span className="text-slate-500">75%</span>
-                                    </div>
-                                    <div className="w-full bg-slate-200 rounded-full h-2">
-                                        <motion.div
-                                            className="bg-blue-500 h-2 rounded-full"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: '75%' }}
-                                            transition={{ delay: 0.5, duration: 1 }}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-sm font-inter mb-2">
-                                        <span className="text-slate-700">Database Systems</span>
-                                        <span className="text-slate-500">60%</span>
-                                    </div>
-                                    <div className="w-full bg-slate-200 rounded-full h-2">
-                                        <motion.div
-                                            className="bg-purple-500 h-2 rounded-full"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: '60%' }}
-                                            transition={{ delay: 0.7, duration: 1 }}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* Floating Cards */}
-                    <motion.div
-                        className="absolute -top-6 -right-6 w-64 bg-white rounded-2xl shadow-lg p-6 border border-slate-200"
-                        animate={{ y: [0, -15, 0] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                        style={{ rotate: -3 }}
-                    >
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 bg-linear-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-                                <Award className="w-5 h-5 text-white" />
-                            </div>
+                    <div className="relative z-10 p-8">
+                        <div className="flex items-center justify-between mb-7">
                             <div>
-                                <div className="font-poppins font-bold text-slate-900">7 Day Streak! 🔥</div>
-                                <div className="text-xs text-slate-500 font-inter">Keep going!</div>
+                                <p className="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Current streak</p>
+                                <div className="flex items-center gap-2">
+                                    <Flame className="w-6 h-6 text-amber-300" />
+                                    <span className="text-4xl font-black">47 days</span>
+                                </div>
                             </div>
+                            <motion.div
+                                animate={{ rotate: [0, 8, -8, 0] }}
+                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                                className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                                style={{ background: 'rgba(255,255,255,0.12)' }}
+                            >
+                                <Flame className="w-5 h-5 text-amber-300" />
+                            </motion.div>
                         </div>
-                    </motion.div>
 
-                    <motion.div
-                        className="absolute -bottom-8 -left-8 w-56 bg-white rounded-2xl shadow-lg p-6 border border-slate-200"
-                        animate={{ y: [0, 10, 0] }}
-                        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        style={{ rotate: 2 }}
-                    >
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-blue-600" />
-                                <span className="text-sm font-inter font-medium text-slate-700">Upcoming</span>
-                            </div>
-                            <div className="text-sm font-inter text-slate-600">Midterm: Data Structures</div>
-                            <div className="text-xs text-slate-500">in 3 days</div>
+                        <div className="overflow-x-auto pb-1">
+                            <StreakPreview weeks={20} rows={7} cellSize={12} gap={4} />
                         </div>
-                    </motion.div>
+
+                        <div className="grid grid-cols-3 gap-3 mt-7">
+                            <div className="rounded-2xl p-3.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                                <CheckCircle2 className="w-4 h-4 text-emerald-300 mb-1.5" />
+                                <p className="text-lg font-black leading-none">8</p>
+                                <p className="text-xs text-indigo-300 font-semibold mt-0.5">Tasks today</p>
+                            </div>
+                            <div className="rounded-2xl p-3.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                                <Flame className="w-4 h-4 text-amber-300 mb-1.5" />
+                                <p className="text-lg font-black leading-none">4.2h</p>
+                                <p className="text-xs text-indigo-300 font-semibold mt-0.5">Focus time</p>
+                            </div>
+                            <div className="rounded-2xl p-3.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                                <Users className="w-4 h-4 text-pink-300 mb-1.5" />
+                                <p className="text-lg font-black leading-none">3</p>
+                                <p className="text-xs text-indigo-300 font-semibold mt-0.5">In your squad</p>
+                            </div>
+                        </div>
+                    </div>
                 </motion.div>
             </div>
         </section>
-    )
+    );
 }
 
 export default HeroSection;

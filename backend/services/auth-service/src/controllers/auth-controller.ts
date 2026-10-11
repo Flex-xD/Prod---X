@@ -66,7 +66,6 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
     const { email, password } = req.body;
     const user = await authService.loginLocalUser({ email, password });
 
-    // same as above or should be different ?
     const accessToken = signAccessToken({ userId: user._id });
     const refreshPlain = `${crypto.randomUUID()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
@@ -84,17 +83,14 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
 
     user.refreshTokens.push(refreshToken._id);
     await user.save();
-    // res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
+    res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS); // was commented out — this is the fix
 
-    await emitEvent("user.login", {
-        email
-    });
+    await emitEvent("user.login", { email });
 
-    console.log("This is the response of the LoginController : ", { refreshPlain, accessToken, user });
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         message: "User logged in successfully!",
-        data: { refreshToken: refreshPlain, accessToken, user },
+        data: { accessToken, user },
         success: true
     })
 });
@@ -107,18 +103,17 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     const user = await authService.findOrCreateGoogleUser(googleUser);
 
     if (!user) {
-        return sendResponse(res, {
-            statusCode: 400,
-            message: "User not found !",
-            success: false
-        })
+        return sendResponse(res, { statusCode: 400, message: "User not found !", success: false })
     }
 
-    const accessToken = signRefreshToken({ sub: user._id!.toString() });
+    // CHANGED: was signRefreshToken({ sub: ... }) — wrong token type/shape/secret entirely.
+    // This must match the same signAccessToken the login/register flows use, or every
+    // subsequent API call from a Google-authenticated user fails Bearer verification.
+    const accessToken = signAccessToken({ userId: user._id! });
+
     const refreshPlain = `${crypto.randomUUID()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
 
-    // ? Think about slidingExpiry 
     const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
@@ -131,12 +126,10 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     })
 
     user.refreshTokens.push(refreshToken._id);
-
     await user.save();
+    res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS); // was missing entirely before
 
-    await emitEvent("user.login", {
-        email: googleUser.email
-    })
+    await emitEvent("user.login", { email: googleUser.email })
 
     return sendResponse(res, {
         statusCode: StatusCodes.CREATED,

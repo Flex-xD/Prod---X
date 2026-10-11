@@ -21,7 +21,7 @@ export const QUERY_KEYS = {
     GROUP_PRODUCTIVITY_TIMER: {
         ACTIVE_GROUP_TIMERS: (userId: string) => ["group-productivity-timer", "active", userId],
         EXPIRED_GROUP_TIMERS: (userId: string) => ["group-productivity-timer", "expired", userId],
-        COMPLETED_GROUP_TIMERS: (userId: string) => ["group-productivity-timer", "completed", userId], // CHANGED
+        COMPLETED_GROUP_TIMERS: (userId: string) => ["group-productivity-timer", "completed", userId], 
         PENDING_INVITES: (userId: string) => ["group-productivity-timer", "pending-invites", userId],
     },
     notificationKeys: {

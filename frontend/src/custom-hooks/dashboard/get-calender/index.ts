@@ -19,4 +19,18 @@ const useGetCalendar = () => {
     });
 };
 
+// ? The below code is not working for some reason
+// const useGetCalendar = (year: number) => {
+//     const userId = userAppStore((state) => state.user_id) ?? "";
+//     return useQuery({
+//         queryKey: [...QUERY_KEYS.DASHBOARD.CALENDAR(userId), year],
+//         queryFn: async () => {
+//             const response = await apiClient.get(`/dashboard/calendar?year=${year}`);
+//             return response.data as ApiResponse<ICalendarCell[][]>;
+//         },
+//         enabled: !!userId,
+//         staleTime: 1000 * 60,
+//     });
+// };
+
 export default useGetCalendar;

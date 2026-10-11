@@ -46,14 +46,17 @@ export const respondToGroupTimerInvitation = asyncHandler(async (req: Request, r
     };
     if (!groupTimerId || !status) throw ApiError(StatusCodes.BAD_REQUEST, "groupTimerId and status are required !");
 
-    await groupProductivityTimerServices.respondToInvitation(toObjectId(groupTimerId), toObjectId(userId), status);
+    const groupTimer = await groupProductivityTimerServices.respondToInvitation(toObjectId(groupTimerId), toObjectId(userId), status);
 
     // ? changes group.timer.invitation.responded -- > group.timer.participant.updated
     await emitEvent("group.timer.participant.updated", {
-        groupTimerId,
-        userId,
-        status,
-    });
+                groupTimerId: groupTimer._id.toString(),
+                recipients: [groupTimer.author.toString(), ...groupTimer.participants.map((p) => p.user.toString())],
+                participants: groupTimer.participants,
+                title: groupTimer.title,
+                deadline: groupTimer.deadline,
+                specifiedTime: groupTimer.specifiedTime,
+            });
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,

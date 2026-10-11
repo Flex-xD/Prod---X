@@ -1,11 +1,11 @@
 import { dashboardService } from "../../../services/dashboard-service";
-import { logger } from "../../../shared";
-import { toObjectId } from "../../../shared";
+import { logger, toObjectId } from "../../../shared";
 
+const resolveUserId = (payload: any): string | undefined => payload?.userId || payload?.task?.author;
 
 export const handlers: Record<string, (payload: any) => Promise<void>> = {
     "task.created": async (payload) => {
-        const userId = payload?.userId || payload?.task?.author;
+        const userId = resolveUserId(payload);
         if (!userId) {
             logger.error("task.created event missing userId");
             return;
@@ -14,12 +14,21 @@ export const handlers: Record<string, (payload: any) => Promise<void>> = {
     },
 
     "task.completed": async (payload) => {
-        const userId = payload?.userId || payload?.task?.author;
+        const userId = resolveUserId(payload);
         if (!userId) {
             logger.error("task.completed event missing userId");
             return;
         }
         await dashboardService.recordTaskCompleted(toObjectId(userId));
+    },
+
+    "task.incompleted": async (payload) => {
+        const userId = resolveUserId(payload);
+        if (!userId) {
+            logger.error("task.incompleted event missing userId");
+            return;
+        }
+        await dashboardService.recordTaskIncompleted(toObjectId(userId));
     },
 
     "productivityTimer.created": async (payload) => {
@@ -33,7 +42,6 @@ export const handlers: Record<string, (payload: any) => Promise<void>> = {
 
     "getProductivityTime.durationUpdated": async (payload) => {
         const userId = payload?.userId;
-        // const seconds = payload?.updatedProductivityTimer?.completedTime;
         const delta = payload?.productivityDuration;
         if (!userId || typeof delta !== "number" || delta <= 0) return;
         await dashboardService.recordIndividualFocusTime(toObjectId(userId), delta);
@@ -61,21 +69,17 @@ export const handlers: Record<string, (payload: any) => Promise<void>> = {
 
     "group.timer.participant.updated": async (payload) => {
         const groupTimerId = payload?.groupTimerId;
-        const participants = payload?.participants as Array<{
-            user: string; productivityDone: number;
-        }> | undefined;
-        if (!groupTimerId || !participants) {
+        const participants = payload?.participants as Array<{ user: string; productivityDone: number }> | undefined;
+        if (!groupTimerId || !participants || !payload?.title || !payload?.deadline) {
             logger.error("group.timer.participant.updated missing data");
             return;
         }
 
         for (const participant of participants) {
-            const participantUserId = toObjectId(participant.user);
-
-            await dashboardService.upsertGroupTimerSnapshot(participantUserId, {
+            await dashboardService.upsertGroupTimerSnapshot(toObjectId(participant.user), {
                 groupTimerId: toObjectId(groupTimerId),
-                title: payload.title ?? "Group Timer",
-                deadline: payload.deadline ? new Date(payload.deadline) : new Date(),
+                title: payload.title,
+                deadline: new Date(payload.deadline),
                 specifiedTime: payload.specifiedTime ?? 0,
                 myProductivityDone: participant.productivityDone,
                 participantCount: participants.length,

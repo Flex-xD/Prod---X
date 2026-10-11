@@ -10,6 +10,7 @@ export interface IProfileStats {
     individualTimers: { active: number; completed: number; expired: number; totalFocusSeconds: number };
     groupTimers: { active: number; completed: number; expired: number; totalFocusSeconds: number };
     streakData: { currentStreak: number; longestStreak: number; weeklyFocusSeconds: number };
+    unavailable?: string[];
 }
 
 export interface IProfileData {

@@ -1,97 +1,72 @@
 import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Flame } from 'lucide-react';
+
+const sp = { type: 'spring', damping: 28, stiffness: 280 } as const;
+
+const SUPPORTING = [
+    { name: 'Priya R.', role: 'Final-year CS student', text: 'I stopped negotiating with myself every morning.', grad: 'linear-gradient(135deg, #10B981, #0D9488)' },
+    { name: 'Marcus O.', role: 'Freelance designer', text: 'Group sessions with two friends got me through a slump.', grad: 'linear-gradient(135deg, #3B82F6, #4F46E5)' },
+];
 
 function Testimonials() {
     return (
-        <section className="py-20 bg-white">
-            <div className="max-w-7xl mx-auto px-6">
+        <section id="testimonials" className="py-24" style={{ background: 'linear-gradient(160deg,#f8f7ff 0%,#fdf4ff 50%,#fafafa 100%)' }}>
+            <div className="max-w-5xl mx-auto px-6">
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
+                    transition={{ duration: 0.5, ...sp }}
                     viewport={{ once: true }}
-                    className="text-center mb-16"
+                    className="rounded-3xl p-10 lg:p-14 text-center mb-8 text-white relative overflow-hidden"
+                    style={{ background: 'linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)', boxShadow: '0 24px 64px rgba(79,46,220,0.35)' }}
                 >
-                    <Badge className="px-4 py-2 bg-green-100 text-green-700 border-green-200 mb-4 font-inter">
-                        💬 Success Stories
-                    </Badge>
-                    <h2 className="text-4xl lg:text-5xl font-bold font-poppins text-slate-900 mb-6">
-                        Loved by Students
-                        <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
-                            Worldwide
-                        </span>
-                    </h2>
+                    <div className="absolute -top-10 -left-10 w-56 h-56 rounded-full" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.2), transparent)' }} />
+                    <Flame className="w-8 h-8 text-amber-300 mx-auto mb-6 relative z-10" />
+                    <p className="text-2xl lg:text-3xl font-black leading-snug max-w-2xl mx-auto mb-7 relative z-10">
+                        "I'm not more disciplined than I was a year ago. I just have a calendar I don't want to see turn empty."
+                    </p>
+                    <div className="flex items-center justify-center gap-3 relative z-10">
+                        <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black"
+                            style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)' }}
+                        >
+                            JD
+                        </div>
+                        <div className="text-left">
+                            <div className="font-bold text-sm">Jordan D.</div>
+                            <div className="text-indigo-300 text-xs font-semibold">Software engineer · 112-day streak</div>
+                        </div>
+                    </div>
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {[
-                        {
-                            name: 'Alex Thompson',
-                            role: 'Computer Science, Stanford',
-                            text: 'EduFocus helped me maintain a 4.0 GPA while balancing research and extracurriculars. The focus timer is a game-changer!',
-                            avatar: 'AT',
-                            improvement: 'GPA: 3.2 → 4.0'
-                        },
-                        {
-                            name: 'Maria Garcia',
-                            role: 'Medical Student, Johns Hopkins',
-                            text: 'As a med student, the volume of information is overwhelming. EduFocus made studying systematic and actually enjoyable.',
-                            avatar: 'MG',
-                            improvement: 'Board Scores: +35%'
-                        },
-                        {
-                            name: 'James Chen',
-                            role: 'Engineering, MIT',
-                            text: 'The progress analytics identified my weak areas in calculus. Two months later, I went from struggling to topping the class!',
-                            avatar: 'JC',
-                            improvement: 'Class Rank: Top 5%'
-                        }
-                    ].map((testimonial, index) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {SUPPORTING.map((t, i) => (
                         <motion.div
-                            key={testimonial.name}
-                            initial={{ opacity: 0, y: 30 }}
+                            key={t.name}
+                            initial={{ opacity: 0, y: 16 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            whileHover={{ y: -8 }}
-                            transition={{ duration: 0.4, delay: index * 0.1 }}
+                            whileHover={{ y: -4 }}
+                            transition={{ duration: 0.4, delay: i * 0.1, ...sp }}
                             viewport={{ once: true }}
+                            className="rounded-3xl bg-white p-6 flex items-start gap-4"
+                            style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.05)' }}
                         >
-                            <Card className="rounded-3xl border border-slate-200 shadow-lg bg-white p-8 relative hover:shadow-xl transition-all duration-300">
-                                <div className="absolute top-6 right-6 text-4xl text-blue-600 opacity-10">"</div>
-                                <CardContent className="p-0">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        {[1, 2, 3, 4, 5].map((star) => (
-                                            <div key={star} className="w-5 h-5 bg-yellow-400 rounded-sm"></div>
-                                        ))}
-                                    </div>
-                                    <p className="text-slate-600 font-inter text-lg leading-relaxed mb-6">
-                                        {testimonial.text}
-                                    </p>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-linear-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-inter font-bold shadow-lg">
-                                            {testimonial.avatar}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="font-poppins font-semibold text-slate-900">
-                                                {testimonial.name}
-                                            </div>
-                                            <div className="font-inter text-slate-500 text-sm">
-                                                {testimonial.role}
-                                            </div>
-                                            <Badge className="bg-green-100 text-green-700 hover:bg-green-200 text-xs mt-1">
-                                                {testimonial.improvement}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <div
+                                className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0"
+                                style={{ background: t.grad }}
+                            >
+                                {t.name.split(' ').map((n) => n[0]).join('')}
+                            </div>
+                            <div>
+                                <p className="text-slate-700 font-semibold mb-1.5">"{t.text}"</p>
+                                <p className="text-sm text-slate-400 font-medium">{t.name} — {t.role}</p>
+                            </div>
                         </motion.div>
                     ))}
                 </div>
             </div>
         </section>
-
-    )
+    );
 }
 
 export default Testimonials;

@@ -60,7 +60,7 @@ export const updateUsername = asyncHandler(async (req: Request, res: Response) =
         statusCode: StatusCodes.OK,
         success: true,
         message: "Username updated successfully !",
-        data: user,
+        data: { username: user.username },
     });
 });
 

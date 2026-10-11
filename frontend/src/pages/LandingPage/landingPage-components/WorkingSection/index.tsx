@@ -1,86 +1,63 @@
 import { motion } from 'framer-motion';
-import { Card, CardDescription,  CardTitle } from '@/components/ui/card';
+import { Play, Send, Flame } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import {  TrendingUp,  Zap,  GraduationCap} from 'lucide-react';
+
+const sp = { type: 'spring', damping: 28, stiffness: 280 } as const;
+
+const STEPS = [
+    { icon: Play, title: 'Start a session', body: 'Solo, or invite a few people in and set a shared goal. Either way, the clock is now on record.', grad: 'linear-gradient(135deg, #7C3AED, #4F46E5)' },
+    { icon: Send, title: 'Log what you did', body: 'Stop, submit the time, close a task while you\'re at it. Both count toward today.', grad: 'linear-gradient(135deg, #EC4899, #F43F5E)' },
+    { icon: Flame, title: 'Watch the chain grow', body: "Today's square lights up. Your streak ticks forward. Tomorrow, you'll want to keep it that way.", grad: 'linear-gradient(135deg, #F59E0B, #EF4444)' },
+];
 
 function WorkingSection() {
     return (
-        <section className="py-20 bg-linear-to-br from-blue-50/50 to-purple-50/50">
-            <div className="max-w-7xl mx-auto px-6">
+        <section id="how-it-works" className="py-24 bg-white">
+            <div className="max-w-6xl mx-auto px-6">
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
+                    transition={{ duration: 0.5, ...sp }}
                     viewport={{ once: true }}
-                    className="text-center mb-20"
+                    className="text-center mb-16"
                 >
-                    <Badge className="px-4 py-2 bg-purple-100 text-purple-700 border-purple-200 mb-4 font-inter">
-                        🚀 Simple Setup
+                    <Badge className="px-3.5 py-1.5 bg-violet-50 text-violet-600 border-violet-200 mb-4">
+                        Simple by design
                     </Badge>
-                    <h2 className="text-4xl lg:text-5xl font-bold font-poppins text-slate-900 mb-6">
-                        Start Succeeding in
-                        <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
-                            3 Easy Steps
-                        </span>
+                    <h2 className="text-3xl lg:text-4xl font-black text-slate-900">
+                        Three steps. The same three, every day.
                     </h2>
                 </motion.div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {[
-                        {
-                            step: '01',
-                            icon: <GraduationCap className="w-8 h-8" />,
-                            title: 'Set Your Goals',
-                            description: 'Define your courses, deadlines, and academic objectives. Our AI will help you create a realistic study plan.',
-                            color: 'blue'
-                        },
-                        {
-                            step: '02',
-                            icon: <Zap className="w-8 h-8" />,
-                            title: 'Start Studying',
-                            description: 'Use our focus timer, note-taking tools, and study sessions to make learning efficient and engaging.',
-                            color: 'purple'
-                        },
-                        {
-                            step: '03',
-                            icon: <TrendingUp className="w-8 h-8" />,
-                            title: 'Track & Improve',
-                            description: 'Monitor your progress with detailed analytics and get personalized recommendations for improvement.',
-                            color: 'green'
-                        }
-                    ].map((step, index) => (
-                        <motion.div
-                            key={step.step}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            whileHover={{ y: -10 }}
-                            transition={{ duration: 0.5, delay: index * 0.2 }}
-                            viewport={{ once: true }}
-                            className="relative"
-                        >
-                            {/* Step Number Background */}
-                            <div className="absolute -top-4 -left-4 text-8xl font-poppins font-bold text-slate-100/80 z-0">
-                                {step.step}
-                            </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                    <div className="hidden md:block absolute top-11 left-[16.5%] right-[16.5%] h-px" style={{ background: 'linear-gradient(90deg, transparent, #ddd6fe, transparent)' }} />
 
-                            <Card className="rounded-3xl border-0 shadow-lg bg-white p-8 relative z-10 hover:shadow-xl transition-all duration-300">
-                                <div className={`w-16 h-16 bg-${step.color}-100 rounded-2xl flex items-center justify-center text-${step.color}-600 mb-6`}>
-                                    {step.icon}
-                                </div>
-                                <CardTitle className="font-poppins text-2xl text-slate-900 mb-4">
-                                    {step.title}
-                                </CardTitle>
-                                <CardDescription className="font-inter text-slate-600 text-lg leading-relaxed">
-                                    {step.description}
-                                </CardDescription>
-                            </Card>
+                    {STEPS.map((step, i) => (
+                        <motion.div
+                            key={step.title}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            whileHover={{ y: -6 }}
+                            transition={{ duration: 0.45, delay: i * 0.12, ...sp }}
+                            viewport={{ once: true }}
+                            className="relative z-10 text-center"
+                        >
+                            <motion.div
+                                whileHover={{ rotate: 8, scale: 1.08 }}
+                                transition={sp}
+                                className="w-16 h-16 rounded-3xl flex items-center justify-center text-white mx-auto mb-5"
+                                style={{ background: step.grad, boxShadow: '0 10px 28px rgba(124,58,237,0.3)' }}
+                            >
+                                <step.icon className="w-7 h-7" />
+                            </motion.div>
+                            <h3 className="text-xl font-black text-slate-900 mb-2">{step.title}</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed max-w-xs mx-auto">{step.body}</p>
                         </motion.div>
                     ))}
                 </div>
             </div>
         </section>
-
-    )
+    );
 }
 
 export default WorkingSection;

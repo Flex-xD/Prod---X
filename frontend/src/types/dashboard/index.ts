@@ -13,15 +13,19 @@ export interface IDashboardSummary {
     } | null;
 }
 
+
 export interface IWeeklyGraphEntry {
     day: string;
     date: string;
     tasks: number;
-    hours: number;
+    focusSeconds: number;
 }
+
 
 export interface ICalendarCell {
     date: string;
     intensity: "high" | "medium" | "low" | "none";
     hours: number;
+    focusSeconds: number;
+    tasks: number;
 }

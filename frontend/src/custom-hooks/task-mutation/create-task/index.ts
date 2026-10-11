@@ -1,78 +1,89 @@
-import ENDPOINTS from "@/constants/api-endpoints"
-import { QUERY_KEYS } from "@/constants/query-keys"
-import type { ITask, ITaskData } from "@/pages/Dashboard/dashboard-components/tasks-card/tasks-card-types"
-import type { ApiResponse } from "@/types/api-response"
-import apiClient from "@/utils/Axios-client"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import type { AxiosError } from "axios"
-import { toast } from "sonner"
+import ENDPOINTS from "@/constants/api-endpoints";
+import { QUERY_KEYS } from "@/constants/query-keys";
+import {
+    applyOptimisticDashboardUpdate,
+    reconcileDashboardAfterDelay,
+    rollbackDashboardOptimisticUpdate,
+    type DashboardOptimisticContext,
+} from "@/custom-hooks/dashboard/apply-optimistic-activity";
+import type { ITask, ITaskData } from "@/pages/Dashboard/dashboard-components/tasks-card/tasks-card-types";
+import type { ApiResponse } from "@/types/api-response";
+import apiClient from "@/utils/Axios-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
+import { toast } from "sonner";
 
+type TodaysTasksResponse = ApiResponse<{
+    tasks: ITask[];
+    metaData: { date: string; totalTasks: number };
+}>;
+
+interface MutationContext {
+    previousTasks?: TodaysTasksResponse;
+    dashboard?: DashboardOptimisticContext;
+}
 
 const useCreateTaskMutation = (userId: string) => {
     const queryClient = useQueryClient();
-    return useMutation({
+    const tasksKey = QUERY_KEYS.TASKS.TODAYS_TASKS(userId);
 
-        mutationFn: async ({ title, description }: ITaskData) => {
-            if (!userId) {
-                throw Error("userID not defined in createTaskMutation !");
-            };
-            const response = await apiClient.post(ENDPOINTS.TASKS_ENDPOINTS.CREATE_TASK, {
-                title, description
-            });
+    return useMutation<ApiResponse<ITaskData>, Error | AxiosError, ITaskData, MutationContext>({
+        mutationFn: async ({ title, description }) => {
+            if (!userId) throw new Error("userID not defined in createTaskMutation !");
+            const response = await apiClient.post(ENDPOINTS.TASKS_ENDPOINTS.CREATE_TASK, { title, description });
+            if (!response.data?.success) throw new Error(response.data?.message || "Task creation failed !");
             return response.data as ApiResponse<ITaskData>;
         },
-        onSuccess: async (data) => {
-            let failedMessage;
-            if (!data?.success) {
-                failedMessage = data?.message || "Task creation failed !"
-                toast.error(failedMessage);
-                throw Error(failedMessage);
-            }
-            console.log("Task created successfully : ", data.data);
-            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TASKS.TODAYS_TASKS(userId) });
+        onMutate: async ({ title, description }) => {
+            await queryClient.cancelQueries({ queryKey: tasksKey });
+            const previousTasks = queryClient.getQueryData<TodaysTasksResponse>(tasksKey);
+            const now = new Date();
 
-            return toast.success(data.message);
+            const optimisticTask: ITask = {
+                _id: `temp-${Date.now()}`,
+                title,
+                description,
+                author: userId,
+                status: "pending",
+                createdAt: now,
+                updatedAt: now,
+            };
 
-        },
-        onMutate: async (data) => {
-            await queryClient.cancelQueries({ queryKey: QUERY_KEYS.TASKS.TODAYS_TASKS(userId) });
-            const previous = queryClient.getQueryData(QUERY_KEYS.TASKS.TODAYS_TASKS(userId));
-            // ? here below I have to update the optimistically
-            // queryClient.setQueryData(['tasks'], (old:ITask[]) =>
-            //     old.map(t => t._id === data. ? { ...t, status: newTask.status } : t)
-            // );
-
-            return { previous };
-        },
-        onError: async (error: AxiosError | Error,data , context) => {
-            await queryClient.setQueryData(QUERY_KEYS.TASKS.TODAYS_TASKS(userId), context?.previous);
-            console.log(
-                "Error while creating task:",
-                error
+            queryClient.setQueryData<TodaysTasksResponse>(tasksKey, (old) =>
+                old
+                    ? {
+                        ...old,
+                        data: {
+                            ...old.data,
+                            tasks: [...old.data.tasks, optimisticTask],
+                            metaData: { ...old.data.metaData, totalTasks: old.data.metaData.totalTasks + 1 },
+                        },
+                    }
+                    : old
             );
 
-            let message =
-                "Task creation failed!";
+            const dashboard = await applyOptimisticDashboardUpdate(queryClient, userId, { tasksCreated: 1 });
+            return { previousTasks, dashboard };
+        },
+        onError: (error, _vars, context) => {
+            if (context?.previousTasks) queryClient.setQueryData(tasksKey, context.previousTasks);
+            rollbackDashboardOptimisticUpdate(queryClient, userId, context?.dashboard);
 
-            if (
-                (error as AxiosError).isAxiosError &&
-                (error as AxiosError).response
-            ) {
-
-                const responseData =
-                    (error as AxiosError)
-                        .response?.data as {
-                            message?: string;
-                        };
-
-                message =
-                    responseData?.message ||
-                    message;
+            let message = error.message || "Task creation failed!";
+            if ((error as AxiosError).isAxiosError && (error as AxiosError).response) {
+                const responseData = (error as AxiosError).response?.data as { message?: string };
+                message = responseData?.message || message;
             }
-
             toast.error(message);
         },
-    })
-}
+        onSuccess: (data) => {
+            toast.success(data.message);
+        },
+        onSettled: async () => {
+            await queryClient.invalidateQueries({ queryKey: tasksKey });
+            reconcileDashboardAfterDelay(queryClient, userId);
+        },
+    });
+};
 
 export default useCreateTaskMutation;

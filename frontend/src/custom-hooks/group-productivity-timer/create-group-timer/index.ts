@@ -1,5 +1,6 @@
 import ENDPOINTS from "@/constants/api-endpoints";
 import { QUERY_KEYS } from "@/constants/query-keys";
+import { applyOptimisticDashboardUpdate } from "@/custom-hooks/dashboard/apply-optimistic-activity";
 import type { IGroupTimer, IGroupTimerForm } from "@/pages/Productivity-timer-pages/timer-components/types";
 import { userAppStore } from "@/store";
 import type { ApiResponse } from "@/types/api-response";

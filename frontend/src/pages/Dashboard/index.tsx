@@ -26,8 +26,8 @@ const Dashboard = () => {
   const user_id = userAppStore((state) => state.user_id);
   const safeUserId = user_id ?? "";
 
-  const { mutateAsync: createTaskMutation, isPending: createTaskPending } = useCreateTaskMutation(safeUserId);
-  const { mutateAsync: updateTaskStatus, isPending: isUpdateTaskStatusPending } = useToggleTaskMutation();
+  const { mutate: createTaskMutation, isPending: createTaskPending } = useCreateTaskMutation(safeUserId);
+  const { mutate: updateTaskStatus, isPending: isUpdateTaskStatusPending } = useToggleTaskMutation();
   const { data: todaysTask } = useGetTodaysTasks(safeUserId);
   const tasksToDisplay = todaysTask?.data.tasks ?? [];
 
@@ -46,12 +46,13 @@ const Dashboard = () => {
   const weeklyData = weeklyGraph?.data ?? [];
   const maxHours = weeklyData.length ? Math.max(...weeklyData.map((d) => d.hours), 1) : 1;
 
-  const handleToggleTask = async (taskId: string, isTaskPending: boolean) => {
-    await updateTaskStatus({ taskId, isTaskPending });
+  const handleToggleTask = (taskId: string, isTaskPending: boolean) => {
+    if (taskId.startsWith('temp-')) return;
+    updateTaskStatus({ taskId, isTaskPending });
   };
 
-  const onAddTask = async (taskData: ITaskData) => {
-    await createTaskMutation(taskData);
+  const onAddTask = (taskData: ITaskData) => {
+    createTaskMutation(taskData);
   };
 
   return (
@@ -107,7 +108,7 @@ const Dashboard = () => {
               createTaskPending={createTaskPending}
             />
             <CalendarCard calendarData={calendar?.data ?? []} />
-            <WeeklyGraphCard weeklyData={weeklyData} maxHours={maxHours} />
+            <WeeklyGraphCard weeklyData={weeklyData} />
           </div>
 
           {/* Right Column - Sidebar */}

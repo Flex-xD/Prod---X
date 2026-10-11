@@ -1,95 +1,133 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { logger } from "../shared/utils/winston-logger";
 
+interface Fetched<T> {
+    data: T | null;
+    failed: boolean;
+}
 
-const safeGet = async (url: string, userId: string) => {
+interface Stat<T> {
+    value: T;
+    failed: boolean;
+}
+
+interface TimerBucket {
+    active: number;
+    completed: number;
+    expired: number;
+    totalFocusSeconds: number;
+}
+
+const serviceUrls = () => ({
+    tasks: process.env.TASKS_SERVICE_URL || "http://localhost:4000",
+    productivityTimer: process.env.PRODUCTIVITY_TIMER_SERVICE_URL || "http://localhost:6000",
+    groupTimer: process.env.GROUP_PRODUCTIVITY_TIMER_SERVICE_URL || "http://localhost:9000",
+    dashboard: process.env.DASHBOARD_SERVICE_URL || "http://localhost:7000",
+});
+
+const fetchData = async <T>(source: string, url: string, userId: string): Promise<Fetched<T>> => {
     try {
         const response = await axios.get(url, {
             headers: { "x-user-id": userId },
             timeout: 5000,
         });
-        return response.data?.data ?? null;
+        return { data: (response.data?.data ?? null) as T | null, failed: false };
     } catch (error) {
-        logger.error(`❌ Profile aggregation call failed: ${url}`, { error: (error as Error).message });
-        return null;
+        const err = error as AxiosError;
+        logger.error(
+            `Profile aggregation failed [${source}] ${url} -> ${err.response?.status ?? err.code ?? err.message}`
+        );
+        return { data: null, failed: true };
     }
 };
 
+const sumIndividualFocus = (lists: any[][]): number =>
+    lists.flat().reduce((sum: number, t: any) => sum + (t?.completedTime ?? 0), 0);
+
+const sumGroupFocus = (lists: any[][], userId: string): number =>
+    lists.flat().reduce((sum: number, t: any) => {
+        const mine = t?.participants?.find((p: any) => String(p?.user?._id ?? p?.user) === userId);
+        return sum + (mine?.productivityDone ?? 0);
+    }, 0);
+
 export const profileAggregationService = {
     getTaskStats: async (userId: string) => {
-        const base = process.env.TASKS_SERVICE_URL;
-        const todays = await safeGet(`${base}/api/v1/tasks/today`, userId);
-
-        // ? tasks-service doesn't expose an "all tasks grouped by status" endpoint in what
-        // we've seen so far — this degrades gracefully to today's counts only. If/when
-        // tasks-service adds a lifetime-stats endpoint, swap this call for that one.
-        const tasks = todays?.tasks ?? [];
+        const result = await fetchData<{ tasks: any[] }>(
+            "tasks",
+            `${serviceUrls().tasks}/api/v1/task/todays-tasks`,
+            userId
+        );
+        const tasks = result.data?.tasks ?? [];
         return {
-            totalToday: tasks.length,
-            pending: tasks.filter((t: any) => t.status === "pending").length,
-            inProgress: tasks.filter((t: any) => t.status === "in-progress").length,
-            done: tasks.filter((t: any) => t.status === "done").length,
+            failed: result.failed,
+            value: {
+                totalToday: tasks.length,
+                pending: tasks.filter((t: any) => t.status === "pending").length,
+                inProgress: tasks.filter((t: any) => t.status === "in-progress").length,
+                done: tasks.filter((t: any) => t.status === "done").length,
+            },
+        } satisfies Stat<unknown>;
+    },
+
+    getIndividualTimerStats: async (userId: string): Promise<Stat<TimerBucket>> => {
+        const base = `${serviceUrls().productivityTimer}/api/v1/productivity-timer`;
+        const [active, completed, expired] = await Promise.all([
+            fetchData<any[]>("productivity-timer:active", `${base}/active-productivity-timers`, userId),
+            fetchData<any[]>("productivity-timer:completed", `${base}/completed-productivity-timers`, userId),
+            fetchData<any[]>("productivity-timer:expired", `${base}/expired-productivity-timers`, userId),
+        ]);
+
+        const activeList = active.data ?? [];
+        const completedList = completed.data ?? [];
+        const expiredList = expired.data ?? [];
+
+        return {
+            failed: active.failed || completed.failed || expired.failed,
+            value: {
+                active: activeList.length,
+                completed: completedList.length,
+                expired: expiredList.length,
+                totalFocusSeconds: sumIndividualFocus([activeList, completedList, expiredList]),
+            },
         };
     },
 
-    getIndividualTimerStats: async (userId: string) => {
-        const base = process.env.PRODUCTIVITY_TIMER_SERVICE_URL;
+    getGroupTimerStats: async (userId: string): Promise<Stat<TimerBucket>> => {
+        const base = `${serviceUrls().groupTimer}/api/v1/group-productivity-timer`;
         const [active, completed, expired] = await Promise.all([
-            safeGet(`${base}/api/v1/productivity-timer/active-productivity-timers`, userId),
-            safeGet(`${base}/api/v1/productivity-timer/completed-productivity-timers`, userId),
-            safeGet(`${base}/api/v1/productivity-timer/expired-productivity-timers`, userId),
+            fetchData<any[]>("group-timer:active", `${base}/active-group-timers`, userId),
+            fetchData<any[]>("group-timer:completed", `${base}/completed-group-timers`, userId),
+            fetchData<any[]>("group-timer:expired", `${base}/expired-group-timers`, userId),
         ]);
 
-        const activeList = active ?? [];
-        const completedList = completed ?? [];
-        const expiredList = expired ?? [];
-
-        const totalFocusSeconds = [...activeList, ...completedList, ...expiredList].reduce(
-            (sum: number, t: any) => sum + (t.completedTime ?? 0), 0
-        );
+        const activeList = active.data ?? [];
+        const completedList = completed.data ?? [];
+        const expiredList = expired.data ?? [];
 
         return {
-            active: activeList.length,
-            completed: completedList.length,
-            expired: expiredList.length,
-            totalFocusSeconds,
-        };
-    },
-
-    getGroupTimerStats: async (userId: string) => {
-        const base = process.env.GROUP_PRODUCTIVITY_TIMER_SERVICE_URL;
-        const [active, completed, expired] = await Promise.all([
-            safeGet(`${base}/api/v1/group-productivity-timer/active-group-timers`, userId),
-            safeGet(`${base}/api/v1/group-productivity-timer/completed-group-timers`, userId),
-            safeGet(`${base}/api/v1/group-productivity-timer/expired-group-timers`, userId),
-        ]);
-
-        const activeList = active ?? [];
-        const completedList = completed ?? [];
-        const expiredList = expired ?? [];
-
-        const totalFocusSeconds = [...activeList, ...completedList, ...expiredList].reduce(
-            (sum: number, t: any) => {
-                const myParticipant = t.participants?.find((p: any) => p.user?._id === userId);
-                return sum + (myParticipant?.productivityDone ?? 0);
-            }, 0
-        );
-
-        return {
-            active: activeList.length,
-            completed: completedList.length,
-            expired: expiredList.length,
-            totalFocusSeconds,
+            failed: active.failed || completed.failed || expired.failed,
+            value: {
+                active: activeList.length,
+                completed: completedList.length,
+                expired: expiredList.length,
+                totalFocusSeconds: sumGroupFocus([activeList, completedList, expiredList], userId),
+            },
         };
     },
 
     getStreakAndWeeklyFocus: async (userId: string) => {
-        const base = process.env.DASHBOARD_SERVICE_URL;
-        const summary = await safeGet(`${base}/api/v1/dashboard/summary`, userId);
+        const result = await fetchData<any>(
+            "dashboard",
+            `${serviceUrls().dashboard}/api/v1/dashboard/summary`,
+            userId
+        );
         return {
-            currentStreak: summary?.streak?.current ?? 0,
-            longestStreak: summary?.streak?.longest ?? 0,
-            weeklyFocusSeconds: summary?.weeklyFocusSeconds ?? 0,
+            failed: result.failed,
+            value: {
+                currentStreak: result.data?.streak?.current ?? 0,
+                longestStreak: result.data?.streak?.longest ?? 0,
+                weeklyFocusSeconds: result.data?.weeklyFocusSeconds ?? 0,
+            },
         };
     },
 
@@ -101,6 +139,16 @@ export const profileAggregationService = {
             profileAggregationService.getStreakAndWeeklyFocus(userId),
         ]);
 
-        return { tasks, individualTimers, groupTimers, streakData };
+        const unavailable = Object.entries({ tasks, individualTimers, groupTimers, streakData })
+            .filter(([, result]) => result.failed)
+            .map(([name]) => name);
+
+        return {
+            tasks: tasks.value,
+            individualTimers: individualTimers.value,
+            groupTimers: groupTimers.value,
+            streakData: streakData.value,
+            unavailable,
+        };
     },
 };

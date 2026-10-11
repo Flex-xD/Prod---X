@@ -32,6 +32,7 @@ export const sendError = (res: Response, {
     message?: string;
     error?: unknown;
 }) => {
+    // ? Should I also throw an Api Error here 
     const errorMessage = error instanceof Error ? error.message : message;
     const code = (error as any)?.statusCode ?? statusCode;
     console.log(error);

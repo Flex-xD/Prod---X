@@ -3,6 +3,19 @@ import { ApiError, asyncHandler, sendResponse, toObjectId } from "../shared";
 import { StatusCodes } from "http-status-codes";
 import { dashboardService } from "../services/dashboard-service";
 
+export const getCalendar = asyncHandler(async (req: Request, res: Response) => {
+    const userId = getUserIdOrThrow(req);
+    const year = req.query.year ? Number(req.query.year) : new Date().getUTCFullYear();
+    const data = await dashboardService.getCalendar(toObjectId(userId), year);
+    return sendResponse(res, { statusCode: StatusCodes.OK, success: true, message: "Calendar fetched !", data });
+});
+
+export const getAvailableYears = asyncHandler(async (req: Request, res: Response) => {
+    const userId = getUserIdOrThrow(req);
+    const data = await dashboardService.getAvailableYears(toObjectId(userId));
+    return sendResponse(res, { statusCode: StatusCodes.OK, success: true, message: "Years fetched !", data });
+});
+
 const getUserIdOrThrow = (req: Request): string => {
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
@@ -19,13 +32,6 @@ export const getWeeklyGraph = asyncHandler(async (req: Request, res: Response) =
     const userId = getUserIdOrThrow(req);
     const data = await dashboardService.getWeeklyGraph(toObjectId(userId));
     return sendResponse(res, { statusCode: StatusCodes.OK, success: true, message: "Weekly graph fetched !", data });
-});
-
-export const getCalendar = asyncHandler(async (req: Request, res: Response) => {
-    const userId = getUserIdOrThrow(req);
-    const weeks = req.query.weeks ? Number(req.query.weeks) : 53;
-    const data = await dashboardService.getCalendar(toObjectId(userId), weeks);
-    return sendResponse(res, { statusCode: StatusCodes.OK, success: true, message: "Calendar fetched !", data });
 });
 
 export const getAiTip = asyncHandler(async (req: Request, res: Response) => {

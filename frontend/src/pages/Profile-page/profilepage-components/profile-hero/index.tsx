@@ -32,11 +32,9 @@ const ProfileHero = ({ user, currentStreak }: ProfileHeroProps) => {
 
     const handleSaveUsername = () => {
         const trimmed = draftUsername.trim();
-        if (!trimmed || trimmed === user.username) {
-            setIsEditingName(false);
-            return;
-        }
-        updateUsername({ username: trimmed }, { onSuccess: () => setIsEditingName(false) });
+        setIsEditingName(false);
+        if (!trimmed || trimmed === user.username) return;
+        updateUsername({ username: trimmed });
     };
 
     return (
@@ -97,7 +95,7 @@ const ProfileHero = ({ user, currentStreak }: ProfileHeroProps) => {
                                 className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.25)' }}>
                                 {isSavingUsername ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 text-emerald-300" />}
                             </motion.button>
-                            <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setDraftUsername(user.username); setIsEditingName(false); }}
+                            <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setDraftUsername(user.username); setIsEditingName(true); }}
                                 className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.2)' }}>
                                 <X className="w-4 h-4 text-rose-300" />
                             </motion.button>

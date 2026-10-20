@@ -1,46 +1,42 @@
 import { CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import CreateTaskModal from '../create-task-modal';
 
 interface TasksHeaderProps {
-    onAddTask: (task: { title: string; description: string; }) => void; 
-    createTaskPending:boolean;
+    onAddTask: (task: { title: string; description: string }) => void;
+    createTaskPending: boolean;
 }
 
-const TasksHeader = ({ onAddTask  , createTaskPending}: TasksHeaderProps) => {
-    
+const TasksHeader = ({ onAddTask, createTaskPending }: TasksHeaderProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleCreateTask = (title: string, description: string) => {
-        const newTaskData = {
-            title,
-            description,
-        };
-        onAddTask(newTaskData);
+        onAddTask({ title, description });
     };
 
     return (
         <>
-            <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
+            <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-4">
                     <div>
-                        <CardTitle className="text-2xl font-bold bg-linear-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                        <CardTitle className="text-sm font-bold uppercase tracking-[0.12em] text-ink">
                             Today's Tasks
                         </CardTitle>
-                        <p className="text-slate-500 text-sm mt-1">
-                            Keep the momentum going! 💪
+                        <p className="mt-1 text-xs font-medium text-ink-faint">
+                            A finished task keeps today's streak alive.
                         </p>
                     </div>
 
-                    <Button
+                    <button
+                        type="button"
                         onClick={() => setIsModalOpen(true)}
-                        className="bg-linear-to-r from-purple-600 to-blue-600 text-white rounded-xl"
+                        disabled={createTaskPending}
+                        className="inline-flex shrink-0 items-center gap-2 rounded-lg border-2 border-ink bg-ink px-4 py-2 text-sm font-bold text-paper shadow-hard-sm transition-all duration-fast hover:shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-xs disabled:pointer-events-none disabled:opacity-50"
                     >
-                        <Plus className="w-4 h-4 mr-2" />
+                        <Plus className="h-4 w-4" aria-hidden="true" />
                         Add Task
-                    </Button>
+                    </button>
                 </div>
             </CardHeader>
 

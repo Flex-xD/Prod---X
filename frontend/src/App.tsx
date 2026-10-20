@@ -41,7 +41,7 @@ function App() {
 
   useEffect(() => {
   const handleNotification = (payload: any) => {
-    toast.info(`You are invited to a group-timer by ${payload.username}`);
+    toast.info(`You are invited to a group-timer by ${payload.username}` , {id:payload.notification._id});
     if (user_id) {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notificationKeys.list(user_id) });
     }

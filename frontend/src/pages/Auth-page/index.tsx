@@ -13,9 +13,6 @@ import useGoogleAuth from '@/custom-hooks/auth-mutation/google-auth';
 import useLoginMutation from '@/custom-hooks/auth-mutation/login';
 import useRegisterMutation from '@/custom-hooks/auth-mutation/register';
 import type { IHandleLogin, IHandleRegiser } from './auth-components/Auth-Types';
-import { useLogoutMutation } from '@/custom-hooks/auth-mutation/logout';
-import { toast } from 'sonner';
-
 
 export default function AuthPage() {
     const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
@@ -27,22 +24,23 @@ export default function AuthPage() {
         confirmPassword: '',
     });
 
-    const { mutateAsync: handleGoogleAuth } = useGoogleAuth();
-    const { mutateAsync: handleLoginAuth, isPending: isLoginAuthPending } = useLoginMutation();
-    const { mutateAsync: handleRegisterAuth, isPending: isRegisterAuthPending } = useRegisterMutation();
+    const { mutateAsync: handleGoogleAuth, isError: isGoogleAuthError } = useGoogleAuth();
+    const {
+        mutateAsync: handleLoginAuth,
+        isPending: isLoginAuthPending,
+        isError: isLoginAuthError,
+    } = useLoginMutation();
+    const {
+        mutateAsync: handleRegisterAuth,
+        isPending: isRegisterAuthPending,
+        isError: isRegisterAuthError,
+    } = useRegisterMutation();
 
-
-    // ? Add actual pending and error components
-    // if (isGoogleAuthError || isLoginAuthError || isRegisterAuthError) {
-    //     setTimeout(() => {
-    //         return toast.error("Try again . . . !");
-
-    //     }, 3000)
-    // }
-    // if (isGoogleAuthPending || isLoginAuthPending || isRegisterAuthPending) return <div>Loading...</div>
+    // Error state is clear and actionable: one banner, no toasts, no drama.
+    const isAuthError = isGoogleAuthError || isLoginAuthError || isRegisterAuthError;
 
     const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleGoogleLogin = async (credentialResponse: any) => {
@@ -51,56 +49,66 @@ export default function AuthPage() {
 
     const handleLogin = async (formData: IHandleLogin) => {
         await handleLoginAuth(formData);
-    }
+    };
 
     const handleRegister = async (formData: IHandleRegiser) => {
         await handleRegisterAuth(formData);
-    }
+    };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50/30 to-blue-50/30 relative overflow-hidden px-6 py-8">
-            <div className="relative z-10 max-w-7xl mx-auto">
+        <div className="min-h-screen bg-paper px-6 py-8">
+            <div className="relative z-10 mx-auto max-w-7xl">
                 <AuthHeader />
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[70vh] lg:mr-16">
-
+                <div className="grid min-h-[70vh] grid-cols-1 items-center gap-12 lg:mr-16 lg:grid-cols-2">
                     {/* Left: Auth Form */}
                     <div className="flex justify-center lg:justify-end">
-                        <AuthFormCard
-                            activeTab={activeTab}
-                            setActiveTab={setActiveTab}
-                            onGoogleLogin={handleGoogleLogin}
-                        >
-                            <AnimatePresence mode="wait">
-                                <>
-                                    <TabsContent value="login">
-                                        <LoginForm
-                                            formData={formData}
-                                            showPassword={showPassword}
-                                            togglePassword={() => setShowPassword(prev => !prev)}
-                                            onChange={handleInputChange}
-                                            handleLogin={handleLogin}
-                                            isLoginAuthPending={isLoginAuthPending}
-                                        />
-                                    </TabsContent>
+                        <div className="w-full max-w-md space-y-4">
+                            {isAuthError && (
+                                <div
+                                    role="alert"
+                                    className="rounded-lg border-2 border-ink bg-alert-tint px-4 py-3 text-sm font-semibold text-ink"
+                                >
+                                    Authentication failed. Check your details and try again.
+                                </div>
+                            )}
 
-                                    <TabsContent value="register">
-                                        <RegisterForm
-                                            formData={formData}
-                                            showPassword={showPassword}
-                                            togglePassword={() => setShowPassword(prev => !prev)}
-                                            onChange={handleInputChange}
-                                            handleRegister={handleRegister}
-                                            isRegisterAuthPending={isRegisterAuthPending}
-                                        />
-                                    </TabsContent>
-                                </>
-                            </AnimatePresence>
-                        </AuthFormCard>
+                            <AuthFormCard
+                                activeTab={activeTab}
+                                setActiveTab={setActiveTab}
+                                onGoogleLogin={handleGoogleLogin}
+                            >
+                                <AnimatePresence mode="wait">
+                                    <>
+                                        <TabsContent value="login">
+                                            <LoginForm
+                                                formData={formData}
+                                                showPassword={showPassword}
+                                                togglePassword={() => setShowPassword((prev) => !prev)}
+                                                onChange={handleInputChange}
+                                                handleLogin={handleLogin}
+                                                isLoginAuthPending={isLoginAuthPending}
+                                            />
+                                        </TabsContent>
+
+                                        <TabsContent value="register">
+                                            <RegisterForm
+                                                formData={formData}
+                                                showPassword={showPassword}
+                                                togglePassword={() => setShowPassword((prev) => !prev)}
+                                                onChange={handleInputChange}
+                                                handleRegister={handleRegister}
+                                                isRegisterAuthPending={isRegisterAuthPending}
+                                            />
+                                        </TabsContent>
+                                    </>
+                                </AnimatePresence>
+                            </AuthFormCard>
+                        </div>
                     </div>
 
-                    {/* Right Side Marketing (Desktop Only) */}
-                    <div className="hidden lg:block space-y-8">
+                    {/* Right Side (Desktop Only) */}
+                    <div className="hidden space-y-6 lg:block">
                         <MotivationalQuote />
                         <FeaturesGrid />
                         <CommunityStats />

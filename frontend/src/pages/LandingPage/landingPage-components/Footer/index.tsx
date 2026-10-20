@@ -1,57 +1,62 @@
 import { Link } from 'react-router-dom';
-import { Zap } from 'lucide-react';
+import { AnchorLink, Wordmark } from '../shared';
 
-const COLUMNS = [
-    { title: 'Product', links: ['Dashboard', 'Focus timer', 'Group sessions', 'Tasks'] },
-    { title: 'Resources', links: ['Help center', 'Changelog'] },
-    { title: 'Company', links: ['About', 'Contact'] },
-];
+const PAGE_LINKS = [
+    { label: 'How it works', href: '#how-it-works' },
+    { label: 'The record', href: '#record' },
+    { label: 'Features', href: '#features' },
+    { label: 'Group sessions', href: '#groups' },
+] as const;
+
+const LINK_CLASS = 'text-sm font-semibold underline-offset-4 hover:underline';
+const HEADING = 'text-[11px] font-bold uppercase tracking-[0.14em] text-ink-soft';
 
 function Footer() {
     return (
-        <footer className="bg-slate-900">
-            <div className="max-w-7xl mx-auto px-6 py-16">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-14">
-                    <div className="md:col-span-2">
-                        <div className="flex items-center gap-2.5 mb-5">
-                            <div
-                                className="w-9 h-9 rounded-2xl flex items-center justify-center"
-                                style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)' }}
-                            >
-                                <Zap className="w-4.5 h-4.5 text-white" />
-                            </div>
-                            <span className="text-lg font-black text-white">ProdX</span>
-                        </div>
-                        <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-sm">
-                            A record of your focus, built one session at a time — so the only question left is
-                            whether you'll keep it going.
-                        </p>
+        <footer className="border-t-2 border-ink bg-paper">
+            <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+                <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr]">
+                    <div>
+                        <Wordmark />
+                        <p className="mt-4 max-w-sm text-ink-soft">A record of your focus, built one session at a time.</p>
                     </div>
 
-                    {COLUMNS.map((col) => (
-                        <div key={col.title}>
-                            <h3 className="font-bold text-sm text-white mb-5">{col.title}</h3>
-                            <ul className="space-y-3">
-                                {col.links.map((link) => (
-                                    <li key={link}>
-                                        <a href="#" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">
-                                            {link}
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
+                    <nav aria-label="On this page">
+                        <p className={HEADING}>On this page</p>
+                        <ul className="mt-3 space-y-2">
+                            {PAGE_LINKS.map((l) => (
+                                <li key={l.href}>
+                                    <AnchorLink href={l.href} className={LINK_CLASS}>
+                                        {l.label}
+                                    </AnchorLink>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+
+                    <nav aria-label="Account and legal">
+                        <p className={HEADING}>Account</p>
+                        <ul className="mt-3 space-y-2">
+                            <li>
+                                <Link to="/auth" className={LINK_CLASS}>
+                                    Sign in or create an account
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/privacy" className={LINK_CLASS}>
+                                    Privacy policy
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/terms" className={LINK_CLASS}>
+                                    Terms of service
+                                </Link>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
 
-                <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p className="text-slate-500 text-sm font-medium">
-                        ProdX. Built for people who don't want to break the chain.
-                    </p>
-                    <Link to="/auth" className="text-sm font-bold text-violet-400 hover:text-violet-300 transition-colors">
-                        Get started →
-                    </Link>
-                </div>
+                <p className="mt-10 border-t border-line pt-6 text-sm text-ink-soft">© {new Date().getFullYear()} Prod-X</p>
             </div>
         </footer>
     );

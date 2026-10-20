@@ -2,7 +2,7 @@ import ENDPOINTS from "@/constants/api-endpoints";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { userAppStore } from "@/store";
 import type { ApiResponse } from "@/types/api-response";
-import type { ILoginResponseData, IUser } from "@/types/user";
+import type { ILoginResponseData } from "@/types/user";
 import apiClient from "@/utils/Axios-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
@@ -24,15 +24,20 @@ const useGoogleAuth = () => {
                 toast.error(data?.message || "User login failed");
                 return;
             }
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
+
             setIsAuthenticated(true);
             setAccessToken(data.data.accessToken);
             setUserId(data.data.user._id);
 
-            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
-
-            console.log("User logged in successfully : ", data.data);
             toast.success(data.message);
             return await navigate("/dashboard");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
+
+            // queryClient.cancelQueries({ queryKey: QUERY_KEYS.PROFILE_PAGE.ME });
+            // const prev = queryClient.getQueryData(QUERY_KEYS.PROFILE.ME);
         },
         onError: (error: AxiosError | Error) => {
             console.log("Error while logging in user with google auth : ", error);

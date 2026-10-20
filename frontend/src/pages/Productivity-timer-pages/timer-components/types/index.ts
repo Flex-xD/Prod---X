@@ -27,7 +27,7 @@ export interface IProductivityTimer {
 
 export interface IGroupParticipant {
     user: IUser;
-    username:String
+    username:string
     productivityDone: number;
     isCurrentlyActive: boolean;
     rank: number;

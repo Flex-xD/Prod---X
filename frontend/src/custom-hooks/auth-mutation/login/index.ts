@@ -12,7 +12,7 @@ import { toast } from "sonner";
 const useLoginMutation = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const { setIsAuthenticated, setAccessToken  ,setUserId} = userAppStore.getState();
+    const { setIsAuthenticated, setAccessToken, setUserId } = userAppStore.getState();
     return useMutation({
         mutationFn: async (formdata: { email: string, password: string }) => {
             const response = await apiClient.post(ENDPOINTS.AUTH_ENDPOINTS.LOGIN, formdata);
@@ -28,10 +28,14 @@ const useLoginMutation = () => {
             setAccessToken(data.data.accessToken);
             setUserId(data.data.user._id);
             console.log("User logged in successfully : ", data.data);
-            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
             toast.success(data.message);
             return await navigate("/dashboard", { replace: true });
         },
+        onSettled: async () => {
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
+
+        }
+        ,
         onError: (error: AxiosError | Error) => {
             console.log("Error while logging in user : ", error);
 

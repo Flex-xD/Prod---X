@@ -1,16 +1,6 @@
-export interface IProfileHeroProps {
-    username: string;
-    email: string;
-    avatarUrl: string;
-    friendsCount: number;
-    productivityPoints: number;
-    onSave: (data: IProfileEditPayload) => void;
-    onLogout: () => void;
-    isLogoutPending:boolean
-}
+import type { IUser } from '@/pages/Productivity-timer-pages/timer-components/types';
 
-export interface IProfileEditPayload {
-    username: string;
-    avatarFile: File | null;
-    avatarPreview: string;
+export interface IProfileHeroProps {
+    user: IUser;
+    currentStreak: number;
 }

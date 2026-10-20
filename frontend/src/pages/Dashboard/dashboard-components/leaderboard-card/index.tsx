@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Trophy, Crown, Medal, Star, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import { spring, quick } from '@/lib/motion';
 
 interface LeaderboardItem {
     rank: number;
@@ -13,128 +14,79 @@ interface LeaderboardCardProps {
     leaderboard: LeaderboardItem[];
 }
 
-const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
-
-const RANK_CONFIG = [
-    { icon: Crown, bg: 'linear-gradient(135deg,#f59e0b,#d97706)', shadow: 'rgba(245,158,11,0.35)' },
-    { icon: Medal, bg: 'linear-gradient(135deg,#94a3b8,#64748b)', shadow: 'rgba(100,116,139,0.25)' },
-    { icon: Star, bg: 'linear-gradient(135deg,#f97316,#ea580c)', shadow: 'rgba(249,115,22,0.3)' },
-];
-
-// Stable avatar gradient for each position
-const AVATAR_GRADS = [
-    'linear-gradient(135deg,#7C3AED,#4F46E5)',
-    'linear-gradient(135deg,#EC4899,#F43F5E)',
-    'linear-gradient(135deg,#10B981,#0D9488)',
-    'linear-gradient(135deg,#F59E0B,#EF4444)',
-];
-
-const LeaderboardCard = ({ leaderboard }: LeaderboardCardProps) => {
-    return (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.6, ...sp }}
-            className="rounded-3xl bg-white overflow-hidden"
-            style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.05)' }}
-        >
-            {/* Header */}
-            <div
-                className="px-5 pt-5 pb-4 flex items-center justify-between"
-                style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}
-            >
-                <div>
-                    <h3 className="font-black text-slate-900 text-base">Leaderboard</h3>
-                    <p className="text-slate-400 text-xs font-medium mt-0.5">This week's top performers</p>
-                </div>
-                <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{ background: '#fefce8', border: '1px solid #fde68a' }}
-                >
-                    <Trophy className="w-4.5 h-4.5 w-[18px] h-[18px] text-amber-500" />
-                </div>
+// Ranking as measurement, not game: mono rank numbers and scores,
+// no medals, crowns, wobbles or confetti colors.
+const LeaderboardCard = ({ leaderboard }: LeaderboardCardProps) => (
+    <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...spring, delay: 0.2 }}
+        className="overflow-hidden rounded-lg border-2 border-ink bg-surface"
+    >
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 border-b-2 border-ink px-5 py-3.5">
+            <div>
+                <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-ink">Leaderboard</h2>
+                <p className="mt-0.5 text-[11px] font-medium text-ink-faint">
+                    Ranked by focus this week
+                </p>
             </div>
+        </div>
 
-            {/* Rows */}
-            <div className="p-3 space-y-1.5">
-                {leaderboard.map((user, i) => {
-                    const rank = RANK_CONFIG[i];
-                    const RankIcon = rank?.icon ?? Star;
+        {/* Rows */}
+        <div className="divide-y divide-line px-5">
+            {leaderboard.map((user, i) => (
+                <motion.div
+                    key={user.rank}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ ...quick, delay: i * 0.05 }}
+                    className="flex items-center gap-3 py-3"
+                >
+                    <span className="w-5 flex-shrink-0 font-mono text-sm font-bold tabular-nums text-ink-faint">
+                        {String(user.rank).padStart(2, '0')}
+                    </span>
 
-                    return (
-                        <motion.div
-                            key={user.rank}
-                            initial={{ opacity: 0, x: 16 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.07, ...sp }}
-                            className="p-3.5 rounded-2xl flex items-center gap-3 transition-all"
-                            style={{
-                                background: user.isYou
-                                    ? 'linear-gradient(135deg,#f5f3ff,#ede9fe)'
-                                    : '#f8fafc',
-                                border: user.isYou ? '1.5px solid #ddd6fe' : '1.5px solid transparent',
-                            }}
+                    <span
+                        aria-hidden="true"
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper text-[10px] font-bold text-ink"
+                    >
+                        {user.avatar}
+                    </span>
+
+                    <span className="min-w-0 flex-1">
+                        <span
+                            className={`block truncate text-sm text-ink ${
+                                user.isYou ? 'font-bold' : 'font-semibold'
+                            }`}
                         >
-                            {/* Rank badge */}
-                            <div
-                                className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                                style={{
-                                    background: rank?.bg ?? 'linear-gradient(135deg,#cbd5e1,#94a3b8)',
-                                    boxShadow: rank ? `0 4px 10px ${rank.shadow}` : 'none',
-                                }}
-                            >
-                                <RankIcon className="w-3.5 h-3.5 text-white" />
-                            </div>
+                            {user.name}
+                        </span>
+                    </span>
 
-                            {/* Avatar */}
-                            <div
-                                className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0"
-                                style={{ background: AVATAR_GRADS[i % AVATAR_GRADS.length] }}
-                            >
-                                {user.avatar}
-                            </div>
+                    {user.isYou && (
+                        <span className="flex-shrink-0 rounded-full bg-ink px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-paper">
+                            You
+                        </span>
+                    )}
 
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="font-black text-slate-900 text-sm truncate">{user.name}</span>
-                                    {user.isYou && (
-                                        <span
-                                            className="text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-                                            style={{ background: '#ede9fe', color: '#7c3aed' }}
-                                        >
-                                            You
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-xs font-semibold text-slate-400 mt-0.5">{user.score} pts</p>
-                            </div>
+                    <span className="flex-shrink-0 font-mono text-sm font-bold tabular-nums text-ink">
+                        {user.score}
+                        <span className="ml-0.5 text-[10px] font-semibold text-ink-faint">pts</span>
+                    </span>
+                </motion.div>
+            ))}
+        </div>
 
-                            {/* Score accent for rank 1 */}
-                            {user.rank === 1 && (
-                                <motion.div
-                                    animate={{ rotate: [0, 10, -10, 0] }}
-                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
-                                >
-                                    <Star className="w-4 h-4 text-amber-400" />
-                                </motion.div>
-                            )}
-                        </motion.div>
-                    );
-                })}
-
-                {/* CTA */}
-                <motion.button
-                    whileHover={{ x: 3 }}
-                    whileTap={{ scale: 0.97 }}
-                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold transition-colors"
-                    style={{ color: '#7c3aed' }}
-                >
-                    View Full Leaderboard <ChevronRight className="w-4 h-4" />
-                </motion.button>
-            </div>
-        </motion.div>
-    );
-};
+        {/* CTA */}
+        <button
+            type="button"
+            className="flex w-full items-center justify-center gap-1.5 border-t-2 border-ink py-3 text-xs font-bold uppercase tracking-wider text-ink transition-colors duration-fast hover:bg-paper-deep"
+        >
+            View full leaderboard
+            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+    </motion.div>
+);
 
 export default LeaderboardCard;

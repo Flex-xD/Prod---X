@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Clock3, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Pill, SectionDivider } from './timer-components/ui';
 import type { IGroupTimer, IProductivityTimer, ViewMode } from './timer-components/types';
-import { MAX_INDIVIDUAL_TIMERS, MAX_GROUP_TIMERS, sp } from './timer-components/constants';
+import { MAX_INDIVIDUAL_TIMERS, MAX_GROUP_TIMERS } from './timer-components/constants';
+import { enter, pressSpring, quick } from '@/lib/motion';
 import TimerPageHeader from './timer-components/timer-page-header';
 import EmptyGroupState from './timer-components/empty-group-state';
 import GroupTimerCard from './timer-components/group-timer-card';
@@ -28,9 +29,8 @@ const TimerPage = () => {
     const [view, setView] = useState<ViewMode>('dashboard');
     const [selectedInd, setSelectedInd] = useState<IProductivityTimer | null>(null);
     const [selectedGrp, setSelectedGrp] = useState<IGroupTimer | null>(null);
-    const [dashboardTab, setDashboardTab] = useState<DashboardTab>('active')
+    const [dashboardTab, setDashboardTab] = useState<DashboardTab>('active');
     useLiveGroupTimerUpdates();
-
 
     const { data: activeGroupProductivityTimers } = useGetActiveGroupProductivityTimers();
     const { data: activeProducitivityTimers } = useGetActiveProductivityTimer();
@@ -39,7 +39,6 @@ const TimerPage = () => {
     const { data: expiredIndividualTimers } = useGetExpiredProductivityTimer();
     const { data: completedGroupTimers } = useGetCompletedGroupProductivityTimers();
     const { data: completedIndividualTimers } = useGetCompletedProductivityTimer();
-
 
     useEffect(() => {
         if (!selectedGrp) return;
@@ -84,17 +83,17 @@ const TimerPage = () => {
     const pendingInvitesCount = pendingInvites?.data?.length ?? 0;
     const expiredCount = (expiredGroupTimers?.data?.length ?? 0) + (expiredIndividualTimers?.data?.length ?? 0);
     const completedCount = (completedGroupTimers?.data?.length ?? 0) + (completedIndividualTimers?.data?.length ?? 0);
+
     const TABS: { key: DashboardTab; label: string; icon: typeof Clock3; count?: number }[] = [
         { key: 'active', label: 'Active', icon: Clock3 },
         { key: 'completed', label: 'Completed', icon: CheckCircle2, count: completedCount },
         { key: 'expired', label: 'Expired', icon: AlertTriangle, count: expiredCount },
     ];
 
+    const EMPTY = 'rounded-lg border-2 border-dashed border-line bg-surface p-8 text-center text-sm font-medium text-ink-faint';
+
     return (
-        <div
-            className="min-h-screen"
-            style={{ background: 'linear-gradient(160deg,#f8f7ff 0%,#fdf4ff 35%,#f0f9ff 65%,#fafafa 100%)' }}
-        >
+        <div className="min-h-screen bg-paper">
             <TimerPageHeader
                 view={view}
                 selectedInd={selectedInd}
@@ -103,237 +102,332 @@ const TimerPage = () => {
                 onNewTimer={() => setShowModal(true)}
             />
 
-            <div className="max-w-4xl mx-auto px-6 py-8">
+            <div className="mx-auto max-w-4xl px-6 py-8">
                 <AnimatePresence mode="wait">
                     {view === 'dashboard' && (
                         <motion.div
                             key="dashboard"
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            transition={{ duration: 0.22 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={quick}
                         >
-                            <div className="flex items-center gap-2 mb-8">
+                            {/* Tabs: one shared underline slides with pressSpring.
+                                Green marks where you are, the way ::selection does. */}
+                            <div
+                                role="group"
+                                aria-label="Timer status"
+                                className="mb-8 flex flex-wrap items-center gap-1 border-b-2 border-ink"
+                            >
                                 {TABS.map(({ key, label, icon: Icon, count }) => (
                                     <button
                                         key={key}
+                                        type="button"
+                                        aria-pressed={dashboardTab === key}
                                         onClick={() => setDashboardTab(key)}
-                                        className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-bold transition-all"
-                                        style={
+                                        className={`relative flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors duration-fast ${
                                             dashboardTab === key
-                                                ? { background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', color: 'white', boxShadow: '0 6px 16px rgba(124,58,237,0.3)' }
-                                                : { background: '#f8fafc', color: '#94a3b8', border: '1px solid rgba(0,0,0,0.05)' }
-                                        }
+                                                ? 'text-ink'
+                                                : 'text-ink-faint hover:text-ink-soft'
+                                        }`}
                                     >
-                                        <Icon className="w-3.5 h-3.5" /> {label}
+                                        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                                        {label}
                                         {!!count && (
                                             <span
-                                                className="ml-1 text-[10px] font-black px-1.5 py-0.5 rounded-full"
-                                                style={dashboardTab === key ? { background: 'rgba(255,255,255,0.25)' } : { background: '#e2e8f0', color: '#64748b' }}
+                                                className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums ${
+                                                    dashboardTab === key
+                                                        ? 'bg-ink text-paper'
+                                                        : 'bg-paper-deep text-ink-soft'
+                                                }`}
                                             >
                                                 {count}
                                             </span>
+                                        )}
+                                        {dashboardTab === key && (
+                                            <motion.span
+                                                layoutId="timer-tab-active"
+                                                transition={pressSpring}
+                                                aria-hidden="true"
+                                                className="absolute inset-x-0 -bottom-[2px] h-0.5 bg-progress"
+                                            />
                                         )}
                                     </button>
                                 ))}
                             </div>
 
-                            {dashboardTab === 'active' && pendingInvitesCount > 0 && (
-                                <section className="mb-10">
-                                    <div className="flex items-center justify-between mb-5">
-                                        <div>
-                                            <h2 className="text-base font-black text-slate-900">Pending Invitations</h2>
-                                            <p className="text-xs text-slate-400 font-medium mt-0.5">Group timers waiting on your response</p>
-                                        </div>
-                                        <Pill color="violet">{pendingInvitesCount} pending</Pill>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {pendingInvites?.data.map((timer, i) => (
-                                            <GroupTimerCard key={timer._id} timer={timer} index={i} onClick={() => { }} isPendingInvite />
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
-
-                            {dashboardTab === 'active' && (
-                                <>
-                                    <section className="mb-10">
-                                        <div className="flex items-center justify-between mb-5">
-                                            <div>
-                                                <h2 className="text-base font-black text-slate-900">Group Timers</h2>
-                                                <p className="text-xs text-slate-400 font-medium mt-0.5">Created or joined sessions</p>
-                                            </div>
-                                            <Pill color={activeGroupTimersLength > 0 ? 'rose' : 'slate'}>{activeGroupTimersLength} active</Pill>
-                                        </div>
-
-                                        {/* CHANGED: new — group timers get the same slot tracker individual timers have */}
-                                        <CapacityTracker used={activeGroupTimersLength} max={MAX_GROUP_TIMERS} />
-
-                                        {activeGroupTimersLength === 0 ? (
-                                            <div className="rounded-3xl bg-white overflow-hidden" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                                                <EmptyGroupState onCreateClick={() => setShowModal(true)} />
-                                            </div>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {activeGroupProductivityTimers?.data.map((timer, i) => (
-                                                    <GroupTimerCard key={timer._id} timer={timer} index={i} onClick={() => openGroup(timer)} />
-                                                ))}
-                                            </div>
+                            {/* Tab content swaps as one block; sections below carry
+                                the arrival. One entrance per section, not per card. */}
+                            <AnimatePresence mode="wait" initial={false}>
+                                {dashboardTab === 'active' && (
+                                    <motion.div
+                                        key="tab-active"
+                                        initial={{ opacity: 0, y: 6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -6 }}
+                                        transition={quick}
+                                    >
+                                        {pendingInvitesCount > 0 && (
+                                            <motion.section {...enter(0)} className="mb-10">
+                                                <div className="mb-5 flex items-center justify-between gap-4">
+                                                    <div>
+                                                        <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-ink">
+                                                            Pending Invitations
+                                                        </h2>
+                                                        <p className="mt-0.5 text-xs font-medium text-ink-faint">
+                                                            Group timers waiting on your response
+                                                        </p>
+                                                    </div>
+                                                    <Pill color="focus">{pendingInvitesCount} pending</Pill>
+                                                </div>
+                                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                                    {/* popLayout: cards collapse out when accepted
+                                                        or declined, the grid reflows behind them. */}
+                                                    <AnimatePresence mode="popLayout" initial={false}>
+                                                        {pendingInvites?.data.map((timer) => (
+                                                            <GroupTimerCard
+                                                                key={timer._id}
+                                                                timer={timer}
+                                                                onClick={() => {}}
+                                                                isPendingInvite
+                                                            />
+                                                        ))}
+                                                    </AnimatePresence>
+                                                </div>
+                                            </motion.section>
                                         )}
-                                    </section>
 
-                                    <SectionDivider>Individual Sessions</SectionDivider>
-
-                                    <section>
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div>
-                                                <h2 className="text-base font-black text-slate-900">Your Focus Sessions</h2>
-                                                <p className="text-xs text-slate-400 font-medium mt-0.5">
-                                                    {activeIndividualTimersLength}/{MAX_INDIVIDUAL_TIMERS} slots used
-                                                </p>
+                                        <motion.section {...enter(0.06)} className="mb-10">
+                                            <div className="mb-5 flex items-center justify-between gap-4">
+                                                <div>
+                                                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-ink">
+                                                        Group Timers
+                                                    </h2>
+                                                    <p className="mt-0.5 text-xs font-medium text-ink-faint">
+                                                        Created or joined sessions
+                                                    </p>
+                                                </div>
+                                                <Pill color={activeGroupTimersLength > 0 ? 'focus' : 'neutral'}>
+                                                    {activeGroupTimersLength} active
+                                                </Pill>
                                             </div>
-                                        </div>
 
-                                        <CapacityTracker used={activeIndividualTimersLength} max={MAX_INDIVIDUAL_TIMERS} />
+                                            <CapacityTracker used={activeGroupTimersLength} max={MAX_GROUP_TIMERS} />
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {activeProducitivityTimers?.data.map((timer, i) => (
-                                                <IndividualTimerCard key={timer._id} timer={timer} index={i} onClick={() => openIndividual(timer)} />
-                                            ))}
-
-                                            {canCreateIndividual && (
-                                                <motion.button
-                                                    initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: activeIndividualTimersLength * 0.07, ...sp }}
-                                                    whileHover={{ y: -5, borderColor: '#7C3AED' }}
-                                                    whileTap={{ scale: 0.97 }}
-                                                    onClick={() => setShowModal(true)}
-                                                    className="rounded-3xl flex flex-col items-center justify-center gap-3 p-8 min-h-36 transition-all group"
-                                                    style={{ border: '2px dashed #e2e8f0', background: 'transparent' }}
-                                                >
-                                                    <motion.div
-                                                        className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                                                        style={{ background: '#f5f3ff', border: '1px solid #ddd6fe' }}
-                                                        whileHover={{ rotate: 90 }} transition={{ duration: 0.3 }}
-                                                    >
-                                                        <Plus className="w-6 h-6 text-violet-500" />
-                                                    </motion.div>
-                                                    <span className="text-sm font-bold text-slate-400 group-hover:text-violet-500 transition-colors">
-                                                        New Session
-                                                    </span>
-                                                </motion.button>
+                                            {activeGroupTimersLength === 0 ? (
+                                                <div className="overflow-hidden rounded-lg border-2 border-ink bg-surface shadow-hard">
+                                                    <EmptyGroupState onCreateClick={() => setShowModal(true)} />
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                                    {activeGroupProductivityTimers?.data.map((timer) => (
+                                                        <GroupTimerCard
+                                                            key={timer._id}
+                                                            timer={timer}
+                                                            onClick={() => openGroup(timer)}
+                                                        />
+                                                    ))}
+                                                </div>
                                             )}
-                                        </div>
-                                    </section>
-                                </>
-                            )}
+                                        </motion.section>
 
-                            {dashboardTab === 'completed' && (
-                                <>
-                                    <section className="mb-10">
-                                        <div className="flex items-center justify-between mb-5">
-                                            <div>
-                                                <h2 className="text-base font-black text-slate-900">Completed Group Timers</h2>
-                                                <p className="text-xs text-slate-400 font-medium mt-0.5">Goals you've finished and archived</p>
-                                            </div>
-                                            <Pill color="slate">{completedGroupTimers?.data?.length ?? 0} completed</Pill>
-                                        </div>
+                                        <SectionDivider>Individual Sessions</SectionDivider>
 
-                                        {(completedGroupTimers?.data?.length ?? 0) === 0 ? (
-                                            <div className="rounded-3xl bg-white p-8 text-center text-sm text-slate-400 font-medium"
-                                                style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                                                No completed group timers yet.
+                                        <motion.section {...enter(0.12)}>
+                                            <div className="mb-4 flex items-center justify-between gap-4">
+                                                <div>
+                                                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-ink">
+                                                        Your Focus Sessions
+                                                    </h2>
+                                                    <p className="mt-0.5 font-mono text-xs text-ink-faint">
+                                                        {activeIndividualTimersLength}/{MAX_INDIVIDUAL_TIMERS} slots used
+                                                    </p>
+                                                </div>
                                             </div>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {completedGroupTimers?.data.map((timer, i) => (
-                                                    <GroupTimerCard key={timer._id} timer={timer} index={i} onClick={() => openGroup(timer)} />
+
+                                            <CapacityTracker used={activeIndividualTimersLength} max={MAX_INDIVIDUAL_TIMERS} />
+
+                                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                                {activeProducitivityTimers?.data.map((timer) => (
+                                                    <IndividualTimerCard
+                                                        key={timer._id}
+                                                        timer={timer}
+                                                        onClick={() => openIndividual(timer)}
+                                                    />
                                                 ))}
-                                            </div>
-                                        )}
-                                    </section>
 
-                                    <SectionDivider>Completed Individual Sessions</SectionDivider>
-
-                                    <section>
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h2 className="text-base font-black text-slate-900">Finished Focus Sessions</h2>
-                                            <Pill color="slate">{completedIndividualTimers?.data?.length ?? 0} completed</Pill>
-                                        </div>
-
-                                        {(completedIndividualTimers?.data?.length ?? 0) === 0 ? (
-                                            <div className="rounded-3xl bg-white p-8 text-center text-sm text-slate-400 font-medium"
-                                                style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                                                No completed sessions yet.
+                                                {canCreateIndividual && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowModal(true)}
+                                                        className="group flex min-h-36 flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-line p-8 transition-all duration-fast hover:-translate-y-px hover:border-ink active:translate-x-[2px] active:translate-y-[2px]"
+                                                    >
+                                                        <span className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-ink bg-surface text-ink transition-colors duration-fast group-hover:bg-focus">
+                                                            <Plus className="h-6 w-6" aria-hidden="true" />
+                                                        </span>
+                                                        <span className="text-xs font-bold uppercase tracking-wider text-ink-faint transition-colors duration-fast group-hover:text-ink">
+                                                            New Session
+                                                        </span>
+                                                    </button>
+                                                )}
                                             </div>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {completedIndividualTimers?.data.map((timer, i) => (
-                                                    <IndividualTimerCard key={timer._id} timer={timer} index={i} onClick={() => openIndividual(timer)} />
-                                                ))}
-                                            </div>
-                                        )}
-                                    </section>
-                                </>
-                            )}
+                                        </motion.section>
+                                    </motion.div>
+                                )}
 
-                            {dashboardTab === 'expired' && (
-                                <>
-                                    <section className="mb-10">
-                                        <div className="flex items-center justify-between mb-5">
-                                            <div>
-                                                <h2 className="text-base font-black text-slate-900">Expired Group Timers</h2>
-                                                <p className="text-xs text-slate-400 font-medium mt-0.5">Sessions past their deadline</p>
+                                {dashboardTab === 'completed' && (
+                                    <motion.div
+                                        key="tab-completed"
+                                        initial={{ opacity: 0, y: 6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -6 }}
+                                        transition={quick}
+                                    >
+                                        <motion.section {...enter(0)} className="mb-10">
+                                            <div className="mb-5 flex items-center justify-between gap-4">
+                                                <div>
+                                                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-ink">
+                                                        Completed Group Timers
+                                                    </h2>
+                                                    <p className="mt-0.5 text-xs font-medium text-ink-faint">
+                                                        Goals you've finished and archived
+                                                    </p>
+                                                </div>
+                                                <Pill color="progress">
+                                                    {completedGroupTimers?.data?.length ?? 0} completed
+                                                </Pill>
                                             </div>
-                                            <Pill color="slate">{expiredGroupTimers?.data?.length ?? 0} expired</Pill>
-                                        </div>
 
-                                        {(expiredGroupTimers?.data?.length ?? 0) === 0 ? (
-                                            <div className="rounded-3xl bg-white p-8 text-center text-sm text-slate-400 font-medium"
-                                                style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                                                No expired group timers.
-                                            </div>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {expiredGroupTimers?.data.map((timer, i) => (
-                                                    <GroupTimerCard key={timer._id} timer={timer} index={i} onClick={() => openGroup(timer)} />
-                                                ))}
-                                            </div>
-                                        )}
-                                    </section>
+                                            {(completedGroupTimers?.data?.length ?? 0) === 0 ? (
+                                                <div className={EMPTY}>No completed group timers yet.</div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                                    {completedGroupTimers?.data.map((timer) => (
+                                                        <GroupTimerCard
+                                                            key={timer._id}
+                                                            timer={timer}
+                                                            onClick={() => openGroup(timer)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </motion.section>
 
-                                    <SectionDivider>Expired Individual Sessions</SectionDivider>
+                                        <SectionDivider>Completed Individual Sessions</SectionDivider>
 
-                                    <section>
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h2 className="text-base font-black text-slate-900">Past Focus Sessions</h2>
-                                            <Pill color="slate">{expiredIndividualTimers?.data?.length ?? 0} expired</Pill>
-                                        </div>
+                                        <motion.section {...enter(0.06)}>
+                                            <div className="mb-5 flex items-center justify-between gap-4">
+                                                <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-ink">
+                                                    Finished Focus Sessions
+                                                </h2>
+                                                <Pill color="progress">
+                                                    {completedIndividualTimers?.data?.length ?? 0} completed
+                                                </Pill>
+                                            </div>
 
-                                        {(expiredIndividualTimers?.data?.length ?? 0) === 0 ? (
-                                            <div className="rounded-3xl bg-white p-8 text-center text-sm text-slate-400 font-medium"
-                                                style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.05)' }}>
-                                                No expired sessions.
+                                            {(completedIndividualTimers?.data?.length ?? 0) === 0 ? (
+                                                <div className={EMPTY}>No completed sessions yet.</div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                                    {completedIndividualTimers?.data.map((timer) => (
+                                                        <IndividualTimerCard
+                                                            key={timer._id}
+                                                            timer={timer}
+                                                            onClick={() => openIndividual(timer)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </motion.section>
+                                    </motion.div>
+                                )}
+
+                                {dashboardTab === 'expired' && (
+                                    <motion.div
+                                        key="tab-expired"
+                                        initial={{ opacity: 0, y: 6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -6 }}
+                                        transition={quick}
+                                    >
+                                        <motion.section {...enter(0)} className="mb-10">
+                                            <div className="mb-5 flex items-center justify-between gap-4">
+                                                <div>
+                                                    <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-ink">
+                                                        Expired Group Timers
+                                                    </h2>
+                                                    <p className="mt-0.5 text-xs font-medium text-ink-faint">
+                                                        Sessions past their deadline
+                                                    </p>
+                                                </div>
+                                                <Pill color="alert">{expiredGroupTimers?.data?.length ?? 0} expired</Pill>
                                             </div>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {expiredIndividualTimers?.data.map((timer, i) => (
-                                                    <IndividualTimerCard key={timer._id} timer={timer} index={i} onClick={() => openIndividual(timer)} />
-                                                ))}
+
+                                            {(expiredGroupTimers?.data?.length ?? 0) === 0 ? (
+                                                <div className={EMPTY}>No expired group timers.</div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                                    {expiredGroupTimers?.data.map((timer) => (
+                                                        <GroupTimerCard
+                                                            key={timer._id}
+                                                            timer={timer}
+                                                            onClick={() => openGroup(timer)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </motion.section>
+
+                                        <SectionDivider>Expired Individual Sessions</SectionDivider>
+
+                                        <motion.section {...enter(0.06)}>
+                                            <div className="mb-5 flex items-center justify-between gap-4">
+                                                <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-ink">
+                                                    Past Focus Sessions
+                                                </h2>
+                                                <Pill color="alert">{expiredIndividualTimers?.data?.length ?? 0} expired</Pill>
                                             </div>
-                                        )}
-                                    </section>
-                                </>
-                            )}
+
+                                            {(expiredIndividualTimers?.data?.length ?? 0) === 0 ? (
+                                                <div className={EMPTY}>No expired sessions.</div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                                    {expiredIndividualTimers?.data.map((timer) => (
+                                                        <IndividualTimerCard
+                                                            key={timer._id}
+                                                            timer={timer}
+                                                            onClick={() => openIndividual(timer)}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </motion.section>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
                     )}
 
                     {view === 'individual-detail' && selectedInd && (
-                        <motion.div key="individual-detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <motion.div
+                            key="individual-detail"
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={quick}
+                        >
                             <IndividualTimerDetail timer={selectedInd} onBack={handleBack} />
                         </motion.div>
                     )}
 
                     {view === 'group-detail' && selectedGrp && (
-                        <motion.div key="group-detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <motion.div
+                            key="group-detail"
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={quick}
+                        >
                             <GroupTimerDetail timer={selectedGrp} onBack={handleBack} />
                         </motion.div>
                     )}
@@ -341,7 +435,13 @@ const TimerPage = () => {
             </div>
 
             <AnimatePresence>
-                {showModal && <CreateTimerModal onClose={() => setShowModal(false)} canCreateIndividual={canCreateIndividual} canCreateGroup={canCreateGroup} />}
+                {showModal && (
+                    <CreateTimerModal
+                        onClose={() => setShowModal(false)}
+                        canCreateIndividual={canCreateIndividual}
+                        canCreateGroup={canCreateGroup}
+                    />
+                )}
             </AnimatePresence>
         </div>
     );

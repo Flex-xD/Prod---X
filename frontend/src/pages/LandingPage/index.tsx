@@ -1,24 +1,37 @@
-import FeaturesSection from "./landingPage-components/FeaturesSection";
-import Footer from "./landingPage-components/Footer";
-import HeroSection from "./landingPage-components/HeroSection";
-import LandingNavbar from "./landingPage-components/Navbar";
-import Testimonials from "./landingPage-components/Testimonial";
-import WorkingSection from "./landingPage-components/WorkingSection";
-import StorySection from "./landingPage-components/Story-section";
-import CtaSection from "./landingPage-components/CTA-Section";
+import { MotionConfig } from 'framer-motion';
+import CtaSection from './landingPage-components/CTA-Section';
+import FeaturesSection from './landingPage-components/FeaturesSection';
+import Footer from './landingPage-components/Footer';
+import GroupSection from './landingPage-components/Group-Section';
+import HeroSection from './landingPage-components/HeroSection';
+import LandingNavbar from './landingPage-components/Navbar';
+import RecordSection from './landingPage-components/Record-Section';
+import StorySection from './landingPage-components/Story-section';
+import WorkingSection from './landingPage-components/WorkingSection';
 
 const ProdXLandingPage = () => {
     return (
-        <div className="bg-white">
-            <LandingNavbar />
-            <HeroSection />
-            <StorySection />
-            <FeaturesSection />
-            <WorkingSection />
-            <Testimonials />
-            <CtaSection />
-            <Footer />
-        </div>
+        <MotionConfig reducedMotion="user">
+            <div className="bg-paper text-ink">
+                <a
+                    href="#main"
+                    className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:border-2 focus:border-ink focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:font-bold"
+                >
+                    Skip to content
+                </a>
+                <LandingNavbar />
+                <main id="main">
+                    <HeroSection />
+                    <StorySection />
+                    <WorkingSection />
+                    <RecordSection />
+                    <FeaturesSection />
+                    <GroupSection />
+                    <CtaSection />
+                </main>
+                <Footer />
+            </div>
+        </MotionConfig>
     );
 };
 

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
-import { Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { IDashboardSummary } from '@/types/dashboard';
+import { spring, progressUpdate } from '@/lib/motion';
 
 interface GroupTimerStatCardProps {
     data: IDashboardSummary['latestGroupTimer'];
@@ -9,55 +9,61 @@ interface GroupTimerStatCardProps {
 }
 
 const GroupTimerStatCard = ({ data, delay = 0 }: GroupTimerStatCardProps) => {
+    if (!data) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...spring, delay: delay + 0.15 }}
+                className="flex flex-col gap-2 p-5 lg:p-6"
+            >
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink-soft">
+                    Group Session
+                </span>
+                <span className="font-mono text-3xl font-bold leading-none text-ink-faint lg:text-4xl">
+                    None
+                </span>
+                <span className="min-h-5 text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
+                    <Link
+                        to="/timer"
+                        className="font-bold text-ink underline decoration-2 underline-offset-2 transition-colors duration-fast hover:text-progress-deep"
+                    >
+                        Create one
+                    </Link>
+                </span>
+            </motion.div>
+        );
+    }
+
     return (
         <motion.div
-            initial= {{ opacity: 0, y: 20 }
-}
-animate = {{ opacity: 1, y: 0 }}
-transition = {{ duration: 0.4, delay, type: 'spring', damping: 28, stiffness: 280 }}
-whileHover = {{ y: -4, boxShadow: '0 24px 48px rgba(236,72,153,0.35)' }}
-className = "relative rounded-3xl overflow-hidden text-white cursor-default"
-style = {{ background: 'linear-gradient(135deg, #EC4899, #F43F5E)', boxShadow: '0 8px 28px rgba(236,72,153,0.4)' }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...spring, delay: delay + 0.15 }}
+            className="flex flex-col gap-2 p-5 lg:p-6"
         >
-    <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full" style = {{ background: 'rgba(255,255,255,0.12)', filter: 'blur(24px)' }} />
+            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink-soft">
+                Group Session
+            </span>
+            <span className="font-mono text-3xl font-bold leading-none tabular-nums text-ink lg:text-4xl">
+                {data.progressPct}
+                <span className="text-base">%</span>
+            </span>
 
-        < div className = "relative z-10 p-6" >
-            <div className="flex items-start justify-between mb-4" >
-                <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style = {{ background: 'rgba(255,255,255,0.18)' }}>
-                    <Users className="w-8 h-8 p-1.5" />
-                        </div>
-                        < span className = "text-xs font-bold px-2.5 py-1 rounded-full" style = {{ background: 'rgba(255,255,255,0.2)' }}>
-                            Group
-                            </span>
-                            </div>
-
-{
-    data ? (
-        <>
-        <div className= "text-lg font-black mb-1 leading-tight truncate" > { data.title } </div>
-        < div className = "text-sm font-medium opacity-75 mb-3" >
-            { data.participantCount } member{ data.participantCount !== 1 ? 's' : '' } · { data.progressPct }% done
-                </div>
-                < div className = "w-full rounded-full overflow-hidden" style = {{ height: 5, background: 'rgba(255,255,255,0.2)' }
-}>
-    <motion.div
-                                className="h-full rounded-full bg-white"
-initial = {{ width: 0 }}
-animate = {{ width: `${data.progressPct}%` }}
-transition = {{ duration: 1.2, delay: delay + 0.4, ease: [0.34, 1.2, 0.64, 1] }}
-                            />
-    </div>
-    </>
-                ) : (
-    <>
-    <div className= "text-lg font-black mb-1" > No active group timer </div>
-        < Link to = "/timer" className = "flex items-center gap-1 text-sm font-bold opacity-90 hover:opacity-100 transition-opacity mt-2" >
-            Create one < ArrowRight className = "w-3.5 h-3.5" />
-                </Link>
-                </>
-                )}
-</div>
-    </motion.div>
+            <span className="flex min-h-5 flex-col gap-1.5">
+                <span className="block h-1.5 w-full overflow-hidden rounded-sm bg-paper-deep">
+                    <motion.span
+                        className="block h-full rounded-sm bg-progress"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${data.progressPct}%` }}
+                        transition={{ ...progressUpdate, delay: delay + 0.3 }}
+                    />
+                </span>
+                <span className="block truncate text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
+                    {data.participantCount} member{data.participantCount !== 1 ? 's' : ''} · {data.title}
+                </span>
+            </span>
+        </motion.div >
     );
 };
 

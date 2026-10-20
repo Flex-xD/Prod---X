@@ -4,13 +4,12 @@ import type { INotification, InvitationStatus } from "@/types/notification";
 import { userAppStore } from "@/store";
 import useRespondToInvitationMutation from "@/custom-hooks/notification/response-invitation";
 import { timeAgo } from "@/utils/notification";
+import { enter } from "@/lib/motion";
 
 interface Props {
     notification: INotification;
     index: number;
 }
-
-const sp = { type: "spring", damping: 26, stiffness: 300 } as const;
 
 const InvitationNotificationItem = ({ notification, index }: Props) => {
     const user_id = userAppStore((state) => state.user_id) ?? "";
@@ -32,73 +31,78 @@ const InvitationNotificationItem = ({ notification, index }: Props) => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05, ...sp }}
-            className="p-4 rounded-2xl relative"
-            style={{
-                background: isUnread ? "linear-gradient(135deg,#f5f3ff,#ede9fe)" : "#f8fafc",
-                border: isUnread ? "1.5px solid #ddd6fe" : "1.5px solid rgba(0,0,0,0.05)",
-            }}
+            {...enter(Math.min(index, 8) * 0.04)}
+            className={`relative rounded-lg p-4 ${
+                isUnread ? "border-2 border-ink bg-focus-tint" : "border border-line bg-surface"
+            }`}
         >
+            {/* Unread = a decision waiting on you, so focus orange marks current
+                attention. The tint clears when the item is read; the pills below
+                carry the decision itself. */}
             {isUnread && (
-                <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-violet-500" />
+                <span
+                    aria-hidden="true"
+                    className="absolute right-4 top-4 h-2 w-2 rounded-full bg-focus-deep"
+                />
             )}
 
             <div className="flex items-start gap-3">
                 {/* Icon */}
-                <div
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg,#7C3AED,#4F46E5)", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
-                >
-                    <Users className="w-4.5 h-4.5 w-[18px] h-[18px] text-white" />
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-sm border-2 border-ink bg-focus text-ink">
+                    <Users className="h-[18px] w-[18px]" aria-hidden="true" />
                 </div>
 
-                <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-900 leading-snug">
-                        <span className="text-violet-600">{notification.from?.username ?? "Someone"}</span>{" "}
+                <div className="min-w-0 flex-1 pr-6">
+                    <p className="text-sm font-semibold leading-snug text-ink-soft">
+                        <span className="font-bold text-ink">
+                            {notification.from?.username ?? "Someone"}
+                        </span>{" "}
                         invited you to join{" "}
-                        <span className="font-black">"{notification.invitation?.timerName ?? "a group timer"}"</span>
+                        <span className="font-bold text-ink">
+                            "{notification.invitation?.timerName ?? "a group timer"}"
+                        </span>
                     </p>
-                    <p className="text-xs text-slate-400 font-semibold mt-1 flex items-center gap-1">
-                        <Clock3 className="w-3 h-3" /> {timeAgo(notification.createdAt)}
+                    <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-ink-faint">
+                        <Clock3 className="h-3 w-3" aria-hidden="true" />{" "}
+                        {timeAgo(notification.createdAt)}
                     </p>
 
                     {/* Actions / status */}
                     <div className="mt-3">
                         {status === "pending" ? (
                             <div className="flex gap-2">
-                                <motion.button
-                                    whileTap={{ scale: 0.95 }}
+                                <button
+                                    type="button"
                                     disabled={isPending}
                                     onClick={() => handleResponse("accepted")}
-                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-white transition-opacity disabled:opacity-60"
-                                    style={{ background: "linear-gradient(135deg,#7C3AED,#4F46E5)", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
+                                    className="press-hard inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border-2 border-ink bg-progress px-3 py-2 text-xs font-bold text-ink disabled:pointer-events-none disabled:opacity-60"
                                 >
-                                    <Check className="w-3.5 h-3.5" />
+                                    <Check className="h-3.5 w-3.5" aria-hidden="true" />
                                     {pendingAction === "accepted" ? "Accepting..." : "Accept"}
-                                </motion.button>
-                                <motion.button
-                                    whileTap={{ scale: 0.95 }}
+                                </button>
+                                <button
+                                    type="button"
                                     disabled={isPending}
                                     onClick={() => handleResponse("declined")}
-                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-opacity disabled:opacity-60"
-                                    style={{ background: "white", color: "#64748b", border: "1.5px solid rgba(0,0,0,0.08)" }}
+                                    className="press-hard inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border-2 border-ink bg-surface px-3 py-2 text-xs font-bold text-ink-soft disabled:pointer-events-none disabled:opacity-60"
                                 >
-                                    <X className="w-3.5 h-3.5" />
+                                    <X className="h-3.5 w-3.5" aria-hidden="true" />
                                     {pendingAction === "declined" ? "Declining..." : "Decline"}
-                                </motion.button>
+                                </button>
                             </div>
                         ) : (
                             <span
-                                className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
-                                style={
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${
                                     status === "accepted"
-                                        ? { background: "#dcfce7", color: "#16a34a" }
-                                        : { background: "#fee2e2", color: "#dc2626" }
-                                }
+                                        ? "border-progress bg-progress-tint text-progress-deep"
+                                        : "border-alert bg-alert-tint text-alert-deep"
+                                }`}
                             >
-                                {status === "accepted" ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                {status === "accepted" ? (
+                                    <Check className="h-3 w-3" aria-hidden="true" />
+                                ) : (
+                                    <X className="h-3 w-3" aria-hidden="true" />
+                                )}
                                 {status === "accepted" ? "Accepted" : "Declined"}
                             </span>
                         )}

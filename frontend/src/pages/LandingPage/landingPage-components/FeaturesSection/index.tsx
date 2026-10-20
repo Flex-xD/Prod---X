@@ -1,117 +1,178 @@
+import { useState, type ComponentType } from 'react';
+import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { motion } from 'framer-motion';
-import { Timer, Users, ListChecks, Calendar, TrendingUp, Sparkles } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import StreakPreview from '../StreakPreview';
+import { quick } from '@/lib/motion';
+import { cn } from '@/utils/utils';
+import { PANEL, SectionHeading } from '../shared';
+import {
+    CalendarPreview,
+    FocusTimerPreview,
+    GroupPreview,
+    StreakPreview,
+    SummaryPreview,
+    TasksPreview,
+    TipPreview,
+    WeeklyPreview,
+} from '../previews';
 
-const sp = { type: 'spring', damping: 28, stiffness: 280 } as const;
+type Tone = 'focus' | 'progress' | 'info';
 
-const FEATURES = [
+// Color follows Prod-X meaning: orange = focus, green = completion, blue-green = information.
+const TONE_SWATCH: Record<Tone, string> = { focus: 'bg-focus', progress: 'bg-progress', info: 'bg-info' };
+const TONE_TINT: Record<Tone, string> = { focus: 'bg-focus-tint', progress: 'bg-progress-tint', info: 'bg-info-tint' };
+
+interface Feature {
+    id: string;
+    name: string;
+    body: string;
+    adds: string;
+    tone: Tone;
+    Preview: ComponentType;
+}
+
+const FEATURES: readonly Feature[] = [
     {
-        icon: Timer,
-        title: 'Focus timer',
-        desc: 'Start a session, work, submit the time when you\'re done. No fake averages — just what you actually sat down and did.',
-        grad: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
-        shadow: 'rgba(124,58,237,0.35)',
-        span: 'md:col-span-3',
+        id: 'timer',
+        name: 'Focus timer',
+        body: 'Start a session, work, and submit the time when you stop. It records what you actually sat down and did.',
+        adds: 'Focus time',
+        tone: 'focus',
+        Preview: FocusTimerPreview,
     },
     {
-        icon: Users,
-        title: 'Group timers',
-        desc: 'Invite up to five people into a session with a shared goal. Everyone\'s ranked live — nobody wants to be the one lagging.',
-        grad: 'linear-gradient(135deg, #EC4899, #F43F5E)',
-        shadow: 'rgba(236,72,153,0.35)',
-        span: 'md:col-span-3',
+        id: 'tasks',
+        name: 'Tasks',
+        body: 'List what you need to do today and check it off. Progress updates as you finish each one.',
+        adds: 'Tasks done',
+        tone: 'progress',
+        Preview: TasksPreview,
     },
     {
-        icon: ListChecks,
-        title: 'Tasks that count',
-        desc: 'A finished task keeps the streak alive too, even on a no-timer day.',
-        grad: 'linear-gradient(135deg, #10B981, #0D9488)',
-        shadow: 'rgba(16,185,129,0.35)',
-        span: 'md:col-span-2',
+        id: 'groups',
+        name: 'Group sessions',
+        body: 'Invite up to 5 people into a timed session with a shared goal and see everyone ranked live.',
+        adds: 'Your rank',
+        tone: 'focus',
+        Preview: GroupPreview,
     },
     {
-        icon: TrendingUp,
-        title: 'Weekly focus graph',
-        desc: 'See the week shape up live, scaled to how you actually work — minutes or hours.',
-        grad: 'linear-gradient(135deg, #3B82F6, #4F46E5)',
-        shadow: 'rgba(59,130,246,0.35)',
-        span: 'md:col-span-2',
+        id: 'streak',
+        name: 'Streak',
+        body: 'Your streak counts the days in a row you did the work, so a missed day is easy to see.',
+        adds: 'Days in a row',
+        tone: 'progress',
+        Preview: StreakPreview,
     },
     {
-        icon: Sparkles,
-        title: 'A new tip, every day',
-        desc: 'One short, specific suggestion based on how your day\'s going — not a generic quote.',
-        grad: 'linear-gradient(135deg, #F59E0B, #EF4444)',
-        shadow: 'rgba(245,158,11,0.35)',
-        span: 'md:col-span-2',
+        id: 'calendar',
+        name: 'Activity calendar',
+        body: 'One square for every day you worked, darker for more work, so consistency is visible at a glance.',
+        adds: 'Daily activity level',
+        tone: 'progress',
+        Preview: CalendarPreview,
+    },
+    {
+        id: 'weekly',
+        name: 'Weekly focus graph',
+        body: 'Focus time for each of the last seven days, so you can see where the week went.',
+        adds: 'Focus per day',
+        tone: 'info',
+        Preview: WeeklyPreview,
+    },
+    {
+        id: 'tip',
+        name: 'Daily AI tip',
+        body: 'One short suggestion based on how your day is going, not a generic quote.',
+        adds: 'A next step',
+        tone: 'info',
+        Preview: TipPreview,
+    },
+    {
+        id: 'summary',
+        name: 'Day summary',
+        body: 'A running summary of your day that updates as you work.',
+        adds: 'Your day so far',
+        tone: 'info',
+        Preview: SummaryPreview,
     },
 ];
 
-function FeaturesSection() {
+function FeaturePanel({ feature }: { feature: Feature }) {
     return (
-        <section id="features" className="py-24" style={{ background: 'linear-gradient(160deg,#f8f7ff 0%,#fdf4ff 50%,#fafafa 100%)' }}>
-            <div className="max-w-7xl mx-auto px-6">
-                <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, ...sp }}
-                    viewport={{ once: true }}
-                    className="mb-14 max-w-xl"
-                >
-                    <Badge className="px-3.5 py-1.5 bg-violet-50 text-violet-600 border-violet-200 mb-4">
-                        Everything feeds one streak
-                    </Badge>
-                    <h2 className="text-3xl lg:text-4xl font-black text-slate-900">
-                        Timers, tasks, and group sessions all count.
-                    </h2>
-                </motion.div>
-
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-5">
-                    {FEATURES.map((f, i) => (
-                        <motion.div
-                            key={f.title}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            whileHover={{ y: -4, boxShadow: `0 24px 48px ${f.shadow}` }}
-                            transition={{ duration: 0.4, delay: i * 0.06, ...sp }}
-                            viewport={{ once: true }}
-                            className={`relative rounded-3xl overflow-hidden text-white p-7 ${f.span}`}
-                            style={{ background: f.grad, boxShadow: `0 8px 28px ${f.shadow}` }}
-                        >
-                            <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full" style={{ background: 'rgba(255,255,255,0.12)', filter: 'blur(20px)' }} />
-                            <div className="relative z-10">
-                                <div className="w-11 h-11 rounded-2xl flex items-center justify-center mb-5" style={{ background: 'rgba(255,255,255,0.18)' }}>
-                                    <f.icon className="w-5 h-5" />
-                                </div>
-                                <h3 className="text-xl font-black mb-2">{f.title}</h3>
-                                <p className="text-sm font-medium opacity-85 leading-relaxed">{f.desc}</p>
-                            </div>
-                        </motion.div>
-                    ))}
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        whileHover={{ y: -4 }}
-                        transition={{ duration: 0.4, delay: 0.36, ...sp }}
-                        viewport={{ once: true }}
-                        className="md:col-span-4 rounded-3xl bg-white p-7"
-                        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.05)' }}
-                    >
-                        <div className="flex items-center gap-3 mb-5">
-                            <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: '#f5f3ff', border: '1px solid #ddd6fe' }}>
-                                <Calendar className="w-5 h-5 text-violet-500" />
-                            </div>
-                            <h3 className="text-xl font-black text-slate-900">A full year, mapped</h3>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <div className="inline-block p-1">
-                                <StreakPreview weeks={28} rows={7} cellSize={10} gap={3} />
-                            </div>
-                        </div>
-                    </motion.div>
+        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={quick}>
+            <div className="flex flex-col gap-3 border-b-2 border-ink px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+                <div>
+                    <h3 className="text-lg font-bold">{feature.name}</h3>
+                    <p className="mt-1 max-w-md text-sm text-ink-soft">{feature.body}</p>
                 </div>
+                <p
+                    className={cn(
+                        'shrink-0 rounded-sm border-2 border-ink px-2 py-1 text-xs font-bold',
+                        TONE_TINT[feature.tone],
+                    )}
+                >
+                    Adds: {feature.adds}
+                </p>
+            </div>
+            <div className="min-h-[300px] p-4 sm:p-6">
+                <feature.Preview />
+            </div>
+        </motion.div>
+    );
+}
+
+function FeaturesSection() {
+    const [value, setValue] = useState<string>(FEATURES[0].id);
+
+    return (
+        <section id="features" className="group/section scroll-mt-16 border-b-2 border-ink bg-surface">
+            <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
+                <div className="max-w-2xl">
+                    <SectionHeading>Everything Prod-X does.</SectionHeading>
+                    <p className="mt-4 text-lg text-ink-soft">
+                        Each feature adds something to the same record. Pick one to see what it looks like in use.
+                    </p>
+                </div>
+
+                <TabsPrimitive.Root
+                    value={value}
+                    onValueChange={setValue}
+                    orientation="vertical"
+                    className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start"
+                >
+                    <TabsPrimitive.List
+                        aria-label="Prod-X features"
+                        className="flex flex-wrap gap-2 lg:flex-col lg:flex-nowrap lg:gap-0 lg:overflow-hidden lg:rounded-lg lg:border-2 lg:border-ink lg:bg-paper"
+                    >
+                        {FEATURES.map((f, i) => (
+                            <TabsPrimitive.Trigger
+                                key={f.id}
+                                value={f.id}
+                                className="group flex items-center gap-3 rounded-sm border-2 border-ink bg-surface px-3 py-2 text-left text-ink transition-colors duration-fast hover:bg-paper-deep focus-visible:outline-offset-[-4px] data-[state=active]:bg-ink data-[state=active]:text-paper data-[state=active]:hover:bg-ink data-[state=active]:focus-visible:outline-paper lg:rounded-none lg:border-0 lg:border-b lg:border-line lg:bg-paper lg:px-4 lg:py-3.5 lg:last:border-b-0"
+                            >
+                                <span className="hidden font-mono text-xs font-bold text-ink-soft group-data-[state=active]:text-paper/70 lg:inline">
+                                    {String(i + 1).padStart(2, '0')}
+                                </span>
+                                <span className="text-sm font-bold lg:text-base">{f.name}</span>
+                                <span
+                                    aria-hidden
+                                    className={cn(
+                                        'ml-auto hidden size-3 border-2 border-ink group-data-[state=active]:border-paper lg:block',
+                                        TONE_SWATCH[f.tone],
+                                    )}
+                                />
+                            </TabsPrimitive.Trigger>
+                        ))}
+                    </TabsPrimitive.List>
+
+                    <div className={cn(PANEL, 'overflow-hidden shadow-hard')}>
+                        {FEATURES.map((f) => (
+                            <TabsPrimitive.Content key={f.id} value={f.id}>
+                                <FeaturePanel feature={f} />
+                            </TabsPrimitive.Content>
+                        ))}
+                    </div>
+                </TabsPrimitive.Root>
             </div>
         </section>
     );

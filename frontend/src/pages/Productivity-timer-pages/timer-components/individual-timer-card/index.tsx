@@ -1,347 +1,116 @@
-import { motion } from "framer-motion";
 import {
     Timer,
     Clock,
     Target,
     Calendar,
-    AlertTriangle, 
-} from "lucide-react";
+    AlertTriangle,
+} from 'lucide-react';
 
-import { SlimBar } from "../ui";
-import { sp } from "../constants";
+import { Pill, SlimBar } from '../ui';
 
 import {
     formatSeconds,
     formatMinutes,
     progressPercent,
-    getAvatarColors,
-    isExpired, 
-} from "../utils";
+    isExpired,
+} from '../utils';
 
-import type { IProductivityTimer } from "../types";
+import type { IProductivityTimer } from '../types';
 
 interface IndividualTimerCardProps {
     timer: IProductivityTimer;
-    index: number;
+    index?: number;
     onClick: () => void;
 }
 
-const IndividualTimerCard = ({
-    timer,
-    index,
-    onClick,
-}: IndividualTimerCardProps) => {
-
+// Static arrival (the section enters once); hover and press are
+// CSS-only, and the percent bar eases through progressUpdate.
+const IndividualTimerCard = ({ timer, onClick }: IndividualTimerCardProps) => {
     const completedTime = timer.completedTime ?? 0;
-
-    const pct = progressPercent(
-        completedTime,
-        timer.specifiedTime
-    );
-
-    const [c1, c2] = getAvatarColors(index);
-
+    const pct = progressPercent(completedTime, timer.specifiedTime);
     const expired = isExpired(timer.deadline);
+    const description = timer.description?.trim() || 'No description provided';
 
-    const description =
-        timer.description?.trim() ||
-        "No description provided";
-
-    const formattedDeadline = new Date(
-        timer.deadline
-    ).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
+    const formattedDeadline = new Date(timer.deadline).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
     });
-    
 
     return (
-        <motion.div
-            initial={{
-                opacity: 0,
-                y: 18,
-            }}
-            animate={{
-                opacity: 1,
-                y: 0,
-            }}
-            transition={{
-                delay: index * 0.07,
-                ...sp,
-            }}
-            whileHover={{
-                y: -5,
-                boxShadow:
-                    "0 24px 48px rgba(0,0,0,0.1)",
-            }}
-            whileTap={{
-                scale: 0.975,
-            }}
+        <div
+            role="button"
+            tabIndex={0}
             onClick={onClick}
-            className="
-                relative
-                bg-white
-                rounded-3xl
-                overflow-hidden
-                cursor-pointer
-            "
-            style={{
-                boxShadow:
-                    "0 2px 16px rgba(0,0,0,0.06)",
-
-                border:
-                    "1px solid rgba(0,0,0,0.05)",
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onClick();
+                }
             }}
+            className="cursor-pointer overflow-hidden rounded-lg border-2 border-ink bg-surface shadow-hard transition-all duration-fast hover:-translate-y-px hover:shadow-hard-lg active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard"
         >
-
-            <div
-                className="
-                    absolute
-                    top-0
-                    left-0
-                    right-0
-                    h-[3px]
-                "
-                style={{
-                    background:
-                        `linear-gradient(90deg, ${c1}, ${c2}44)`,
-                }}
-            />
-
-            {timer.isActive && !expired && (
-                <div className="absolute top-4 right-4">
-                    <span className="relative flex h-2.5 w-2.5">
-                        <span
-                            className="
-                                animate-ping
-                                absolute
-                                inset-0
-                                rounded-full
-                                bg-emerald-400
-                                opacity-70
-                            "
-                        />
-
-                        <span
-                            className="
-                                relative
-                                rounded-full
-                                h-2.5
-                                w-2.5
-                                bg-emerald-500
-                            "
-                        />
-                    </span>
-                </div>
-            )}
-
             <div className="p-5">
-
-                <div className="flex items-start gap-3 mb-4">
-
-                    {/* Timer Icon */}
-
-                    <div
-                        className="
-                            w-10
-                            h-10
-                            rounded-2xl
-                            flex
-                            items-center
-                            justify-center
-                            flex-shrink-0
-                        "
-                        style={{
-                            background: `${c1}18`,
-                            border:
-                                `1.5px solid ${c1}30`,
-                        }}
+                <div className="mb-4 flex items-start gap-3">
+                    {/* Timer icon: tint encodes state, not personality */}
+                    <span
+                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border-2 ${
+                            expired
+                                ? 'border-alert bg-alert-tint text-alert-deep'
+                                : timer.isActive
+                                  ? 'border-focus bg-focus-tint text-focus-deep'
+                                  : 'border-line bg-paper-deep text-ink-soft'
+                        }`}
                     >
-                        <Timer
-                            className="w-5 h-5"
-                            style={{
-                                color: c1,
-                            }}
-                        />
-                    </div>
+                        <Timer className="h-5 w-5" aria-hidden="true" />
+                    </span>
 
-                    <div className="flex-1 min-w-0 pt-0.5">
-
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <h4
-                                className="
-                                    font-black
-                                    text-slate-900
-                                    text-sm
-                                    truncate
-                                "
-                            >
-                                {timer.title}
-                            </h4>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="truncate text-sm font-bold text-ink">{timer.title}</h4>
 
                             {expired ? (
-                                <span
-                                    className="
-                                        flex-shrink-0
-                                        flex
-                                        items-center
-                                        gap-1
-                                        text-[10px]
-                                        font-bold
-                                        text-rose-600
-                                        bg-rose-50
-                                        px-1.5
-                                        py-0.5
-                                        rounded-full
-                                    "
-                                >
-                                    <AlertTriangle className="w-2.5 h-2.5" />
-                                    Expired
-                                </span>
+                                <Pill color="alert">
+                                    <AlertTriangle className="h-3 w-3" aria-hidden="true" /> Expired
+                                </Pill>
                             ) : (
                                 <>
-                                    {timer.status === "pending" && (
-                                        <span
-                                            className="
-                                                flex-shrink-0
-                                                text-[10px]
-                                                font-bold
-                                                text-amber-600
-                                                bg-amber-50
-                                                px-1.5
-                                                py-0.5
-                                                rounded-full
-                                            "
-                                        >
-                                            Pending
-                                        </span>
-                                    )}
-
-                                    {timer.isActive && (
-                                        <span
-                                            className="
-                                                flex-shrink-0
-                                                text-[10px]
-                                                font-bold
-                                                text-emerald-600
-                                                bg-emerald-50
-                                                px-1.5
-                                                py-0.5
-                                                rounded-full
-                                            "
-                                        >
-                                            Active
-                                        </span>
-                                    )}
+                                    {timer.status === 'pending' && <Pill color="focus">Pending</Pill>}
+                                    {timer.isActive && <Pill color="focus">Active</Pill>}
                                 </>
                             )}
                         </div>
 
-                        <p
-                            className="
-                                text-slate-400
-                                text-xs
-                                truncate
-                                mt-0.5
-                                font-medium
-                            "
-                            title={description}
-                        >
+                        <p className="mt-0.5 truncate text-xs font-medium text-ink-faint" title={description}>
                             {description}
                         </p>
-
                     </div>
 
                     <div className="flex-shrink-0 text-right">
-
-                        <span
-                            className="
-                                text-2xl
-                                font-black
-                            "
-                            style={{
-                                color: c1,
-                            }}
-                        >
-                            {pct}
-                        </span>
-
-                        <span
-                            className="
-                                text-sm
-                                font-bold
-                                text-slate-400
-                            "
-                        >
-                            %
-                        </span>
-
+                        <span className="font-mono text-2xl font-bold tabular-nums text-ink">{pct}</span>
+                        <span className="text-sm font-bold text-ink-faint">%</span>
                     </div>
-
                 </div>
 
-                <SlimBar
-                    percent={pct}
-                    gradient={
-                        `linear-gradient(90deg, ${c1}, ${c2})`
-                    }
-                    height={4}
-                />
+                <SlimBar percent={pct} height={4} />
 
-                <div className="flex items-center justify-between mt-4">
-
-                    <span
-                        className="
-                            flex
-                            items-center
-                            gap-1
-                            text-xs
-                            font-semibold
-                            text-slate-400
-                        "
-                    >
-                        <Clock className="w-3 h-3" />
-
-                        {formatSeconds(completedTime)}
+                <div className="mt-4 flex items-center justify-between text-xs font-semibold text-ink-faint">
+                    <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" aria-hidden="true" />
+                        <span className="font-mono tabular-nums">{formatSeconds(completedTime)}</span>
                     </span>
 
-                    <span
-                        className="
-                            flex
-                            items-center
-                            gap-1
-                            text-xs
-                            font-semibold
-                            text-slate-400
-                        "
-                    >
-                        <Target className="w-3 h-3" />
-
-                        {formatMinutes(
-                            timer.specifiedTime
-                        )}
+                    <span className="flex items-center gap-1">
+                        <Target className="h-3 w-3" aria-hidden="true" />
+                        {formatMinutes(timer.specifiedTime)}
                     </span>
 
-                    <span
-                        className="
-                            flex
-                            items-center
-                            gap-1
-                            text-xs
-                            font-semibold
-                            text-slate-400
-                        "
-                        title={timer.deadline}
-                    >
-                        <Calendar className="w-3 h-3" />
-
+                    <span className="flex items-center gap-1" title={timer.deadline}>
+                        <Calendar className="h-3 w-3" aria-hidden="true" />
                         {formattedDeadline}
                     </span>
-
                 </div>
-
             </div>
-        </motion.div>
+        </div>
     );
 };
 

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { spring, progressUpdate } from '@/lib/motion';
 import type { TasksCardProps } from './tasks-card-types';
 import TasksHeader from './tasks-card-components/task-header';
 import TaskList from './tasks-card-components/task-list';
@@ -8,48 +9,46 @@ const TasksCard = ({
     handleToggleTask,
     onAddTask,
     createTaskPending,
-    onToggleTaskPending,
+    isLoading,
 }: TasksCardProps) => {
-    const doneCount = tasks.filter(t => t.status === 'done').length;
+    const doneCount = tasks.filter((t) => t.status === 'done').length;
+    const pct = tasks.length > 0 ? (doneCount / tasks.length) * 100 : 0;
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4, type: 'spring', damping: 28, stiffness: 280 }}
-            className="rounded-3xl bg-white overflow-hidden"
-            style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.05)' }}
+            transition={{ ...spring, delay: 0.05 }}
+            className="overflow-hidden rounded-lg border-2 border-ink bg-surface shadow-hard"
         >
             <TasksHeader onAddTask={onAddTask} createTaskPending={createTaskPending} />
 
-            {/* Progress bar under header */}
+            {/* Progress rule under header */}
             {tasks.length > 0 && (
-                <div className="px-6 pb-3">
-                    <div className="flex justify-between text-xs font-bold text-slate-400 mb-1.5">
+                <div className="px-6 pb-4">
+                    <div className="mb-1.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-ink-soft">
                         <span>Progress</span>
-                        <span style={{ color: '#7c3aed' }}>{doneCount}/{tasks.length} done</span>
+                        <span className="font-mono tabular-nums text-progress-deep">
+                            {doneCount}/{tasks.length} done
+                        </span>
                     </div>
-                    <div
-                        className="w-full rounded-full overflow-hidden"
-                        style={{ height: 4, background: 'rgba(0,0,0,0.05)' }}
-                    >
+                    <div className="h-2 w-full overflow-hidden rounded-sm bg-paper-deep">
                         <motion.div
-                            className="h-full rounded-full"
-                            style={{ background: 'linear-gradient(90deg,#7C3AED,#4F46E5)' }}
+                            className="h-full rounded-sm bg-progress"
                             initial={{ width: 0 }}
-                            animate={{ width: tasks.length > 0 ? `${(doneCount / tasks.length) * 100}%` : '0%' }}
-                            transition={{ duration: 1, ease: [0.34, 1.2, 0.64, 1] }}
+                            animate={{ width: `${pct}%` }}
+                            transition={progressUpdate}
                         />
                     </div>
                 </div>
             )}
 
             {/* Divider */}
-            <div className="mx-6 h-px" style={{ background: 'rgba(0,0,0,0.04)' }} />
+            <div className="mx-6 h-px bg-line" />
 
             {/* Task list */}
-            <div className="px-4 pb-4 pt-3">
-                <TaskList tasks={tasks} handleToggleTask={handleToggleTask} />
+            <div className="px-6 pb-4 pt-1">
+                <TaskList tasks={tasks} handleToggleTask={handleToggleTask} isLoading={isLoading} />
             </div>
         </motion.div>
     );

@@ -5,8 +5,8 @@ interface SkeletonBlockProps {
 
 const SkeletonBlock = ({ className, style }: SkeletonBlockProps) => (
     <div
-        className= {`animate-pulse rounded-xl bg-slate-100 ${className ?? ""}`}
-style = { style }
+        className={`animate-skeleton-pulse rounded-sm bg-paper-deep ${className ?? ""}`}
+        style={style}
     />
 );
 

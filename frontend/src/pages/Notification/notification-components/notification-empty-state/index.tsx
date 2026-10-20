@@ -1,20 +1,20 @@
 import { motion } from "framer-motion";
 import { BellOff } from "lucide-react";
+import { enter } from "@/lib/motion";
 
+// Dashed ink border = "nothing filed here", matching the dashboard's
+// empty calendar panel rather than a floating tinted box.
 const NotificationEmptyState = () => (
-    <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center py-16 text-center px-6"
-    >
-        <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-            style={{ background: "#f5f3ff", border: "1px solid #ddd6fe" }}
-        >
-            <BellOff className="w-6 h-6 text-violet-400" />
+    <motion.div {...enter(0.04)} className="px-4 pb-4">
+        <div className="rounded-lg border-2 border-dashed border-line px-6 py-12 text-center">
+            <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-sm border-2 border-ink bg-paper-deep">
+                <BellOff className="h-5 w-5 text-ink-soft" aria-hidden="true" />
+            </span>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-ink">
+                You're all caught up
+            </p>
+            <p className="mt-1.5 text-xs font-medium text-ink-soft">No notifications right now.</p>
         </div>
-        <p className="font-black text-slate-700 text-sm">You're all caught up!</p>
-        <p className="text-slate-400 text-xs mt-1 font-medium">No notifications right now</p>
     </motion.div>
 );
 

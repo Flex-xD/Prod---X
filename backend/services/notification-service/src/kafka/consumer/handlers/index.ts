@@ -15,6 +15,7 @@ type TEventGroupTimerCreated = {
 
 type TEventNotificationCreated = {
     notification: INotification,
+    recipientId:mongoose.Types.ObjectId
 }
 
 export const handlers = {
@@ -49,34 +50,39 @@ export const handlers = {
 
     // ? This event is for triggering the send-notification API
 
-    "notification.created": async ({ notification }: TEventNotificationCreated) => {
+    "notification.created": async ({ notification , recipientId }: TEventNotificationCreated) => {
         logger.info("Sending API request to : /send-notification")
         const limit = pLimit(notification.to.length);
-        for (const notificationReceivingUserId of notification.to) {
-            await limit(async () => {
-                try {
-                    logger.info(`Sending API request to : /send-notification/${notificationReceivingUserId}`)
 
-                    const response = await axios.post("http://localhost:3000/api/v1/notification/send-notification", {
-                        notificationReceivingUserId,
-                        notificationId: notification._id,
-                        userId: notification.from
-                    }, {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "x-service-key": process.env.PRODX_SERVICE_KEY,
-                        }
-                    })
-                    console.log(`Event : notification.created , response :`, response.data);
-                } catch (error) {
-                    logger.error({ error })
-                    throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Error while sending the notification to userIds : ${notification.to}`);
-                }
-            })
+        await notificationServices.sendNotification(recipientId , notification._id)
 
-        }
+        // ? notification is not being emitted on the frontend
+        // * I can just use the notification-service directly 
+        // for (const notificationReceivingUserId of notification.to) {
+        //     await limit(async () => {
+        //         try {
+        //             logger.info(`Sending API request to : /send-notification/${notificationReceivingUserId}`)
+
+        //             const response = await axios.post("http://localhost:3000/api/v1/notification/send-notification", {
+        //                 notificationReceivingUserId,
+        //                 notificationId: notification._id,
+        //                 userId: notification.from
+        //             }, {
+        //                 headers: {
+        //                     "Content-Type": "application/json",
+        //                     "x-service-key": process.env.PRODX_SERVICE_KEY,
+        //                 }
+        //             })
+        //             console.log(`Event : notification.created , response :`, response.data);
+        //         } catch (error) {
+        //             logger.error({ error })
+        //             throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Error while sending the notification to userIds : ${notification.to}`);
+        //         }
+        //     })
+
+        // }
     },
-    "group.timer.invitation.responded": async ({ groupTimerId, userId, status }: {
+    "group.timer.invitation.updated": async ({ groupTimerId, userId, status }: {
     groupTimerId: string, userId: string, status: "accepted" | "declined"
 }) => {
     logger.info(`Updating invitation response for groupTimer ${groupTimerId} -> ${status}`);

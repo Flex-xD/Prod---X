@@ -1,5 +1,3 @@
-import { AVATAR_COLORS } from '../constants';
-
 // ─── Time Formatters ──────────────────────────────────────────────────────────
 
 /**
@@ -32,13 +30,15 @@ export const formatMinutes = (m: number): string =>
 export const progressPercent = (done: number, total: number): number =>
     Math.min(100, Math.round((done / (total * 60)) * 100));
 
-// ─── Avatar Colors ────────────────────────────────────────────────────────────
+/** True when the deadline is in the past. */
+export const isExpired = (deadline: string): boolean =>
+    new Date(deadline).getTime() < Date.now();
 
-/**
- * Returns a stable [from, to] gradient pair for a given numeric index
- * so every avatar always gets the same color regardless of render order.
- */
-export const getAvatarColors = (idx: number): [string, string] =>
-    AVATAR_COLORS[idx % AVATAR_COLORS.length];
-export const isExpired = (deadline: string): boolean => new Date(deadline).getTime() < Date.now();
-
+/** First letters of a (possibly multi-word) username, max 2. */
+export const initialsOf = (name: string): string =>
+    name
+        .split(' ')
+        .map((word) => word.charAt(0))
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();

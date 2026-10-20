@@ -1,13 +1,13 @@
+import type { IProfileStats } from '@/types/user';
+
+export interface IFocusSummaryCardProps {
+    stats: IProfileStats;
+}
+
 export interface IPointsBreakdown {
     label: string;
     points: number;
     iconName: 'CheckSquare' | 'Clock' | 'Users';
-    color: string;
+    tone: 'ink' | 'focus' | 'progress';
     pct: number;
-}
-
-export interface IPointsCardProps {
-    totalPoints: number;
-    rank: number;
-    breakdown: IPointsBreakdown[];
 }

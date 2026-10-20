@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { PartyPopper, X } from 'lucide-react';
-import { softSp } from '../constants';
+import { CheckCircle2, X } from 'lucide-react';
+import { quick, spring } from '@/lib/motion';
+import { PressBtn } from '../ui';
 
 interface CompletionModalProps {
     isOpen: boolean;
@@ -21,69 +22,60 @@ const CompletionModal = ({
 }: CompletionModalProps) => (
     <AnimatePresence>
         {isOpen && (
-            <motion.div
-                className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            >
+            <>
+                {/* Backdrop: flat ink scrim, no blur (foundation: no glass) */}
                 <motion.div
-                    className="absolute inset-0"
-                    style={{ background: 'rgba(15,10,40,0.65)', backdropFilter: 'blur(12px)' }}
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[60] bg-ink/60"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={quick}
                     onClick={onClose}
+                    aria-hidden="true"
                 />
 
                 <motion.div
-                    className="relative w-full max-w-sm bg-white rounded-3xl overflow-hidden z-10 text-center p-8"
-                    style={{ boxShadow: '0 32px 80px rgba(0,0,0,0.35)' }}
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    transition={softSp}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="completion-title"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 12 }}
+                    transition={spring}
+                    className="fixed left-1/2 top-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 border-ink bg-surface p-8 text-center shadow-hard-lg"
                 >
                     <button
+                        type="button"
                         onClick={onClose}
-                        className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center hover:bg-slate-100 transition-colors"
+                        aria-label="Close dialog"
+                        className="absolute right-3 top-3 rounded-sm p-1.5 text-ink-soft transition-colors duration-fast hover:bg-paper-deep hover:text-ink"
                     >
-                        <X className="w-4 h-4 text-slate-400" />
+                        <X className="h-4 w-4" />
                     </button>
 
-                    <motion.div
-                        initial={{ scale: 0, rotate: -20 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ delay: 0.1, type: 'spring', damping: 12, stiffness: 200 }}
-                        className="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-5"
-                        style={{ background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', boxShadow: '0 12px 32px rgba(124,58,237,0.4)' }}
-                    >
-                        <PartyPopper className="w-8 h-8 text-white" />
-                    </motion.div>
+                    {/* Achievement block: green means completion here */}
+                    <span className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-lg border-2 border-ink bg-progress text-ink shadow-hard-sm">
+                        <CheckCircle2 className="h-8 w-8" aria-hidden="true" />
+                    </span>
 
-                    <h3 className="text-xl font-black text-slate-900 mb-2">{title}</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed mb-6">{message}</p>
+                    <h3 id="completion-title" className="text-base font-bold uppercase tracking-[0.14em] text-ink">
+                        {title}
+                    </h3>
+                    <p className="mb-6 mt-2 text-sm font-medium leading-relaxed text-ink-soft">{message}</p>
 
                     <div className="flex flex-col gap-2.5">
-                        <motion.button
-                            whileTap={{ scale: 0.97 }}
-                            disabled={primaryPending}
-                            onClick={onPrimary}
-                            className="w-full py-3.5 rounded-2xl text-white font-bold text-sm disabled:opacity-60"
-                            style={{ background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', boxShadow: '0 8px 24px rgba(124,58,237,0.35)' }}
-                        >
+                        <PressBtn variant="success" disabled={primaryPending} onClick={onPrimary} className="w-full py-3.5">
                             {primaryPending ? 'Working...' : primaryLabel}
-                        </motion.button>
+                        </PressBtn>
 
                         {secondaryLabel && onSecondary && (
-                            <motion.button
-                                whileTap={{ scale: 0.97 }}
-                                onClick={onSecondary}
-                                className="w-full py-3 rounded-2xl font-bold text-sm text-slate-500"
-                                style={{ background: '#f8fafc', border: '1px solid rgba(0,0,0,0.06)' }}
-                            >
+                            <PressBtn variant="secondary" onClick={onSecondary} className="w-full py-3">
                                 {secondaryLabel}
-                            </motion.button>
+                            </PressBtn>
                         )}
                     </div>
                 </motion.div>
-            </motion.div>
+            </>
         )}
     </AnimatePresence>
 );

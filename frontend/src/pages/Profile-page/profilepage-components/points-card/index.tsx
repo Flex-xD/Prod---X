@@ -1,49 +1,82 @@
 import { motion } from 'framer-motion';
 import { Clock, Timer, Users, Flame } from 'lucide-react';
-import type { IProfileStats } from '@/types/user';
-
-interface FocusSummaryCardProps {
-    stats: IProfileStats;
-}
+import type { IFocusSummaryCardProps } from './points-card-types';
+import { enter } from '@/lib/motion';
 
 const formatHours = (seconds: number) => (seconds / 3600).toFixed(1);
 
-const FocusSummaryCard = ({ stats }: FocusSummaryCardProps) => {
-    const totalFocusSeconds = stats.individualTimers.totalFocusSeconds + stats.groupTimers.totalFocusSeconds;
+// Tile color earns its place: focus orange = focus time (chart-2's
+// mapping), progress green = the streak record, ink = plain session
+// counts - the same neutral treatment as the dashboard stat strip.
+const FocusSummaryCard = ({ stats }: IFocusSummaryCardProps) => {
+    const totalFocusSeconds =
+        stats.individualTimers.totalFocusSeconds + stats.groupTimers.totalFocusSeconds;
 
     const items = [
-        { icon: Clock, label: 'Total Focus Time', value: `${formatHours(totalFocusSeconds)}h`, color: '#7C3AED' },
-        { icon: Timer, label: 'Individual Sessions', value: `${stats.individualTimers.completed + stats.individualTimers.active}`, color: '#3B82F6' },
-        { icon: Users, label: 'Group Sessions', value: `${stats.groupTimers.completed + stats.groupTimers.active}`, color: '#EC4899' },
-        { icon: Flame, label: 'Longest Streak', value: `${stats.streakData.longestStreak}d`, color: '#F97316' },
+        {
+            icon: Clock,
+            label: 'Total Focus Time',
+            value: `${formatHours(totalFocusSeconds)}h`,
+            tile: 'bg-focus',
+            iconCls: 'text-ink',
+        },
+        {
+            icon: Timer,
+            label: 'Individual Sessions',
+            value: `${stats.individualTimers.completed + stats.individualTimers.active}`,
+            tile: 'bg-ink',
+            iconCls: 'text-paper',
+        },
+        {
+            icon: Users,
+            label: 'Group Sessions',
+            value: `${stats.groupTimers.completed + stats.groupTimers.active}`,
+            tile: 'bg-ink',
+            iconCls: 'text-paper',
+        },
+        {
+            icon: Flame,
+            label: 'Longest Streak',
+            value: `${stats.streakData.longestStreak}d`,
+            tile: 'bg-progress',
+            iconCls: 'text-ink',
+        },
     ];
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1, type: 'spring', damping: 28, stiffness: 280 }}
-            className="rounded-3xl bg-white p-6"
-            style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.05)' }}
+        <motion.section
+            {...enter(0.06)}
+            aria-label="Focus summary"
+            className="overflow-hidden rounded-lg border-2 border-ink bg-surface shadow-hard"
         >
-            <h3 className="font-black text-slate-900 text-base mb-5">Focus Summary</h3>
+            <div className="border-b-2 border-ink px-5 py-3.5">
+                <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-ink">
+                    Focus Summary
+                </h2>
+                <p className="mt-0.5 text-[11px] font-medium text-ink-faint">
+                    Time and sessions, all time
+                </p>
+            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                {items.map(({ icon: Icon, label, value, color }, i) => (
-                    <motion.div
-                        key={label}
-                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.15 + i * 0.05 }}
-                        className="p-4 rounded-2xl" style={{ background: '#f8fafc' }}
-                    >
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2" style={{ background: `${color}18` }}>
-                            <Icon className="w-4.5 h-4.5" style={{ color }} />
+            {/* One arrival per section: the card arrives as a whole instead of
+                staggering every tile. */}
+            <div className="grid grid-cols-2 gap-4 p-5">
+                {items.map(({ icon: Icon, label, value, tile, iconCls }) => (
+                    <div key={label} className="rounded-lg border border-line bg-paper p-4">
+                        <span
+                            aria-hidden="true"
+                            className={`mb-3 flex h-9 w-9 items-center justify-center rounded-sm border-2 border-ink ${tile}`}
+                        >
+                            <Icon className={`h-4 w-4 ${iconCls}`} />
+                        </span>
+                        <div className="font-mono text-xl font-bold leading-none tabular-nums text-ink">
+                            {value}
                         </div>
-                        <div className="text-xl font-black text-slate-900">{value}</div>
-                        <div className="text-xs font-semibold text-slate-400 mt-0.5">{label}</div>
-                    </motion.div>
+                        <div className="mt-1.5 text-xs font-medium text-ink-soft">{label}</div>
+                    </div>
                 ))}
             </div>
-        </motion.div>
+        </motion.section>
     );
 };
 

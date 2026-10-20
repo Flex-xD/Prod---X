@@ -1,58 +1,39 @@
-import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { motion } from 'framer-motion';
+import { spring } from '@/lib/motion';
 
-const CountUp = ({ end, suffix = "" }: { end: number; suffix?: string }) => {
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true });
-
-    return (
-        <motion.span
-            ref={ref}
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-        >
-            {isInView && (
-                <motion.span
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                >
-                    {end}
-                    {suffix}
-                </motion.span>
-            )}
-        </motion.span>
-    );
-};
+// Honest content: describes what the product tracks instead of
+// inventing user counts, hours or success percentages.
+const cells = [
+    { label: 'Tasks', text: 'Plan and finish each day' },
+    { label: 'Focus', text: 'Deep-work hours, tracked' },
+    { label: 'Streaks', text: 'Days you kept going' },
+];
 
 export const CommunityStats = () => (
-    <motion.div
-        initial={{ opacity: 0, y: 40 }}
+    <motion.section
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.4, duration: 0.8 }}
-        whileHover={{ scale: 1.02 }}
-        className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl"
+        transition={{ ...spring, delay: 0.1 }}
+        aria-labelledby="record-heading"
+        className="overflow-hidden rounded-lg border-2 border-ink bg-surface"
     >
-        <h4 className="font-bold text-slate-800 text-lg mb-6 text-center">Join Our Community</h4>
-        <div className="grid grid-cols-3 gap-6 text-center">
-            <div>
-                <div className="text-4xl font-black text-purple-600">
-                    <CountUp end={10} suffix="K+" />
-                </div>
-                <div className="text-xs text-slate-600 mt-1">Focused Users</div>
-            </div>
-            <div>
-                <div className="text-4xl font-black text-blue-600">
-                    <CountUp end={250} suffix="K+" />
-                </div>
-                <div className="text-xs text-slate-600 mt-1">Hours Tracked</div>
-            </div>
-            <div>
-                <div className="text-4xl font-black text-green-600">
-                    <CountUp end={95} suffix="%" />
-                </div>
-                <div className="text-xs text-slate-600 mt-1">Goal Success</div>
-            </div>
+        <div className="border-b-2 border-ink px-5 py-3.5">
+            <h2 id="record-heading" className="text-sm font-bold uppercase tracking-[0.12em] text-ink">
+                Your Record
+            </h2>
+            <p className="mt-0.5 text-[11px] font-medium text-ink-faint">
+                Everything you do in ProdX lands on one page
+            </p>
         </div>
-    </motion.div>
+        <div className="grid grid-cols-1 divide-y-2 divide-line sm:grid-cols-3 sm:divide-x-2 sm:divide-y-0">
+            {cells.map(({ label, text }) => (
+                <div key={label} className="flex flex-col gap-1.5 p-5">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink">
+                        {label}
+                    </span>
+                    <span className="text-xs font-medium text-ink-soft">{text}</span>
+                </div>
+            ))}
+        </div>
+    </motion.section>
 );

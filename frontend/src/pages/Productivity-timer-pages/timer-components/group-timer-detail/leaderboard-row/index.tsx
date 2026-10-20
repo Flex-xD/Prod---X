@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { Flame, CheckCircle2 } from 'lucide-react';
-import { Avatar, Pill, SlimBar } from '../../ui';
-import { RANK_CONFIG, sp } from '../../constants';
-import { formatSeconds, progressPercent } from '../../utils';
+import { Flame } from 'lucide-react';
+import { Avatar, SlimBar } from '../../ui';
+import { spring } from '@/lib/motion';
+import { formatSeconds, progressPercent, initialsOf } from '../../utils';
 import type { IGroupParticipant, IGroupTimer } from '../../types';
 import { userAppStore } from '@/store';
 
@@ -11,73 +11,65 @@ interface LeaderboardRowProps {
     specifiedTime: IGroupTimer['specifiedTime'];
 }
 
+// Ranking as measurement, not game: mono rank number, no crowns,
+// medals or confetti colors. `layout` + spring reorder the rows
+// when live ranks change - the whole live-update story is one
+// layout animation, not a re-mount.
 const LeaderboardRow = ({ participant, specifiedTime }: LeaderboardRowProps) => {
     const userId = userAppStore((state) => state.user_id);
     const pct = progressPercent(participant.productivityDone, specifiedTime);
 
     const isMe = participant.user._id === userId;
 
-    const rankIndex = participant.rank - 1;
-    const rankConfig = RANK_CONFIG[rankIndex];
-    const RankIcon = rankConfig?.icon ?? CheckCircle2;
-
-    const rankGrad =
-        rankIndex === 0 ? 'linear-gradient(90deg,#f59e0b,#d97706)' :
-            rankIndex === 1 ? 'linear-gradient(90deg,#94a3b8,#64748b)' :
-                isMe ? 'linear-gradient(90deg,#7c3aed,#4f46e5)' :
-                    'linear-gradient(90deg,#e2e8f0,#cbd5e1)';
-
     return (
         <motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: rankIndex * 0.06, ...sp }}
-            className="p-4 rounded-2xl transition-all"
-            style={{
-                background: isMe ? 'linear-gradient(135deg,#f5f3ff,#ede9fe)' : '#f8fafc',
-                border: isMe ? '1.5px solid #ddd6fe' : '1.5px solid transparent',
-            }}
+            layout
+            transition={spring}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`rounded-lg px-4 py-4 transition-colors duration-fast ${
+                isMe ? 'border-2 border-ink bg-focus-tint' : 'border border-line bg-paper'
+            }`}
         >
-            <div className="flex items-center gap-3 mb-3">
-                {/* Rank badge */}
-                <div
-                    className={`w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${rankConfig?.bg ?? 'from-slate-200 to-slate-300'
-                        }`}
-                    style={{ boxShadow: rankIndex < 3 ? '0 4px 12px rgba(0,0,0,0.15)' : 'none' }}
-                >
-                    <RankIcon className="w-4 h-4 text-white" />
-                </div>
+            <div className="mb-3 flex items-center gap-3">
+                {/* Rank: mono number, zero-padded so digits align */}
+                <span className="w-5 flex-shrink-0 font-mono text-sm font-bold tabular-nums text-ink-faint">
+                    {String(participant.rank).padStart(2, '0')}
+                </span>
 
                 <Avatar
-                    initials={participant.username.split(' ')[0][0]}
-                    idx={participant.rank}
+                    initials={initialsOf(participant.username)}
                     size="md"
                     isOnline={participant.user.isOnline}
                 />
 
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-black text-slate-900 text-sm">{participant.user.username}</span>
-                        {isMe && <Pill color="violet">You</Pill>}
+                <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="truncate text-sm font-bold text-ink">{participant.user.username}</span>
+                        {isMe && (
+                            <span className="rounded-full bg-ink px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-paper">
+                                You
+                            </span>
+                        )}
                         {participant.isCurrentlyActive && (
-                            <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
-                                <Flame className="w-3 h-3" />Active
+                            <span className="flex items-center gap-1 text-[11px] font-bold text-focus-deep">
+                                <Flame className="h-3 w-3" aria-hidden="true" /> Active
                             </span>
                         )}
                     </div>
-                    <p className="text-xs font-semibold text-slate-400 mt-0.5">
-                        {formatSeconds(participant.productivityDone)} focused
+                    <p className="mt-0.5 text-xs font-semibold text-ink-faint">
+                        <span className="font-mono tabular-nums">{formatSeconds(participant.productivityDone)}</span> focused
                     </p>
                 </div>
 
                 <div className="flex-shrink-0 text-right">
-                    <span className="text-xl font-black text-slate-800">{pct}</span>
-                    <span className="text-xs font-bold text-slate-400">%</span>
+                    <span className="font-mono text-lg font-bold tabular-nums text-ink">{pct}</span>
+                    <span className="text-xs font-bold text-ink-faint">%</span>
                 </div>
             </div>
 
             {/* Progress bar */}
-            <SlimBar percent={pct} gradient={rankGrad} height={4} trackColor="rgba(0,0,0,0.05)" />
+            <SlimBar percent={pct} height={4} trackClass="bg-line" />
         </motion.div>
     );
 };

@@ -1,56 +1,42 @@
 import { motion } from 'framer-motion';
-import { Brain, Sparkles } from 'lucide-react';
 import SkeletonBlock from '../skeleton-block';
+import { spring } from '@/lib/motion';
 
 interface AiTipCardProps {
     tip?: string;
     isLoading: boolean;
 }
 
-const AiTipCard = ({ tip, isLoading }: AiTipCardProps) => {
-    return (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.5, type: 'spring', damping: 28, stiffness: 280 }}
-            className="relative rounded-3xl overflow-hidden text-white"
-            style={{
-                background: 'linear-gradient(145deg, #78350f 0%, #b45309 45%, #d97706 100%)',
-                boxShadow: '0 16px 48px rgba(217,119,6,0.38)',
-            }}
-        >
-            <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full" style={{ background: 'radial-gradient(circle, rgba(253,230,138,0.25), transparent)' }} />
-            <div className="absolute bottom-0 -left-6 w-28 h-28 rounded-full" style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.18), transparent)' }} />
+const AiTipCard = ({ tip, isLoading }: AiTipCardProps) => (
+    <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...spring, delay: 0.13 }}
+        aria-labelledby="ai-tip-heading"
+        className="overflow-hidden rounded-lg border-2 border-ink bg-surface"
+    >
+        <div className="flex items-center justify-between gap-3 border-b-2 border-ink px-5 py-3.5">
+            <h2 id="ai-tip-heading" className="text-sm font-bold uppercase tracking-[0.12em] text-ink">
+                AI Tip
+            </h2>
+            <span className="flex-shrink-0 rounded-sm border border-ink px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-ink">
+                ProdX AI
+            </span>
+        </div>
 
-            <div className="relative z-10 p-6">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.15)' }}>
-                        <Brain className="w-5 h-5 text-amber-200" />
-                    </div>
-                    <div>
-                        <h3 className="font-black text-sm text-white">AI Tip of the Day</h3>
-                        <div className="flex items-center gap-1 mt-0.5">
-                            <Sparkles className="w-3 h-3 text-amber-300" />
-                            <p className="text-xs text-amber-300 font-semibold">Powered by ProdX AI</p>
-                        </div>
-                    </div>
+        <div className="px-5 py-4">
+            {isLoading ? (
+                <div className="space-y-2.5">
+                    <SkeletonBlock className="h-3.5 w-full" />
+                    <SkeletonBlock className="h-3.5 w-4/5" />
                 </div>
-
-                {isLoading ? (
-                    <div className="space-y-2">
-                        <SkeletonBlock className="h-3.5 w-full" style={{ background: 'rgba(255,255,255,0.2)' }} />
-                        <SkeletonBlock className="h-3.5 w-4/5" style={{ background: 'rgba(255,255,255,0.2)' }} />
-                    </div>
-                ) : (
-                    <p className="text-sm leading-relaxed font-medium" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                        {tip}
-                    </p>
-                )}
-
-                <div className="mt-4 h-0.5 w-12 rounded-full" style={{ background: 'rgba(255,255,255,0.3)' }} />
-            </div>
-        </motion.div>
-    );
-};
+            ) : tip ? (
+                <p className="text-sm font-medium leading-relaxed text-ink">{tip}</p>
+            ) : (
+                <p className="text-xs font-medium text-ink-faint">No tip for today yet.</p>
+            )}
+        </div>
+    </motion.section>
+);
 
 export default AiTipCard;

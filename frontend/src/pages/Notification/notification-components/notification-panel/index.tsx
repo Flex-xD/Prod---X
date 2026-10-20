@@ -6,13 +6,12 @@ import { userAppStore } from "@/store";
 import type { INotification } from "@/types/notification";
 import useGetNotifications from "@/custom-hooks/notification/get-notification";
 import { useMarkAllAsReadMutation } from "@/custom-hooks/notification/mark-as-read";
+import { spring } from "@/lib/motion";
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
 }
-
-const sp = { type: "spring", damping: 30, stiffness: 300 } as const;
 
 const NotificationPanel = ({ isOpen, onClose }: Props) => {
     const user_id = userAppStore((state) => state.user_id) ?? "";
@@ -39,61 +38,71 @@ const NotificationPanel = ({ isOpen, onClose }: Props) => {
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Backdrop */}
+                    {/* Backdrop: flat ink wash, no blur - depth comes from the
+                        sheet's hard offset shadow, not from optics. */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 z-50"
-                        style={{ background: "rgba(15,23,42,0.4)", backdropFilter: "blur(2px)" }}
+                        className="fixed inset-0 z-50 bg-ink/60"
+                        aria-hidden="true"
                     />
 
                     <motion.div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="notification-panel-title"
                         initial={{ x: "100%" }}
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
-                        transition={sp}
-                        className="fixed top-0 right-0 h-screen w-full max-w-md z-50 flex flex-col"
-                        style={{ background: "white", boxShadow: "-16px 0 48px rgba(0,0,0,0.18)" }}
+                        transition={spring}
+                        onKeyDown={(e) => {
+                            if (e.key === "Escape") onClose();
+                        }}
+                        className="fixed right-0 top-0 z-50 flex h-screen w-full max-w-md flex-col border-l-2 border-ink bg-surface"
+                        style={{ boxShadow: "-6px 0 0 0 var(--color-ink)" }}
                     >
-                        <div
-                            className="px-6 pt-6 pb-4 flex-shrink-0"
-                            style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
-                        >
-                            <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-2.5">
-                                    <div
-                                        className="w-9 h-9 rounded-xl flex items-center justify-center"
-                                        style={{ background: "linear-gradient(135deg,#7C3AED,#4F46E5)", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
+                        <div className="flex-shrink-0 border-b-2 border-ink px-6 pb-4 pt-6">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                    <span
+                                        aria-hidden="true"
+                                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm border-2 border-ink bg-ink text-paper"
                                     >
-                                        <Bell className="w-4 h-4 text-white" />
-                                    </div>
-                                    <h2 className="text-lg font-black text-slate-900">Notifications</h2>
-                                    {unreadCount > 0 && (
-                                        <span
-                                            className="text-xs font-bold px-2 py-0.5 rounded-full"
-                                            style={{ background: "#ede9fe", color: "#7c3aed" }}
+                                        <Bell className="h-4 w-4" />
+                                    </span>
+                                    <div>
+                                        <h2
+                                            id="notification-panel-title"
+                                            className="text-sm font-bold uppercase tracking-[0.14em] text-ink"
                                         >
-                                            {unreadCount} new
-                                        </span>
-                                    )}
+                                            Notifications
+                                        </h2>
+                                        {unreadCount > 0 && (
+                                            <span className="mt-1 inline-flex items-center rounded-full border border-info bg-info-tint px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-info-deep">
+                                                {unreadCount} new
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-                                <motion.button
-                                    whileTap={{ scale: 0.9 }}
+                                <button
+                                    type="button"
                                     onClick={onClose}
-                                    className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-slate-100 transition-colors"
+                                    aria-label="Close notifications"
+                                    className="-m-1.5 rounded-sm p-1.5 text-ink-soft transition-colors duration-fast hover:bg-paper-deep hover:text-ink"
                                 >
-                                    <X className="w-4 h-4 text-slate-500" />
-                                </motion.button>
+                                    <X className="h-4 w-4" />
+                                </button>
                             </div>
 
                             {unreadCount > 0 && (
                                 <button
+                                    type="button"
                                     onClick={() => markAllAsRead()}
-                                    className="flex items-center gap-1.5 text-xs font-bold text-violet-600 hover:text-violet-700 mt-2 transition-colors"
+                                    className="press-hard mt-3 inline-flex items-center gap-1.5 rounded-lg border-2 border-ink bg-surface px-3 py-1.5 text-xs font-bold text-ink"
                                 >
-                                    <CheckCheck className="w-3.5 h-3.5" />
+                                    <CheckCheck className="h-3.5 w-3.5" aria-hidden="true" />
                                     Mark all as read
                                 </button>
                             )}

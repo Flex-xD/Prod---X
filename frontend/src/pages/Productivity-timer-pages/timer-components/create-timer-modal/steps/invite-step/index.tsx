@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, UserPlus, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { MAX_GROUP_INVITES, sp } from '../../../constants';
-import { Avatar } from '../../../ui';
+import { MAX_GROUP_INVITES } from '../../../constants';
+import { Avatar, PressBtn } from '../../../ui';
+import { quick, spring } from '@/lib/motion';
+import { initialsOf } from '../../../utils';
 import type { IUser } from '../../../types';
 import UserGetUsersToInvite from '@/custom-hooks/group-productivity-timer/get-users-to-invite';
-import { toast } from 'sonner';
 
 interface InviteStepProps {
     invitedUsers: IUser[];
@@ -18,132 +19,119 @@ const InviteStep = ({ invitedUsers, onToggle, onContinue }: InviteStepProps) => 
     // * Local State
     const [query, setQuery] = useState('');
 
-
     // * Users to invite query
     const { data: usersToInvite, isError: isUsersToInviteError } = UserGetUsersToInvite(query);
 
-
-
-    const filtered = usersToInvite?.data.users ?? usersToInvite?.data.users.filter(
-        u =>
-            u.username.toLowerCase().includes(query.toLowerCase()) &&
-            !invitedUsers.find(i => i._id === u._id),
-    );
-
-
-    console.log("This is the data from : ", usersToInvite);
-    // if (!isUsersToInvitePending) {
-    //     return <Loader2Icon />;
-    // }
-
-    if (isUsersToInviteError) {
-        console.log(`There is error while fetching the users to invite : ${isUsersToInviteError}`);
-        toast.error("Error while fetching the users !");
-    }
+    const results = usersToInvite?.data.users ?? [];
+    const filtered = results.filter(u => !invitedUsers.find(i => i._id === u._id));
 
     return (
         <motion.div
             key="invite-users"
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 12 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={sp}
+            exit={{ opacity: 0, x: -12 }}
+            transition={quick}
             className="space-y-4"
         >
-            {/* Invited chips */}
+            {/* Invited chips: enter/exit on add and remove */}
             <AnimatePresence>
                 {invitedUsers.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="flex flex-wrap gap-2 p-3 rounded-2xl"
-                        style={{ background: '#f5f3ff', border: '1px solid #ddd6fe' }}
+                        transition={spring}
+                        className="overflow-hidden rounded-lg border border-info bg-info-tint"
                     >
-                        {invitedUsers.map((u, i) => (
-                            <motion.div
-                                key={u._id}
-                                layout
-                                initial={{ scale: 0, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0, opacity: 0 }}
-                                transition={sp}
-                                className="flex items-center gap-1.5 bg-white rounded-xl px-2.5 py-1.5"
-                                style={{ border: '1px solid #ddd6fe', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
-                            >
-                                <Avatar initials={""} idx={i} size="sm" />
-                                <span className="text-xs font-bold text-slate-700">{u.username}</span>
-                                <button
-                                    onClick={() => onToggle(u)}
-                                    className="text-slate-300 hover:text-rose-400 transition-colors ml-0.5"
+                        <div className="flex flex-wrap gap-2 p-3">
+                            {invitedUsers.map((u) => (
+                                <motion.span
+                                    key={u._id}
+                                    layout
+                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.9, opacity: 0 }}
+                                    transition={spring}
+                                    className="flex items-center gap-1.5 rounded-lg border border-ink bg-surface px-2.5 py-1.5 shadow-hard-xs"
                                 >
-                                    <X className="w-3 h-3" />
-                                </button>
-                            </motion.div>
-                        ))}
+                                    <Avatar initials={initialsOf(u.username)} size="sm" />
+                                    <span className="text-xs font-bold text-ink">{u.username}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => onToggle(u)}
+                                        aria-label={`Remove ${u.username}`}
+                                        className="ml-0.5 text-ink-faint transition-colors duration-fast hover:text-alert-deep"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </motion.span>
+                            ))}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
             {/* Search input */}
             <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" aria-hidden="true" />
                 <Input
-                    placeholder="Search username…"
+                    placeholder="Search username..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="pl-9 rounded-xl h-10 text-sm border-slate-200 focus-visible:ring-violet-400"
+                    aria-label="Search people to invite"
+                    className="h-10 rounded-lg pl-9 text-sm"
                 />
             </div>
 
+            {/* Fetch failure: inline, actionable, no toasts fired from render */}
+            {isUsersToInviteError && (
+                <p role="alert" className="rounded-lg border-2 border-alert bg-alert-tint px-3 py-2 text-xs font-bold text-alert-deep">
+                    Couldn't load people to invite. Try again in a moment.
+                </p>
+            )}
+
             {/* Results list */}
-            <div className="space-y-1.5 max-h-52 overflow-y-auto">
-                {/* ? Fix the types of user and i below */}
-                {filtered && filtered?.map((user: IUser, i: any) => (
+            <div className="max-h-52 space-y-1.5 overflow-y-auto">
+                {filtered.map((user: IUser, i: number) => (
                     <motion.div
                         key={user._id}
-                        initial={{ opacity: 0, y: 6 }}
+                        initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.04 }}
-                        className="flex items-center gap-3 p-3 rounded-2xl"
-                        style={{ background: '#f8fafc' }}
+                        transition={{ ...quick, delay: Math.min(i, 5) * 0.03 }}
+                        className="flex items-center gap-3 rounded-lg border border-line bg-paper p-3 transition-colors duration-fast hover:border-ink"
                     >
-                        <Avatar initials={user.username.split(' ').map(word => word.charAt(0)).join('')} idx={i + 2} size="md" isOnline={user.isOnline} />
+                        <Avatar initials={initialsOf(user.username)} size="md" isOnline={user.isOnline} />
 
-                        <div className="flex-1">
-                            <div className="font-bold text-slate-800 text-sm">{user.username}</div>
-                            <div className={`text-xs font-semibold ${user.isOnline ? 'text-emerald-500' : 'text-slate-400'}`}>
-                                {user.isOnline ? '● Online' : '○ Offline'}
+                        <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-bold text-ink">{user.username}</div>
+                            <div className={`text-xs font-semibold ${user.isOnline ? 'text-info-deep' : 'text-ink-faint'}`}>
+                                {user.isOnline ? 'Online' : 'Offline'}
                             </div>
                         </div>
 
-                        <motion.button
-                            whileTap={{ scale: 0.9 }}
+                        <PressBtn
+                            variant="primary"
                             onClick={() => onToggle(user)}
                             disabled={invitedUsers.length >= MAX_GROUP_INVITES}
-                            className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl text-white disabled:opacity-40"
-                            style={{ background: 'linear-gradient(135deg,#7C3AED,#4F46E5)' }}
+                            className="px-3 py-1.5 text-xs"
                         >
-                            <UserPlus className="w-3 h-3" /> Invite
-                        </motion.button>
+                            <UserPlus className="h-3 w-3" aria-hidden="true" /> Invite
+                        </PressBtn>
                     </motion.div>
                 ))}
             </div>
 
             {/* Continue CTA */}
-            <motion.button
-                whileTap={{ scale: 0.97 }}
+            <PressBtn
+                variant="primary"
                 disabled={invitedUsers.length === 0}
                 onClick={onContinue}
-                className="w-full py-3.5 rounded-2xl text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-40"
-                style={{
-                    background: 'linear-gradient(135deg,#7C3AED,#4F46E5)',
-                    boxShadow: invitedUsers.length > 0 ? '0 8px 24px rgba(124,58,237,0.3)' : 'none',
-                }}
+                className="w-full py-3.5"
             >
                 Continue with {invitedUsers.length} member{invitedUsers.length !== 1 ? 's' : ''}
-                <ChevronRight className="w-4 h-4" />
-            </motion.button>
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </PressBtn>
         </motion.div>
     );
 };

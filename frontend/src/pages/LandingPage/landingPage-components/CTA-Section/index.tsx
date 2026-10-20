@@ -1,47 +1,66 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import StreakPreview from '../StreakPreview';
-
-const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
+import { quick } from '@/lib/motion';
+import { cn } from '@/utils/utils';
+import { LinkButton } from '../shared';
 
 function CtaSection() {
+    const [filled, setFilled] = useState(false);
+
     return (
-        <section className="py-24 relative overflow-hidden" style={{ background: 'linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)' }}>
-            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.2), transparent)' }} />
-            <div className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full" style={{ background: 'radial-gradient(circle, rgba(192,132,252,0.16), transparent)' }} />
+        <section className="focus-ring-invert bg-ink text-paper">
+            <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24">
+                <div>
+                    <h2 className="text-3xl font-bold sm:text-4xl">Today’s square is empty.</h2>
+                    <p className="mt-4 max-w-md text-lg text-paper/75">
+                        Create a free account, run one session or finish one task, and the first square goes on your
+                        calendar.
+                    </p>
+                    <div className="mt-8">
+                        <LinkButton to="/auth" variant="onInk" onActiveChange={setFilled}>
+                            Start your record
+                        </LinkButton>
+                    </div>
+                </div>
 
-            <div className="absolute inset-0 flex items-center justify-center opacity-[0.07] pointer-events-none">
-                <StreakPreview weeks={40} rows={12} cellSize={16} gap={6} animate={false} />
-            </div>
-
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ...sp }}
-                viewport={{ once: true }}
-                className="relative z-10 max-w-2xl mx-auto px-6 text-center"
-            >
-                <h2 className="text-4xl font-black text-white mb-5">
-                    Your streak starts today.
-                </h2>
-                <p className="text-lg text-indigo-200 font-medium mb-9">
-                    Day one is free — it only takes one session to put the first square on the board.
-                </p>
-                <Link to="/auth">
-                    <motion.div className="inline-block" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
-                        <Button
-                            className="px-8 py-6 rounded-2xl text-base font-bold text-white flex items-center gap-2"
-                            style={{ background: 'white', color: '#4338ca', boxShadow: '0 12px 32px rgba(0,0,0,0.25)' }}
-                        >
-                            Create your free account <ArrowRight className="w-4 h-4" />
-                        </Button>
+                <div>
+                    <motion.div
+                        aria-hidden
+                        className="grid max-w-sm grid-cols-7 gap-1.5"
+                        variants={{ hidden: {}, show: { transition: { staggerChildren: 0.03 } } }}
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: true, amount: 0.6 }}
+                    >
+                        {Array.from({ length: 14 }, (_, i) => {
+                            const today = i === 13;
+                            return (
+                                <motion.span
+                                    key={i}
+                                    variants={{ hidden: { opacity: 0, scale: 0.6 }, show: { opacity: 1, scale: 1 } }}
+                                    transition={quick}
+                                    className={cn(
+                                        'relative aspect-square overflow-hidden rounded-sm',
+                                        today ? 'border-2 border-dashed border-progress' : 'border border-paper/30',
+                                    )}
+                                >
+                                    {today && (
+                                        <motion.span
+                                            className="absolute inset-0 bg-progress"
+                                            initial={false}
+                                            animate={{ scale: filled ? 1 : 0, opacity: filled ? 1 : 0 }}
+                                            transition={quick}
+                                        />
+                                    )}
+                                </motion.span>
+                            );
+                        })}
                     </motion.div>
-                </Link>
-            </motion.div>
+                    <p className="mt-3 text-sm text-paper/75">Your calendar on day one. The dashed square is today.</p>
+                </div>
+            </div>
         </section>
     );
 }
 
-export default CtaSection;
+export default CtaSection; 

@@ -5,7 +5,6 @@ const apiClient = axios.create({
     withCredentials: true
 })
 
-// ? Now I have to test it , 
 apiClient.interceptors.request.use((config) => {
     const accessToken = userAppStore.getState().accessToken;
     console.log("Checking for the access-token");

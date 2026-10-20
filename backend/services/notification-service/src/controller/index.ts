@@ -14,7 +14,7 @@ interface IAuthRequest extends Request {
 export const createNotification = asyncHandler(async (req: IAuthRequest, res: Response) => {
     // console.info("This is the req.headers of notification-service : " , req.headers);
     console.info("Creating notification . . .")
-    const { topic, message, to, notificationType, from: userId , invitation} = req.body;
+    const { topic, message, to, notificationType, from: userId, invitation } = req.body;
     // const { userId } = req;
     if (!userId) {
         throw ApiError(StatusCodes.UNAUTHORIZED, "You are unauthroized !");
@@ -24,7 +24,7 @@ export const createNotification = asyncHandler(async (req: IAuthRequest, res: Re
 
     // * req.body will be parsed before hitting the api by the validate middleware (so no need to parse it)
 
-    const notification = await notificationServices.createNotification({ topic, message, to, notificationType, from: toObjectId(userId)  , invitation});
+    const notification = await notificationServices.createNotification({ topic, message, to, notificationType, from: toObjectId(userId), invitation });
 
     // ? Emitting the notification.created event
     await emitEvent("notification.created", {
@@ -55,9 +55,9 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
     const notification = await notificationServices.sendNotification(notificationReceivingUserId, notificationId);
     const user = await getUser(userId);
     // ? Emitting the notification.created event
+
     await emitEvent("invitation.notification.created", {
-        notification,
-        username: user.username
+        notification, username: user.username, recipientId: notificationReceivingUserId,
     });
 
     return sendResponse(res, {
@@ -91,7 +91,7 @@ export const getNotifications = asyncHandler(async (req: IAuthRequest, res: Resp
 export const markNotificationAsRead = asyncHandler(async (req: IAuthRequest, res: Response) => {
     const { notificationId } = req.params;
     // * This userId is going to be from the frontend
-    const userId = req.body.userId; 
+    const userId = req.body.userId;
     const notification = await notificationServices.markAsRead(toObjectId(notificationId), toObjectId(userId));
 
     return sendResponse(res, {

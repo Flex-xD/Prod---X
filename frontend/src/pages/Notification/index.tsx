@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Bell } from "lucide-react";
 
 import { userAppStore } from "@/store";
@@ -16,23 +15,28 @@ const NotificationCenter = () => {
 
     return (
         <>
-            <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.93 }}
+            <button
+                type="button"
                 onClick={() => setIsOpen(true)}
-                className="relative w-10 h-10 rounded-2xl flex items-center justify-center transition-colors"
-                style={{ background: "#f8fafc", border: "1px solid rgba(0,0,0,0.06)" }}
+                aria-label={
+                    unreadCount > 0
+                        ? `Open notifications, ${unreadCount} unread`
+                        : "Open notifications"
+                }
+                className="press-hard relative flex h-10 w-10 items-center justify-center rounded-lg border-2 border-ink bg-surface text-ink"
             >
-                <Bell className="w-4.5 h-4.5 text-slate-500 w-[18px] h-[18px]" />
+                <Bell className="h-[18px] w-[18px]" aria-hidden="true" />
                 {unreadCount > 0 && (
+                    /* Unread = information not yet seen, so teal (info), never red:
+                       red is reserved for problems. Mono keeps the count steady. */
                     <span
-                        className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center text-[10px] font-black text-white"
-                        style={{ background: "linear-gradient(135deg,#7C3AED,#4F46E5)", boxShadow: "0 0 0 2px white" }}
+                        aria-hidden="true"
+                        className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border border-ink bg-info px-1 font-mono text-[10px] font-bold leading-none tabular-nums text-ink"
                     >
                         {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                 )}
-            </motion.button>
+            </button>
 
             <NotificationPanel isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </>

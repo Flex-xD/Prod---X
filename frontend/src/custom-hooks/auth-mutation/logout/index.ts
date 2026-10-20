@@ -31,22 +31,17 @@ export const useLogoutMutation = () => {
             }
             clearAccessToken();
             setIsAuthenticated(false);
-            // * May be I should be changing the userId to undefined instead of a string
-            setUserId('');
-
-            console.log(
-                "Logout state:",
-                userAppStore.getState()
-            );
+            setUserId("");
 
             return response.data;
         },
         onSuccess: async (data) => {
             await navigate("/");
-            console.log(data)
-            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
             return toast.success(data?.message || "Logout successfully done !")
         },
+        onSettled:async () => {
+            await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE.ME });
+        } ,
         onError: (error: AxiosError | Error) => {
             console.log("Error while logging out : ", error);
             let message = 'User Logout failed !';

@@ -20,21 +20,27 @@ const ProfilePage = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
+            <div className="flex min-h-screen items-center justify-center" role="status">
+                <Loader2 className="h-6 w-6 animate-spin text-ink-soft" aria-hidden="true" />
+                <span className="sr-only">Loading profile</span>
             </div>
         );
     }
 
     if (isError || !profile?.data) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center gap-3">
-                <AlertTriangle className="w-6 h-6 text-amber-500" />
-                <p className="text-sm font-semibold text-slate-600">Could not load your profile.</p>
+            <div
+                role="alert"
+                className="flex min-h-screen flex-col items-center justify-center gap-3 px-6"
+            >
+                <span className="flex h-12 w-12 items-center justify-center rounded-sm border-2 border-ink bg-alert-tint text-alert-deep">
+                    <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <p className="text-sm font-bold text-ink">Could not load your profile.</p>
                 <button
+                    type="button"
                     onClick={() => refetch()}
-                    className="px-4 py-2 rounded-xl text-sm font-bold text-white"
-                    style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)' }}
+                    className="press-hard rounded-lg border-2 border-ink bg-ink px-4 py-2.5 text-sm font-bold text-paper"
                 >
                     Try again
                 </button>
@@ -46,18 +52,22 @@ const ProfilePage = () => {
     const unavailable = stats.unavailable ?? [];
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">
+        <div className="min-h-screen bg-paper">
             <DashboardHeader />
 
-            <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+            <div className="mx-auto max-w-5xl space-y-8 px-6 py-8">
                 {unavailable.length > 0 && (
+                    /* Partial data = attention banner in focus amber, not an
+                       error: "incomplete" is not "broken" (red stays for failures). */
                     <div
-                        className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-semibold"
-                        style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}
+                        role="status"
+                        className="flex items-center gap-2.5 rounded-lg border-2 border-focus bg-focus-tint px-4 py-3 text-xs font-semibold text-focus-deep"
                     >
-                        <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                        Some numbers may be incomplete right now:{' '}
-                        {unavailable.map((name) => SOURCE_LABELS[name] ?? name).join(', ')}.
+                        <AlertTriangle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                        <span>
+                            Some numbers may be incomplete right now:{' '}
+                            {unavailable.map((name) => SOURCE_LABELS[name] ?? name).join(', ')}.
+                        </span>
                     </div>
                 )}
                 <ProfileHero user={user} currentStreak={stats.streakData.currentStreak} />

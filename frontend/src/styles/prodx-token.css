@@ -1,0 +1,280 @@
+/*
+ * Prod-X design foundation (Phase 1)
+ * "The Digital Progress Ledger": paper, ink, and one semantic color per meaning.
+ *
+ * Import this AFTER `@import "tailwindcss";` in your global stylesheet so the
+ * shadcn variables below override the old violet theme.
+ *
+ * Semantic color rules (do not break these in components):
+ *   progress green  = achievement / completion
+ *   focus orange    = active focus / current work
+ *   alert red-orange = problem / overdue / destructive
+ *   info blue-green = information / secondary state
+ * Text on any semantic FILL is always ink. Semantic colors used as TEXT on
+ * paper must use the matching "-ink" shade (AA contrast).
+ */
+
+@theme {
+    /* ---------- Colors: neutrals ---------- */
+    --color-paper: #f4f0e6;        /* canvas, ~70% of any screen */
+    --color-paper-deep: #e9e3d3;   /* inset areas, empty calendar cells, skeletons */
+    --color-surface: #fffdf7;      /* panels that sit on the canvas */
+    --color-ink: #171717;          /* text, borders, hard shadows */
+    --color-ink-soft: #5c574d;     /* secondary text (6.3:1 on paper) */
+    --color-rule: #d9d3c3;         /* 1px subtle separators */
+
+    /* ---------- Colors: progress (green) ---------- */
+    --color-progress: #a8d95b;
+    --color-progress-wash: #e3f1c3;
+    --color-progress-ink: #456b17; /* green text on paper (5.5:1) */
+
+    /* ---------- Colors: focus (orange) ---------- */
+    --color-focus: #f4a340;
+    --color-focus-wash: #fbe3c2;
+    --color-focus-ink: #8a4b00;    /* orange text on paper (6.0:1) */
+
+    /* ---------- Colors: alert (red-orange) ---------- */
+    --color-alert: #e76f51;
+    --color-alert-wash: #f8d5cb;
+    --color-alert-ink: #a8381b;    /* red text on paper (5.7:1) */
+
+    /* ---------- Colors: info (blue-green) ---------- */
+    --color-info: #78bfc5;
+    --color-info-wash: #d3ecee;
+    --color-info-ink: #2f6f76;     /* teal text on paper (5.0:1) */
+
+    /* ---------- Colors: activity calendar intensity (increasing work) ---------- */
+    --color-activity-0: #e9e3d3;
+    --color-activity-1: #d3e9a5;
+    --color-activity-2: #a8d95b;
+    --color-activity-3: #6c9a2b;
+
+    /* ---------- Typography ---------- */
+    --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+    /* Measurement type: big numbers for stats and timers */
+    --text-stat: 3rem;
+    --text-stat--line-height: 1;
+    --text-stat-lg: 4.5rem;
+    --text-stat-lg--line-height: 1;
+    --text-timer: 6rem;
+    --text-timer--line-height: 1;
+
+    --tracking-label: 0.06em;
+
+    /* ---------- Spacing ---------- */
+    /* Tailwind's 4px base scale (--spacing: 0.25rem) is kept as is. */
+    --container-page: 76rem;
+
+    /* ---------- Radius: small and deliberate ---------- */
+    /* Every large radius collapses to 4px so soft SaaS rounding cannot return by accident.
+       rounded-full stays available for avatars and true status tags only. */
+    --radius-xs: 2px;
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 4px;
+    --radius-xl: 4px;
+    --radius-2xl: 4px;
+    --radius-3xl: 4px;
+    --radius-4xl: 4px;
+
+    /* ---------- Hard shadows (no blur, no glow) ---------- */
+    --shadow-hard: 4px 4px 0 #171717;          /* major cards, primary actions */
+    --shadow-hard-sm: 3px 3px 0 #171717;       /* secondary controls */
+    --shadow-hard-pressed: 2px 2px 0 #171717;  /* pressed state */
+
+    /* Neutralize Tailwind's soft shadow scale so legacy components stop floating */
+    --shadow-2xs: 0 0 #0000;
+    --shadow-xs: 0 0 #0000;
+    --shadow-sm: 3px 3px 0 #171717;
+    --shadow-md: 4px 4px 0 #171717;
+    --shadow-lg: 4px 4px 0 #171717;
+    --shadow-xl: 4px 4px 0 #171717;
+    --shadow-2xl: 4px 4px 0 #171717;
+
+    /* ---------- Motion ---------- */
+    --ease-out: cubic-bezier(0.2, 0, 0, 1);
+    --duration-fast: 120ms;   /* press, hover, focus */
+    --duration-base: 200ms;   /* state changes, progress fills */
+    --duration-slow: 320ms;   /* entrances, page transitions */
+}
+
+/* ---------- shadcn/ui variable mapping ----------
+   Existing shadcn components read these, so mapping them re-themes
+   Button, Badge, Input, etc. without editing component files. */
+:root {
+    color-scheme: light;
+
+    --background: var(--color-paper);
+    --foreground: var(--color-ink);
+
+    --card: var(--color-surface);
+    --card-foreground: var(--color-ink);
+    --popover: var(--color-surface);
+    --popover-foreground: var(--color-ink);
+
+    /* Primary = ink. Green stays reserved for progress so it keeps its meaning. */
+    --primary: var(--color-ink);
+    --primary-foreground: var(--color-paper);
+
+    --secondary: var(--color-paper-deep);
+    --secondary-foreground: var(--color-ink);
+    --muted: var(--color-paper-deep);
+    --muted-foreground: var(--color-ink-soft);
+    --accent: var(--color-paper-deep);
+    --accent-foreground: var(--color-ink);
+
+    --destructive: var(--color-alert);
+    --destructive-foreground: var(--color-ink);
+
+    --border: var(--color-ink);   /* borders are structural: 2px ink by default */
+    --input: var(--color-ink);
+    --ring: var(--color-ink);
+    --radius: 4px;
+
+    --chart-1: var(--color-progress);
+    --chart-2: var(--color-focus);
+    --chart-3: var(--color-info);
+    --chart-4: var(--color-alert);
+    --chart-5: var(--color-ink);
+
+    --sidebar: var(--color-surface);
+    --sidebar-foreground: var(--color-ink);
+    --sidebar-primary: var(--color-ink);
+    --sidebar-primary-foreground: var(--color-paper);
+    --sidebar-accent: var(--color-paper-deep);
+    --sidebar-accent-foreground: var(--color-ink);
+    --sidebar-border: var(--color-ink);
+    --sidebar-ring: var(--color-ink);
+
+    /* Focus ring color; flipped on dark surfaces (see .surface-ink) */
+    --focus-ring: var(--color-ink);
+}
+
+/* ---------- Base ---------- */
+@layer base {
+    * {
+        border-color: var(--color-ink);
+    }
+
+    html {
+        font-family: var(--font-sans);
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        background-color: var(--color-paper);
+        color: var(--color-ink);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    h1, h2, h3, h4 {
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+    }
+
+    p {
+        text-wrap: pretty;
+    }
+
+    ::selection {
+        background: var(--color-progress);
+        color: var(--color-ink);
+    }
+
+    /* Focus: 3px ink outline with a paper gap so it reads on any surface */
+    :focus-visible {
+        outline: 3px solid var(--focus-ring);
+        outline-offset: 2px;
+    }
+
+    /* Mouse focus stays quiet; keyboard focus above stays loud */
+    :focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    /* Ink-colored surfaces need a light ring */
+    .surface-ink {
+        --focus-ring: var(--color-paper);
+    }
+}
+
+/* ---------- Utilities ---------- */
+
+/* Measured values: timers, stats, durations, rankings */
+@utility num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+/* Small descriptive label under or beside a measurement. Sentence case on purpose. */
+@utility label {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    color: var(--color-ink-soft);
+}
+
+/* Structural panel: ink border on warm white. Shadow is opt-in via shadow-hard. */
+@utility panel {
+    background-color: var(--color-surface);
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-md);
+}
+
+/* Subtle 1px separator for lists and table rows */
+@utility rule-b {
+    border-bottom: 1px solid var(--color-rule);
+}
+
+/* Physical press: pair with shadow-hard or shadow-hard-sm on the same element */
+@utility press {
+    transition:
+        transform var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-fast) var(--ease-out),
+        background-color var(--duration-fast) var(--ease-out);
+
+    &:hover:not(:disabled) {
+        transform: translate(-1px, -1px);
+    }
+
+    &:active:not(:disabled) {
+        transform: translate(2px, 2px);
+        box-shadow: var(--shadow-hard-pressed);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        box-shadow: none;
+    }
+}
+
+/* Loading placeholder: flat paper block with a slow opacity pulse */
+@utility skeleton {
+    background-color: var(--color-paper-deep);
+    border-radius: var(--radius-sm);
+    animation: prodx-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes prodx-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

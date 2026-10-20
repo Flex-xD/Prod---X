@@ -8,6 +8,7 @@ import { asyncHandler } from "../shared/utils/async-handler";
 import { sendResponse } from "../shared/utils/response-utils";
 import Token from "../shared/models/Token";
 import { emitEvent } from "../kafka/producer";
+import User from "../shared/models/User";
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
@@ -24,17 +25,16 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
 
     const user = await authService.registerLocalUser({ email, username, password });
 
-    // Check the accessToken below wether it should be of small time or large time
+    // ? This token related stuff should all be inside authService.regigsterLocalUser or may be a different service
     const accessToken = signAccessToken({ userId: user._id! });
     const refreshPlain = `${crypto.randomUUID()}.${crypto.randomUUID()}`;
     const hashed = hashToken(refreshPlain)
 
-    // ? Think about slidingExpiry (I think it should be shorter than absolute expiry)
 
     const slidingExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     const absoluteExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    await Token.create({
+    const refreshToken = await Token.create({
         hashedToken: hashed,
         userAgent: req.headers["user-agent"] as string,
         ip: req.ip as string,
@@ -42,7 +42,7 @@ export const registerController = asyncHandler(async (req: Request, res: Respons
         absoluteExpiresAt
     })
 
-
+    user.refreshTokens.push(refreshToken._id);
     await user.save();
     res.cookie("refreshToken", refreshPlain, REFRESH_COOKIE_OPTIONS);
 
@@ -139,15 +139,50 @@ export const googleAuthController = asyncHandler(async (req: Request, res: Respo
     })
 })
 
-export const logoutController = asyncHandler(async (req: Request, res: Response) => {
-    res.clearCookie("refreshToken", REFRESH_COOKIE_OPTIONS);
-    // ? See what to do with the refresh tokens in db , whether to delete them or keep them for history
-    console.log("Logout done !")
-    return sendResponse(res, {
-        statusCode: StatusCodes.OK,
-        message: "Logged out successfully !",
-        data: null,
-        success: true
-    })
-})
+export const logoutController = asyncHandler(
+    async (req: Request, res: Response) => {
+        const refreshToken = req.cookies?.refreshToken;
+
+        if (!refreshToken) {
+            res.clearCookie("refreshToken", REFRESH_COOKIE_OPTIONS);
+
+            return sendResponse(res, {
+                statusCode: StatusCodes.OK,
+                message: "Logged out successfully!",
+                data: null,
+                success: true,
+            });
+        }
+
+        const hashedToken = hashToken(refreshToken);
+
+        const dbToken = await Token.findOne({
+            hashedToken,
+        });
+
+        if (dbToken) {
+            await User.updateOne(
+                {
+                    refreshTokens: dbToken._id,
+                },
+                {
+                    $pull: {
+                        refreshTokens: dbToken._id,
+                    },
+                }
+            );
+
+            await Token.findByIdAndDelete(dbToken._id);
+        }
+
+        res.clearCookie("refreshToken", REFRESH_COOKIE_OPTIONS);
+
+        return sendResponse(res, {
+            statusCode: StatusCodes.OK,
+            message: "Logged out successfully!",
+            data: null,
+            success: true,
+        });
+    }
+);
 

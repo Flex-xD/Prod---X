@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
-import { Target, Clock, Trophy, Users, Brain, Sparkles } from 'lucide-react';
+import { Target, Clock, Trophy, Users, Brain, Flame } from 'lucide-react';
+import { spring } from '@/lib/motion';
 
 const features = [
-    { icon: Target, text: "Set daily focus goals" },
-    { icon: Clock, text: "Track deep work hours" },
-    { icon: Trophy, text: "Compete with friends" },
-    { icon: Users, text: "Join focus challenges" },
-    { icon: Brain, text: "AI productivity tips" },
-    { icon: Sparkles, text: "Build winning streaks" },
+    { icon: Target, text: 'Set daily focus goals' },
+    { icon: Clock, text: 'Track deep work hours' },
+    { icon: Trophy, text: 'Compete with friends' },
+    { icon: Users, text: 'Join focus challenges' },
+    { icon: Brain, text: 'AI productivity tips' },
+    { icon: Flame, text: 'Build winning streaks' },
 ];
 
 const container = {
@@ -15,63 +16,39 @@ const container = {
     show: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.12,
-            delayChildren: 0.6,
+            staggerChildren: 0.06,
+            delayChildren: 0.2,
         },
     },
 };
 
-const card = {
-    hidden: { opacity: 0, y: 60, scale: 0.9 },
-    show: {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: {
-            type: "spring",
-            stiffness: 300,
-            damping: 24
-        }
-    },
+const row = {
+    hidden: { opacity: 0, y: 8 },
+    show: { opacity: 1, y: 0, transition: spring },
 };
 
+// Features read as a ledger list, not a grid of decorative cards.
 export const FeaturesGrid = () => (
-    <motion.div
+    <motion.section
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-2 gap-5"
+        aria-labelledby="features-heading"
+        className="overflow-hidden rounded-lg border-2 border-ink bg-surface"
     >
-        {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-                <motion.div
-                    key={feature.text}
-                    variants={card}
-                    whileHover={{
-                        y: -8,
-                        scale: 1.05,
-                        transition: { duration: 0.3 }
-                    }}
-                    className="group relative bg-white/70 backdrop-blur-xl rounded-3xl p-7 border border-white/50 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
-                >
-                    <motion.div
-                        className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    />
-                    <div className="relative flex items-center gap-4">
-                        <motion.div
-                            whileHover={{ rotate: 360 }}
-                            transition={{ duration: 0.6 }}
-                            className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg"
-                        >
-                            <Icon className="w-6 h-6 text-white" />
-                        </motion.div>
-                        <span className="text-sm font-semibold text-slate-800">
-                            {feature.text}
-                        </span>
-                    </div>
-                </motion.div>
-            );
-        })}
-    </motion.div>
+        <h2
+            id="features-heading"
+            className="border-b-2 border-ink px-5 py-3.5 text-sm font-bold uppercase tracking-[0.12em] text-ink"
+        >
+            What ProdX Does
+        </h2>
+        <ul className="divide-y divide-line">
+            {features.map(({ icon: Icon, text }) => (
+                <motion.li key={text} variants={row} className="flex items-center gap-4 px-5 py-4">
+                    <Icon className="h-5 w-5 flex-shrink-0 text-ink-soft" aria-hidden="true" />
+                    <span className="text-sm font-semibold text-ink">{text}</span>
+                </motion.li>
+            ))}
+        </ul>
+    </motion.section>
 );

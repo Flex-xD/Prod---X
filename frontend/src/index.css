@@ -1,13 +1,165 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+/* ============================================================
+   Prod-X design foundation — Phase 1 (tokens only)
+   Concept: "The Digital Progress Ledger"
 
+   SEMANTIC COLOR RULES (apply in every later phase):
+   - Green  (#A8D95B)  = progress / achievement / completion
+   - Orange (#F4A340)  = active focus / current work
+   - Red    (#E76F51)  = problem / overdue / destructive
+   - Teal   (#78BFC5)  = information / secondary state
+   Paper and ink carry ~90% of the interface. Color encodes
+   state; it is never decoration. Raw accent colors fail text
+   contrast on paper — use the *-deep variants for text/labels.
+
+   GEOMETRY: borders are structural (2px ink for major
+   components, 1px line for separators), radius capped at 4px
+   (rounded-full is reserved for true circles: avatars, knobs),
+   shadows are hard ink offsets only — no blur, no glow.
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+/* shadcn/ui dark-mode hook. The app is light-first (warm paper);
+   a .dark theme can be added later without touching components. */
 @custom-variant dark (&:is(.dark *));
 
+
+@theme {
+  /* ---------- Typography ---------- */
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* IBM Plex Sans tops out at 700. Remap 800/900 to the real
+     bold weight so `font-extrabold`/`font-black` never render
+     faux-bold synthesized glyphs. Display type should earn its
+     size from hierarchy, not from weight. */
+  --font-weight-extrabold: 700;
+  --font-weight-black: 700;
+
+  /* ---------- Spacing: the 4px grid ----------
+     The whole scale derives from this base unit: p-4 = 1rem,
+     gap-2 = 0.5rem, and so on. Every measurement in Prod-X —
+     card padding, section rhythm, calendar cell gaps, stat
+     strip dividers — snaps to this grid, which is what keeps
+     the ledger layout feeling deliberate rather than eyeballed.
+     Tailwind's default already is 0.25rem; it is declared here
+     explicitly so the foundation owns the decision and no
+     later phase silently overrides it. */
+  --spacing: 0.25rem;
+
+  /* ---------- Palette: canvas, ink, structure ---------- */
+  --color-paper: #f4f0e6; /* primary canvas */
+  --color-paper-deep: #e9e2d1; /* muted fills, skeletons, disabled */
+  --color-surface: #fffdf7; /* raised warm white: cards, panels, inputs */
+  --color-ink: #171717; /* primary text + structural borders */
+  --color-ink-soft: #57534e; /* secondary text (7.7:1 on paper) */
+  --color-ink-faint: #8a8478; /* tertiary text only: placeholders, disabled */
+  --color-line: #d8d1c0; /* subtle 1px separators, non-essential */
+
+  /* ---------- Palette: semantic (each = fill / text / tint) ---------- */
+  --color-progress: #a8d95b; /* fills, calendar cells, check states */
+  --color-progress-deep: #4f6b22; /* progress text/labels on light */
+  --color-progress-tint: #edf5da; /* light progress backgrounds */
+
+  --color-focus: #f4a340; /* active focus fills, running timer */
+  --color-focus-deep: #8f5a0b; /* focus text/labels on light */
+  --color-focus-tint: #fbebd1; /* light focus backgrounds */
+
+  --color-alert: #e76f51; /* overdue fills, warnings */
+  --color-alert-deep: #a63b22; /* alert text/labels on light */
+  --color-alert-tint: #f8e1d9; /* light alert backgrounds */
+
+  --color-info: #78bfc5; /* informational fills, secondary state */
+  --color-info-deep: #2e6a70; /* info text/labels on light */
+  --color-info-tint: #def0f1; /* light info backgrounds */
+
+  /* ---------- Geometry: radius capped at 4px ----------
+     Remapping the default scale means every existing
+     `rounded-2xl`/`rounded-3xl` in the app becomes ledger
+     geometry (4px) with zero component edits. Pills only via
+     `rounded-full`, and only where the shape is truly circular. */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
+  --radius-4xl: 4px;
+
+  /* ---------- Shadows: hard ink offsets, no blur ----------
+     Use sparingly: important buttons, major cards, elevated
+     controls. Borders-only is the default for everything else. */
+  --shadow-hard-xs: 2px 2px 0 0 var(--color-ink);
+  --shadow-hard-sm: 3px 3px 0 0 var(--color-ink);
+  --shadow-hard: 4px 4px 0 0 var(--color-ink);
+  --shadow-hard-lg: 6px 6px 0 0 var(--color-ink);
+
+  /* ---------- Motion ----------
+     Pairs with the framer-motion presets in src/lib/motion.ts.
+     Durations are for CSS transitions (hover, press, fills);
+     springs drive everything JS-animated. Keep both systems small.
+     NOTE: Tailwind v4's `duration-*` utility reads the
+     `--transition-duration-*` namespace, not `--duration-*`. */
+  --transition-duration-fast: 150ms; /* hover, small state flips */
+  --transition-duration-base: 220ms; /* presses, fills, panel reveals */
+
+  /* ---------- Loading ----------
+     Restrained pulse, no aggressive shimmer. */
+  --animate-skeleton-pulse: skeleton-pulse 2s ease-in-out infinite;
+  @keyframes skeleton-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+/* ============================================================
+   shadcn/ui semantic variables.
+   shadcn components (Button, Badge, Card, inputs, sonner…)
+   read these, so remapping them moves every existing component
+   off the old violet/indigo language without editing a single
+   component file. Primary = ink: the default button in a
+   measurement instrument is a plain, solid, high-contrast
+   control — accent color is earned by state, not by default.
+   ============================================================ */
+:root {
+  --background: #f4f0e6;
+  --foreground: #171717;
+
+  --card: #fffdf7;
+  --card-foreground: #171717;
+  --popover: #fffdf7;
+  --popover-foreground: #171717;
+
+  --primary: #171717;
+  --primary-foreground: #fffdf7;
+  --secondary: #e9e2d1;
+  --secondary-foreground: #171717;
+  --muted: #e9e2d1;
+  --muted-foreground: #57534e;
+  --accent: #ede7d7;
+  --accent-foreground: #171717;
+  --destructive: #c0492d; /* 4.9:1 with paper text */
+  --destructive-foreground: #fffdf7;
+
+  --border: #d8d1c0; /* decorative separators */
+  --input: #948b7a; /* control boundaries need 3:1 on surface */
+  --ring: #171717;
+
+  /* Weekly focus graph / charts inherit product semantics:
+     green = accumulated progress, orange = focus time, etc. */
+  --chart-1: #a8d95b;
+  --chart-2: #f4a340;
+  --chart-3: #78bfc5;
+  --chart-4: #e76f51;
+}
+
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -23,6 +175,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -30,101 +183,82 @@
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+/* Dark ink panels (hero, timer-active surfaces) invert the
+   focus ring so keyboard focus stays visible on ink. */
+@utility focus-ring-invert {
+  --focus-ring: var(--color-paper);
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+@utility press-hard {
+  @apply transition-all duration-fast shadow-hard-sm hover:-translate-y-px hover:shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-xs;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  /* Tailwind v4 borders default to currentColor; shadcn expects
+     the --border token. Keeps stray `border` classes subtle. */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
   }
+
+  :root {
+    --focus-ring: var(--color-ink);
+    color-scheme: light;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
   }
-}
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  /* Visible, structural focus: matches the 2px ink language.
+     Never remove without a replacement — keyboard users rely
+     on this, and it must not be color-only (it is an outline,
+     present regardless of hue perception). */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
 
-.fade-up-card {
-  opacity: 0;
-  animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  /* Marking something selected = marking progress. */
+  ::selection {
+    background-color: var(--color-progress);
+    color: var(--color-ink);
+  }
+
+  /* Mono type is for measurable data: timers, stats, points,
+     rankings. Tabular numerals keep digits from jittering when
+     values tick. Utilities can still override. */
+  code,
+  kbd,
+  samp,
+  pre,
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Reduced motion: collapse CSS motion to instant. framer-motion
+     animations are handled per-component via useReducedMotion. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

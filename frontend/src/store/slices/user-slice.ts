@@ -7,7 +7,7 @@ export interface IUserSlice {
 
 export const userSlice:StateCreator<IUserSlice> = (set) => ({
     user_id:undefined , 
-    setUserId:(user_id:string) => {
+    setUserId:(user_id:string | undefined) => {
         set({user_id})
     }
 })

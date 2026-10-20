@@ -113,8 +113,8 @@ app.all(/.*/, async (req: IAuthRequest, res: Response) => {
             res.append("Set-Cookie", setCookieHeader);
         }
 
-        console.log("🔥 DOWNSTREAM STATUS:", response.status);
-        console.log("🔥 DOWNSTREAM DATA:", response.data);
+        logger.info(" DOWNSTREAM STATUS:", response.status);
+        logger.info(" DOWNSTREAM DATA:", response.data);
 
         return res
             .status(response.status)

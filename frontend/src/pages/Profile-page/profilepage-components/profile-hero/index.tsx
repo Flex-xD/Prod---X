@@ -1,18 +1,15 @@
 import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, Check, X, Pencil, Loader2 } from 'lucide-react';
+import { Camera, Check, X, Pencil, Loader2, Flame } from 'lucide-react';
 import useUpdateAvatarMutation from '@/custom-hooks/profile/update-avatar';
-import type { IUser } from '@/pages/Productivity-timer-pages/timer-components/types';
 import useUpdateUsernameMutation from '@/custom-hooks/profile/update-user-name';
+import type { IProfileHeroProps } from './profile-hero-types';
+import { enter } from '@/lib/motion';
 
-interface ProfileHeroProps {
-    user: IUser;
-    currentStreak: number;
-}
-
-const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
-
-const ProfileHero = ({ user, currentStreak }: ProfileHeroProps) => {
+// Ledger hero: a light surface card like every other major component
+// (no gradient, no glow). Identity is ink-on-paper; the only semantic
+// color is progress green on the streak record.
+const ProfileHero = ({ user, currentStreak }: IProfileHeroProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isEditingName, setIsEditingName] = useState(false);
     const [draftUsername, setDraftUsername] = useState(user.username);
@@ -37,94 +34,111 @@ const ProfileHero = ({ user, currentStreak }: ProfileHeroProps) => {
         updateUsername({ username: trimmed });
     };
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ...sp }}
-            className="relative rounded-3xl overflow-hidden text-white"
-            style={{ background: 'linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)', boxShadow: '0 24px 72px rgba(79,46,220,0.4)' }}
-        >
-            <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.22), transparent)' }} />
-            <div className="absolute bottom-0 -left-12 w-56 h-56 rounded-full" style={{ background: 'radial-gradient(circle, rgba(192,132,252,0.16), transparent)' }} />
+    const handleCancelUsername = () => {
+        setDraftUsername(user.username);
+        setIsEditingName(false);
+    };
 
-            <div className="relative z-10 p-8 flex flex-col sm:flex-row items-center sm:items-end gap-6">
+    return (
+        <motion.section {...enter(0)} aria-label="Profile" className="rounded-lg border-2 border-ink bg-surface shadow-hard">
+            <div className="relative flex flex-col items-start gap-6 p-6 sm:flex-row sm:items-center">
                 {/* Avatar */}
                 <div className="relative flex-shrink-0">
-                    <div
-                        className="w-28 h-28 rounded-3xl flex items-center justify-center text-3xl font-black text-white overflow-hidden"
-                        style={{ background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', boxShadow: '0 12px 32px rgba(124,58,237,0.45)' }}
-                    >
+                    <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-2 border-ink bg-ink text-3xl font-bold text-paper">
                         {user.avatar ? (
-                            <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+                            <img src={user.avatar} alt={user.username} className="h-full w-full object-cover" />
                         ) : (
                             initials
                         )}
                     </div>
 
-                    <motion.button
-                        whileTap={{ scale: 0.9 }}
+                    <button
+                        type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploadingAvatar}
-                        className="absolute -bottom-2 -right-2 w-9 h-9 rounded-2xl flex items-center justify-center disabled:opacity-70"
-                        style={{ background: 'white', boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }}
+                        aria-label="Change profile photo"
+                        className="press-hard absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-lg border-2 border-ink bg-surface text-ink disabled:pointer-events-none disabled:opacity-60"
                     >
                         {isUploadingAvatar ? (
-                            <Loader2 className="w-4 h-4 text-violet-600 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                         ) : (
-                            <Camera className="w-4 h-4 text-violet-600" />
+                            <Camera className="h-4 w-4" aria-hidden="true" />
                         )}
-                    </motion.button>
+                    </button>
 
                     <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
                 </div>
 
                 {/* Identity */}
-                <div className="flex-1 min-w-0 text-center sm:text-left">
+                <div className="min-w-0 flex-1">
                     {isEditingName ? (
-                        <div className="flex items-center gap-2 justify-center sm:justify-start">
+                        <div className="flex items-center gap-2">
                             <input
                                 autoFocus
+                                aria-label="Username"
                                 value={draftUsername}
                                 onChange={(e) => setDraftUsername(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSaveUsername()}
-                                className="text-2xl font-black bg-white/10 rounded-xl px-3 py-1.5 outline-none border border-white/20 focus:border-violet-300 text-white max-w-[220px]"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSaveUsername();
+                                    if (e.key === 'Escape') handleCancelUsername();
+                                }}
+                                className="max-w-[220px] rounded-lg border-2 border-ink bg-surface px-3 py-1.5 text-xl font-bold text-ink outline-none"
                                 maxLength={24}
                             />
-                            <motion.button whileTap={{ scale: 0.9 }} onClick={handleSaveUsername} disabled={isSavingUsername}
-                                className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.25)' }}>
-                                {isSavingUsername ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 text-emerald-300" />}
-                            </motion.button>
-                            <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setDraftUsername(user.username); setIsEditingName(true); }}
-                                className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.2)' }}>
-                                <X className="w-4 h-4 text-rose-300" />
-                            </motion.button>
+                            <button
+                                type="button"
+                                onClick={handleSaveUsername}
+                                disabled={isSavingUsername}
+                                aria-label="Save username"
+                                className="press-hard flex h-8 w-8 items-center justify-center rounded-lg border-2 border-ink bg-progress text-ink disabled:pointer-events-none disabled:opacity-60"
+                            >
+                                {isSavingUsername ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                                ) : (
+                                    <Check className="h-4 w-4" aria-hidden="true" />
+                                )}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleCancelUsername}
+                                aria-label="Cancel editing username"
+                                className="press-hard flex h-8 w-8 items-center justify-center rounded-lg border-2 border-ink bg-surface text-ink-soft"
+                            >
+                                <X className="h-4 w-4" aria-hidden="true" />
+                            </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2 justify-center sm:justify-start">
-                            <h1 className="text-2xl font-black text-white">{user.username}</h1>
-                            <motion.button whileTap={{ scale: 0.9 }} onClick={() => setIsEditingName(true)}
-                                className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                                <Pencil className="w-3.5 h-3.5 text-indigo-300" />
-                            </motion.button>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-2xl font-bold text-ink">{user.username}</h1>
+                            <button
+                                type="button"
+                                onClick={() => setIsEditingName(true)}
+                                aria-label="Edit username"
+                                className="press-hard flex h-7 w-7 items-center justify-center rounded-sm border-2 border-ink bg-paper-deep text-ink"
+                            >
+                                <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                            </button>
                         </div>
                     )}
 
-                    <p className="text-indigo-300 text-sm font-medium mt-1">{user.email}</p>
+                    <p className="mt-1 text-sm font-medium text-ink-soft">{user.email}</p>
 
-                    <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
-                        <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.12)' }}>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <span className="rounded-full border border-line bg-paper-deep px-3 py-1.5 text-xs font-bold text-ink-soft">
                             {user.provider === 'google' ? 'Google Account' : 'ProdX Account'}
                         </span>
                         {currentStreak > 0 && (
-                            <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: 'rgba(249,115,22,0.2)', color: '#fdba74' }}>
-                                🔥 {currentStreak} day streak
+                            /* Accumulated streak = progress green, with an icon
+                               instead of the old fire emoji. */
+                            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-progress px-3 py-1.5 text-xs font-bold text-ink">
+                                <Flame className="h-3.5 w-3.5" aria-hidden="true" />
+                                {currentStreak} day streak
                             </span>
                         )}
                     </div>
                 </div>
             </div>
-        </motion.div>
+        </motion.section>
     );
 };
 

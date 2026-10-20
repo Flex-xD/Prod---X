@@ -39,24 +39,18 @@ const userSchema = new mongoose.Schema<IUser>({
         type: String,
         required: false
     },
-    userTasks: {
-        type: [{
+    userTasks:[{
             type: mongoose.Schema.Types.ObjectId,
             ref: "Todo"
-        }]
-    }, 
-    userProductivityTimer:{
-        type: [{
+        }], 
+    userProductivityTimer: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "Timer"
-        }]
-    },
-    userGroupProductivityTimer:{
-        type:[{
+        }] ,
+    userGroupProductivityTimer:[{
             type:mongoose.Schema.Types.ObjectId , 
             ref:"GroupTimer",
-        }]
-    } ,
+        }] ,
     provider: {
         type: String,
         enum: ["local", "google"],
@@ -72,7 +66,7 @@ const userSchema = new mongoose.Schema<IUser>({
     }] , 
     isOnline:{
         type:boolean , 
-        
+        required:false
     } , 
     avatarPublicId: { type: String, required: false },
 } , {

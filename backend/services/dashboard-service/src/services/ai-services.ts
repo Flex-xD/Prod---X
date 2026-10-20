@@ -7,7 +7,7 @@ import { FALLBACK_TIPS, systemPrompt } from "../constants";
 
 // ? PUT THE URL INTO ENV
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct:free";
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct";
 
 const pickFallbackTip = (userId: string): string => {
     const seed = Array.from(userId).reduce((acc, c) => acc + c.charCodeAt(0), 0) + new Date().getUTCDate();
@@ -68,6 +68,7 @@ const callOpenRouter = async (systemPrompt: string, userPrompt: string): Promise
         return content?.trim() || null;
     } catch (error) {
         logger.error("❌ OpenRouter call failed, falling back : ", { error: (error as Error).message });
+        console.log("Error openrouter : " , error);
         return null;
     }
 };
@@ -79,6 +80,7 @@ export const aiService = {
         if (existing) return existing.content;
 
         const aiTip = await callOpenRouter(systemPrompt, "Give me today's productivity tip.");
+
         const content = aiTip || pickFallbackTip(userId.toString());
 
         const saved = await AiCache.findOneAndUpdate(

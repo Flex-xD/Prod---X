@@ -1,65 +1,46 @@
-import { Brain } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { spring } from '@/lib/motion';
 
 const quotes = [
-    "Every focused hour brings you closer to your goals",
-    "Great things are done by a series of small things brought together",
+    'Every focused hour brings you closer to your goals',
+    'Great things are done by a series of small things brought together',
     "Productivity is never an accident. It's the result of commitment to excellence",
-    "The secret of getting ahead is getting started",
-    "Don't count the days, make the days count"
+    'The secret of getting ahead is getting started',
+    "Don't count the days, make the days count",
 ];
 
+// A calm note on paper, not a hero banner: no gradients, no looping motion.
 export const MotivationalQuote = () => {
     const todayQuote = quotes[new Date().getDate() % quotes.length];
+    const today = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+    });
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
-            whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
-            className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-purple-700 to-blue-700 rounded-3xl p-10 text-white shadow-2xl"
+        <motion.figure
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={spring}
+            aria-labelledby="quote-heading"
+            className="rounded-lg border-2 border-ink bg-paper p-8 shadow-hard"
         >
-            <motion.div
-                animate={{
-                    backgroundPosition: ["0% 0%", "100% 100%"],
-                }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 opacity-20"
-                style={{
-                    background: "linear-gradient(45deg, #a855f7, #3b82f6, #8b5cf6)",
-                    backgroundSize: "200% 200%",
-                }}
-            />
-
-            <div className="relative flex items-start gap-5">
-                <motion.div
-                    initial={{ rotate: -180, scale: 0 }}
-                    animate={{ rotate: 0, scale: 1 }}
-                    transition={{ delay: 0.7, type: "spring", stiffness: 200 }}
-                    className="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-3xl flex items-center justify-center flex-shrink-0"
+            <figcaption className="mb-4 flex items-center justify-between gap-4 border-b-2 border-ink pb-3">
+                <h2
+                    id="quote-heading"
+                    className="text-xs font-bold uppercase tracking-[0.16em] text-ink-soft"
                 >
-                    <Brain className="w-8 h-8" />
-                </motion.div>
-                <div>
-                    <motion.h3
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.9 }}
-                        className="font-bold text-xl mb-3"
-                    >
-                        Today's Focus Wisdom
-                    </motion.h3>
-                    <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 1 }}
-                        className="text-purple-50 leading-relaxed text-lg font-light"
-                    >
-                        "{todayQuote}"
-                    </motion.p>
-                </div>
-            </div>
-        </motion.div>
+                    Today's Note
+                </h2>
+                <span className="font-mono text-[11px] uppercase text-ink-faint">{today}</span>
+            </figcaption>
+            <blockquote className="text-lg font-medium leading-relaxed text-ink">
+                <span aria-hidden="true" className="mr-1 font-mono text-2xl text-ink-faint">
+                    &ldquo;
+                </span>
+                {todayQuote}
+            </blockquote>
+        </motion.figure>
     );
 };

@@ -12,7 +12,6 @@ export interface ITask {
     createdAt: Date;
     updatedAt: Date;
     // Virtual field (populated later)
-    // ? should I even have this field below ?
     authorDetails?: {
         _id: string,
         username: string;
@@ -22,8 +21,9 @@ export interface ITask {
 
 export interface TasksCardProps {
     tasks: ITask[];
-    handleToggleTask: (taskId:string , isTaskPending:boolean) => void;
+    handleToggleTask: (taskId: string, isTaskPending: boolean) => void;
     onAddTask: (taskData: ITaskData) => void;
     createTaskPending: boolean;
-    onToggleTaskPending:boolean;
+    onToggleTaskPending: boolean;
+    isLoading?: boolean;
 }

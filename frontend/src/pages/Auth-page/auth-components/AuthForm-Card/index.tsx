@@ -12,23 +12,23 @@ type AuthFormCardProps = {
 
 export const AuthFormCard = ({ activeTab, setActiveTab, children, onGoogleLogin }: AuthFormCardProps) => {
     return (
-        <Card className="w-full max-w-md rounded-3xl border-0 shadow-2xl bg-white/80 backdrop-blur-xl">
-            <CardHeader className="text-center pb-8">
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                    {activeTab === 'login' ? 'Welcome Back!' : 'Start Your Journey'}
+        <Card className="w-full max-w-md rounded-lg border-2 border-ink bg-surface shadow-hard-lg">
+            <CardHeader className="pb-6 text-center">
+                <CardTitle className="text-sm font-bold uppercase tracking-[0.14em] text-ink">
+                    {activeTab === 'login' ? 'Welcome Back' : 'Create Account'}
                 </CardTitle>
-                <p className="text-slate-600 mt-2">
-                    {activeTab === 'login' ? 'Ready to crush your focus goals?' : 'Join the productivity revolution'}
+                <p className="mt-1.5 text-xs font-medium text-ink-faint">
+                    {activeTab === 'login' ? 'Sign in to pick up your record.' : 'Start building your record today.'}
                 </p>
             </CardHeader>
 
             <CardContent className="space-y-6">
-                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-                    <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-100/50 p-1">
-                        <TabsTrigger value="login" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'login' | 'register')}>
+                    <TabsList className="grid w-full grid-cols-2 rounded-lg p-1">
+                        <TabsTrigger value="login" className="rounded-lg font-bold uppercase tracking-wider">
                             Sign In
                         </TabsTrigger>
-                        <TabsTrigger value="register" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                        <TabsTrigger value="register" className="rounded-lg font-bold uppercase tracking-wider">
                             Register
                         </TabsTrigger>
                     </TabsList>
@@ -37,9 +37,11 @@ export const AuthFormCard = ({ activeTab, setActiveTab, children, onGoogleLogin 
                 </Tabs>
 
                 <div className="relative">
-                    <Separator className="my-6" />
+                    <Separator className="my-6 bg-line" />
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="bg-white/80 backdrop-blur-sm px-3 text-sm text-slate-500">Or continue with</span>
+                        <span className="bg-surface px-3 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+                            Or continue with
+                        </span>
                     </div>
                 </div>
 

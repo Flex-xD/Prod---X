@@ -1,143 +1,104 @@
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, ArrowRight, Users, CheckCircle2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import StreakPreview from '../StreakPreview';
+import { quick, progressUpdate } from '@/lib/motion';
+import { cn } from '@/utils/utils';
+import ActivityCalendar from '../Activity-Calender';
+import { CountUp, ExampleNote, LABEL, LinkButton, MONO, PANEL, StreakBlocks } from '../shared';
+import { currentStreak, lastSevenDays, pad2, sampleDay } from '../dummy-data';
 
-const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
+const GROUP_PROGRESS = 72;
+
+function Cell({ label, foot, className, children }: { label: string; foot: ReactNode; className?: string; children: ReactNode }) {
+    return (
+        <div className={cn('flex flex-col gap-2 border-line p-4 sm:p-5', className)}>
+            <dt className={LABEL}>{label}</dt>
+            <dd className={cn(MONO, 'text-3xl font-bold leading-none text-ink')}>{children}</dd>
+            <dd className="flex min-h-5 items-center text-[11px] font-semibold uppercase tracking-wider text-ink-soft">{foot}</dd>
+        </div>
+    );
+}
+
+const reveal = (delay: number) => ({
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { ...quick, delay },
+});
 
 function HeroSection() {
+    const today = sampleDay(0);
+    const streak = currentStreak();
+    const weekHours = lastSevenDays().reduce((sum, d) => sum + d.minutes, 0) / 60;
+
     return (
-        <section
-            className="pt-36 pb-24 relative overflow-hidden"
-            style={{ background: 'linear-gradient(160deg,#f8f7ff 0%,#fdf4ff 35%,#f0f9ff 65%,#fafafa 100%)' }}
-        >
-            <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, ...sp }}
-                >
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1, ...sp }}
-                        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-6"
-                        style={{ background: '#f5f3ff', border: '1px solid #ddd6fe' }}
-                    >
-                        <Flame className="w-3.5 h-3.5 text-violet-500" />
-                        <span className="text-xs font-bold text-violet-600">Built around one idea: don't break the chain</span>
+        <section className="border-b-2 border-ink">
+            <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-center lg:gap-14 lg:py-20">
+                <div>
+                    <motion.h1 {...reveal(0)} className="text-4xl font-bold leading-[1.1] sm:text-5xl lg:text-6xl">
+                        See what you’ve actually done.
+                    </motion.h1>
+                    <motion.p {...reveal(0.08)} className="mt-6 max-w-md text-lg text-ink-soft">
+                        Prod-X puts every focus session and finished task on one calendar. The work you did last week is
+                        still there when you decide whether to work today.
+                    </motion.p>
+                    <motion.div {...reveal(0.16)} className="mt-8 flex flex-col gap-3 sm:flex-row">
+                        <LinkButton to="/auth">Start your record</LinkButton>
+                        <LinkButton href="#how-it-works" variant="secondary">
+                            See how a day adds up
+                        </LinkButton>
                     </motion.div>
+                    <motion.p {...reveal(0.22)} className="mt-5 text-sm text-ink-soft">
+                        Free to sign up.
+                    </motion.p>
+                </div>
 
-                    <h1 className="text-5xl lg:text-6xl font-black leading-[1.05] text-slate-900 mb-6">
-                        Watch your progress.
-                        <span
-                            className="block mt-1"
-                            style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                        >
-                            Keep it going.
-                        </span>
-                    </h1>
-
-                    <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-md mb-9">
-                        Every focus session, finished task, and group sprint lands on one streak you can actually
-                        see. Once it's visible, you stop wanting to let it drop.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-3 mb-10">
-                        <Link to="/auth">
-                            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                                <Button
-                                    className="px-7 py-6 rounded-2xl text-base font-bold text-white w-full sm:w-auto flex items-center gap-2"
-                                    style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', boxShadow: '0 10px 28px rgba(124,58,237,0.4)' }}
-                                >
-                                    Start your streak <ArrowRight className="w-4 h-4" />
-                                </Button>
-                            </motion.div>
-                        </Link>
-                        <a href="#how-it-works">
-                            <Button
-                                variant="outline"
-                                className="px-7 py-6 rounded-2xl text-base font-bold border-2 border-slate-200 hover:border-violet-300 hover:bg-violet-50/50 w-full sm:w-auto"
-                            >
-                                See how it works
-                            </Button>
-                        </a>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                        <div className="flex -space-x-3">
-                            {['#7C3AED,#4F46E5', '#EC4899,#F43F5E', '#10B981,#0D9488', '#F59E0B,#EF4444'].map((grad, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, scale: 0 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.3 + i * 0.08, ...sp }}
-                                    className="w-9 h-9 rounded-full border-2 border-white"
-                                    style={{ background: `linear-gradient(135deg, ${grad})`, boxShadow: '0 4px 10px rgba(0,0,0,0.12)' }}
-                                />
-                            ))}
-                        </div>
-                        <p className="text-sm font-semibold text-slate-500">
-                            Joined by people already on <span className="text-slate-900 font-black">30+ day streaks</span>
+                <motion.div {...reveal(0.1)} className={cn(PANEL, 'overflow-hidden shadow-hard')}>
+                    <div className="flex items-end justify-between gap-4 border-b-2 border-ink px-4 py-3 sm:px-5">
+                        <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-ink-soft">Today’s progress</h2>
+                        <p className="font-mono text-xs text-ink-soft">
+                            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                     </div>
-                </motion.div>
 
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.15, ...sp }}
-                    className="relative rounded-3xl overflow-hidden text-white"
-                    style={{
-                        background: 'linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)',
-                        boxShadow: '0 32px 80px rgba(79,46,220,0.42)',
-                    }}
-                >
-                    <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.22), transparent)' }} />
-                    <div className="absolute bottom-0 -left-10 w-48 h-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(192,132,252,0.16), transparent)' }} />
+                    <dl className="grid grid-cols-2 lg:grid-cols-4">
+                        <Cell label="Tasks" foot="Completed today">
+                            <CountUp value={today.tasks} />
+                            <span className="text-2xl">/{today.tasks + 1}</span>
+                        </Cell>
+                        <Cell label="Current streak" className="border-l-2" foot={<StreakBlocks count={Math.min(streak, 14)} total={14} />}>
+                            <CountUp value={streak} format={pad2} />
+                            <span className="text-base"> DAYS</span>
+                        </Cell>
+                        <Cell label="Focus time" className="border-t-2 lg:border-l-2 lg:border-t-0" foot="This week">
+                            <CountUp value={weekHours} format={(n) => n.toFixed(1)} />
+                            <span className="text-base">h</span>
+                        </Cell>
+                        <Cell
+                            label="Group session"
+                            className="border-l-2 border-t-2 lg:border-t-0"
+                            foot={
+                                <span className="flex w-full flex-col gap-1.5">
+                                    <span aria-hidden className="block h-1.5 w-full overflow-hidden rounded-sm bg-paper-deep">
+                                        <motion.span
+                                            className="block h-full rounded-sm bg-progress"
+                                            initial={{ width: 0 }}
+                                            whileInView={{ width: `${GROUP_PROGRESS}%` }}
+                                            viewport={{ once: true }}
+                                            transition={{ ...progressUpdate, delay: 0.3 }}
+                                        />
+                                    </span>
+                                    <span className="block truncate">3 members · Study sprint</span>
+                                </span>
+                            }
+                        >
+                            <CountUp value={GROUP_PROGRESS} />
+                            <span className="text-base">%</span>
+                        </Cell>
+                    </dl>
 
-                    <div className="relative z-10 p-8">
-                        <div className="flex items-center justify-between mb-7">
-                            <div>
-                                <p className="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Current streak</p>
-                                <div className="flex items-center gap-2">
-                                    <Flame className="w-6 h-6 text-amber-300" />
-                                    <span className="text-4xl font-black">47 days</span>
-                                </div>
-                            </div>
-                            <motion.div
-                                animate={{ rotate: [0, 8, -8, 0] }}
-                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                                className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-                                style={{ background: 'rgba(255,255,255,0.12)' }}
-                            >
-                                <Flame className="w-5 h-5 text-amber-300" />
-                            </motion.div>
-                        </div>
-
-                        <div className="overflow-x-auto pb-1">
-                            <StreakPreview weeks={20} rows={7} cellSize={12} gap={4} />
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-3 mt-7">
-                            <div className="rounded-2xl p-3.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                                <CheckCircle2 className="w-4 h-4 text-emerald-300 mb-1.5" />
-                                <p className="text-lg font-black leading-none">8</p>
-                                <p className="text-xs text-indigo-300 font-semibold mt-0.5">Tasks today</p>
-                            </div>
-                            <div className="rounded-2xl p-3.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                                <Flame className="w-4 h-4 text-amber-300 mb-1.5" />
-                                <p className="text-lg font-black leading-none">4.2h</p>
-                                <p className="text-xs text-indigo-300 font-semibold mt-0.5">Focus time</p>
-                            </div>
-                            <div className="rounded-2xl p-3.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                                <Users className="w-4 h-4 text-pink-300 mb-1.5" />
-                                <p className="text-lg font-black leading-none">3</p>
-                                <p className="text-xs text-indigo-300 font-semibold mt-0.5">In your squad</p>
-                            </div>
-                        </div>
+                    <div className="border-t-2 border-ink px-4 py-4 sm:px-5">
+                        <ActivityCalendar cell={12} gap={3} maxWeeks={30} />
                     </div>
+                    <ExampleNote />
                 </motion.div>
             </div>
         </section>

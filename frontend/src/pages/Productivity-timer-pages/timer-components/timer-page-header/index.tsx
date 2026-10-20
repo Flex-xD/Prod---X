@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Plus } from 'lucide-react';
-import { MagBtn } from '../ui';
+import { PressBtn } from '../ui';
+import { quick } from '@/lib/motion';
 import type { ViewMode, IProductivityTimer, IGroupTimer } from '../types';
 
 interface TimerPageHeaderProps {
@@ -12,9 +13,9 @@ interface TimerPageHeaderProps {
 }
 
 const SUBTITLES: Record<ViewMode, string> = {
-    'dashboard': 'Track your sessions',
-    'individual-detail': 'Individual Session',
-    'group-detail': 'Group Session',
+    dashboard: 'Track your sessions',
+    'individual-detail': 'Individual session',
+    'group-detail': 'Group session',
 };
 
 const TimerPageHeader = ({
@@ -26,71 +27,59 @@ const TimerPageHeader = ({
 }: TimerPageHeaderProps) => {
     // Dynamic title based on active view
     const title =
-        view === 'dashboard' ? 'Focus Timers' :
-            view === 'individual-detail' ? (selectedInd?.title ?? 'Timer') :
-                (selectedGrp?.title ?? 'Group Timer');
+        view === 'dashboard'
+            ? 'Focus Timers'
+            : view === 'individual-detail'
+              ? (selectedInd?.title ?? 'Timer')
+              : (selectedGrp?.title ?? 'Group Timer');
 
     return (
-        <div
-            className="sticky top-0 z-40"
-            style={{
-                background: 'rgba(255,255,255,0.82)',
-                backdropFilter: 'blur(20px)',
-                borderBottom: '1px solid rgba(0,0,0,0.06)',
-            }}
-        >
-            <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-40 border-b-2 border-ink bg-paper">
+            <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-6 py-4">
                 {/* Left: back + title */}
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                     <AnimatePresence>
                         {view !== 'dashboard' && (
                             <motion.button
-                                initial={{ opacity: 0, x: -10 }}
+                                type="button"
+                                initial={{ opacity: 0, x: -8 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -10 }}
+                                exit={{ opacity: 0, x: -8 }}
+                                transition={quick}
                                 onClick={onBack}
-                                whileHover={{ x: -2 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="w-9 h-9 rounded-2xl flex items-center justify-center transition-colors text-slate-500 hover:text-slate-900 bg-slate-50"
-                                style={{ border: '1px solid rgba(0,0,0,0.06)' }}
+                                aria-label="Back to timers"
+                                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface text-ink-soft shadow-hard-xs transition-all duration-fast hover:text-ink hover:shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-xs"
                             >
-                                <ArrowLeft className="w-4 h-4" />
+                                <ArrowLeft className="h-4 w-4" />
                             </motion.button>
                         )}
                     </AnimatePresence>
 
-                    <div>
+                    <div className="min-w-0">
                         <AnimatePresence mode="wait">
                             <motion.h1
                                 key={view}
                                 initial={{ opacity: 0, y: -6 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 6 }}
-                                transition={{ duration: 0.2 }}
-                                className="text-xl font-black text-slate-900"
+                                transition={quick}
+                                className="truncate text-lg font-bold tracking-tight text-ink"
                             >
                                 {title}
                             </motion.h1>
                         </AnimatePresence>
-                        <p className="text-slate-400 text-xs font-semibold">{SUBTITLES[view]}</p>
+                        <p className="text-xs font-medium text-ink-faint">{SUBTITLES[view]}</p>
                     </div>
                 </div>
 
-                {/* Right: new timer button (dashboard only) */}
+                {/* Right: new timer button (dashboard only). Orange = active focus. */}
                 {view === 'dashboard' && (
-                    <MagBtn
-                        onClick={onNewTimer}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-white text-sm font-bold"
-                        style={{
-                            background: 'linear-gradient(135deg,#7C3AED,#4F46E5)',
-                            boxShadow: '0 6px 20px rgba(124,58,237,0.38)',
-                        }}
-                    >
-                        <Plus className="w-4 h-4" /> New Timer
-                    </MagBtn>
+                    <PressBtn variant="focus" onClick={onNewTimer} className="flex-shrink-0 py-2">
+                        <Plus className="h-4 w-4" aria-hidden="true" /> New Timer
+                    </PressBtn>
                 )}
             </div>
-        </div>
+        </header>
     );
 };
 

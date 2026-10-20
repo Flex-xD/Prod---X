@@ -1,70 +1,123 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { AnimatePresence, motion, useScroll } from 'framer-motion';
+import { Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { pressSpring, quick } from '@/lib/motion';
+import { cn } from '@/utils/utils';
+import { SECTION_IDS, scrollToSection, useActiveSection } from '../scroll';
+import { LinkButton, Wordmark } from '../shared';
 
-const NAV_LINKS = ['Features', 'How it works', 'Testimonials'];
-const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
+const NAV_LINKS = [
+    { id: 'how-it-works', label: 'How it works' },
+    { id: 'record', label: 'The record' },
+    { id: 'features', label: 'Features' },
+    { id: 'groups', label: 'Group sessions' },
+] as const;
 
 function LandingNavbar() {
-    const { scrollY } = useScroll();
-    const bg = useTransform(scrollY, [0, 80], ['rgba(255,255,255,0.7)', 'rgba(255,255,255,0.92)']);
-    const shadow = useTransform(scrollY, [0, 80], ['none', '0 4px 24px rgba(124,58,237,0.08)']);
+    const { scrollYProgress } = useScroll();
+    const active = useActiveSection(SECTION_IDS);
+    const [open, setOpen] = useState(false);
+
+    const go = (id: string) => (e: React.MouseEvent) => {
+        e.preventDefault();
+        setOpen(false);
+        scrollToSection(id);
+    };
 
     return (
-        <motion.nav
-            className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl"
-            style={{ background: bg, boxShadow: shadow, borderBottom: '1px solid rgba(0,0,0,0.06)' }}
+        <header
+            className="sticky top-0 z-50 border-b-2 border-ink bg-paper"
+            onKeyDown={(e) => {
+                if (e.key === 'Escape') setOpen(false);
+            }}
         >
-            <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between">
-                <Link to="/" className="flex items-center gap-3">
-                    <motion.div
-                        whileHover={{ rotate: 15, scale: 1.08 }}
-                        transition={sp}
-                        className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', boxShadow: '0 6px 20px rgba(124,58,237,0.35)' }}
-                    >
-                        <Zap className="w-5 h-5 text-white" />
-                    </motion.div>
-                    <span
-                        className="text-xl font-black"
-                        style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                    >
-                        ProdX
-                    </span>
+            <nav aria-label="Primary" className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+                <Link to="/" aria-label="Prod-X home">
+                    <Wordmark />
                 </Link>
 
-                <div className="hidden md:flex items-center gap-8">
-                    {NAV_LINKS.map((item) => (
-                        <a
-                            key={item}
-                            href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                            className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
-                        >
-                            {item}
-                        </a>
-                    ))}
-                </div>
-
-                <div className="flex items-center gap-2.5">
-                    <Link to="/auth">
-                        <Button variant="ghost" className="text-sm font-bold text-violet-600 hover:bg-violet-50 hover:text-violet-700">
-                            Sign in
-                        </Button>
-                    </Link>
-                    <Link to="/auth">
-                        <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }}>
-                            <Button
-                                className="text-sm font-bold text-white px-5 rounded-2xl"
-                                style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', boxShadow: '0 6px 20px rgba(124,58,237,0.35)' }}
+                <ul className="hidden items-center gap-7 md:flex">
+                    {NAV_LINKS.map((l) => (
+                        <li key={l.id} className="relative">
+                            <a
+                                href={`#${l.id}`}
+                                onClick={go(l.id)}
+                                aria-current={active === l.id ? 'location' : undefined}
+                                className={cn(
+                                    'block py-1 text-sm font-bold transition-colors duration-fast hover:text-ink',
+                                    active === l.id ? 'text-ink' : 'text-ink-soft',
+                                )}
                             >
-                                Start free
-                            </Button>
-                        </motion.div>
+                                {l.label}
+                            </a>
+                            {active === l.id && (
+                                <motion.span
+                                    layoutId="nav-active"
+                                    aria-hidden
+                                    className="absolute inset-x-0 -bottom-1.5 h-0.5 bg-ink"
+                                    transition={pressSpring}
+                                />
+                            )}
+                        </li>
+                    ))}
+                </ul>
+
+                <div className="flex items-center gap-2 sm:gap-3">
+                    <button
+                        type="button"
+                        aria-expanded={open}
+                        aria-controls="mobile-nav"
+                        onClick={() => setOpen((o) => !o)}
+                        className="inline-flex h-10 items-center gap-1.5 rounded-lg border-2 border-ink bg-surface px-3 text-sm font-bold text-ink md:hidden"
+                    >
+                        {open ? <X className="size-4" aria-hidden="true" /> : <Menu className="size-4" aria-hidden="true" />}
+                        Menu
+                    </button>
+                    <Link to="/auth" className="hidden px-2 py-2 text-sm font-bold underline-offset-4 hover:underline sm:inline">
+                        Sign in
                     </Link>
+                    <LinkButton to="/auth" className="h-10 px-4 text-sm">
+                        Start free
+                    </LinkButton>
                 </div>
-            </div>
-        </motion.nav>
+            </nav>
+
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        id="mobile-nav"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={quick}
+                        className="absolute inset-x-0 top-full border-b-2 border-ink bg-paper md:hidden"
+                    >
+                        <ul className="mx-auto max-w-7xl px-4 sm:px-6">
+                            {NAV_LINKS.map((l) => (
+                                <li key={l.id} className="border-b border-line">
+                                    <a href={`#${l.id}`} onClick={go(l.id)} className="block py-3.5 text-base font-bold">
+                                        {l.label}
+                                    </a>
+                                </li>
+                            ))}
+                            <li className="sm:hidden">
+                                <Link to="/auth" className="block py-3.5 text-base font-bold">
+                                    Sign in
+                                </Link>
+                            </li>
+                        </ul>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Reading progress: the header border fills with progress green as you scroll */}
+            <motion.div
+                aria-hidden
+                style={{ scaleX: scrollYProgress }}
+                className="absolute inset-x-0 -bottom-0.5 h-0.5 origin-left bg-progress"
+            />
+        </header>
     );
 }
 

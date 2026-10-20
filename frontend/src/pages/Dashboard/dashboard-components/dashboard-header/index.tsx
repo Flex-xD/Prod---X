@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Timer, Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
+import { Zap, Timer, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/custom-hooks/user-related-fetching/user-data';
 import { useLogoutMutation } from '@/custom-hooks/auth-mutation/logout';
 import NotificationCenter from '@/pages/Notification';
-
-const sp = { type: 'spring', damping: 28, stiffness: 300 } as const;
+import { spring } from '@/lib/motion';
 
 const DashboardHeader = () => {
     const { data: UserData } = useUserData();
@@ -18,159 +17,131 @@ const DashboardHeader = () => {
     const { mutateAsync: handleLogoutMutation } = useLogoutMutation();
 
     const handleLogout = async () => {
-        await handleLogoutMutation()
-    }
+        await handleLogoutMutation();
+    };
 
     return (
-        <header
-            className="sticky top-0 z-40"
-            style={{
-                background: 'rgba(255,255,255,0.82)',
-                backdropFilter: 'blur(20px)',
-                borderBottom: '1px solid rgba(0,0,0,0.06)',
-            }}
-        >
-            <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between">
-
-                {/* ── Logo ── */}
-                <div className="flex items-center gap-3">
-                    <motion.div
-                        whileHover={{ rotate: 15, scale: 1.08 }}
-                        transition={sp}
-                        className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', boxShadow: '0 6px 20px rgba(124,58,237,0.35)' }}
+        <header className="sticky top-0 z-40 border-b-2 border-ink bg-paper">
+            <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+                {/* ── Logo + greeting ── */}
+                <Link to="/" className="flex min-w-0 items-center gap-3">
+                    <span
+                        aria-hidden="true"
+                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm border-2 border-ink bg-ink text-paper"
                     >
-                        <Zap className="w-5 h-5 text-white" />
-                    </motion.div>
-                    <div>
-                        <span
-                            className="text-xl font-black"
-                            style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                        >
+                        <Zap className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0">
+                        <span className="block text-lg font-bold leading-none tracking-tight text-ink">
                             ProdX
                         </span>
-                        <p className="text-xs font-semibold text-slate-400 leading-none mt-0.5">
-                            Welcome back, <span className="text-violet-600">{username}</span> 👋
-                        </p>
-                    </div>
-                </div>
+                        <span className="mt-0.5 hidden text-xs font-medium text-ink-soft md:block">
+                            Welcome back, <span className="font-bold text-ink">{username}</span>
+                        </span>
+                    </span>
+                </Link>
 
                 {/* ── Right actions ── */}
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
+                    <NotificationCenter />
 
-                    {/* Notification bell */}
-                    <NotificationCenter />                    
-
-                    {/* Timer CTA */}
-                    <Link to="/timer">
-                        <motion.button
-                            whileHover={{ scale: 1.04 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-white text-sm font-bold"
-                            style={{
-                                background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
-                                boxShadow: '0 6px 20px rgba(124,58,237,0.35)',
-                            }}
-                        >
-                            <Timer className="w-4 h-4" />
-                            <span className="hidden sm:inline">Timers</span>
-                        </motion.button>
+                    {/* Timer CTA: orange is the active-focus semantic */}
+                    <Link
+                        to="/timer"
+                        aria-label="Timers"
+                        className="inline-flex items-center gap-2 rounded-lg border-2 border-ink bg-focus px-3.5 py-2 text-sm font-bold text-ink shadow-hard-sm transition-all duration-fast hover:-translate-y-px hover:shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-xs"
+                    >
+                        <Timer className="h-4 w-4" aria-hidden="true" />
+                        <span className="hidden sm:inline">Timers</span>
                     </Link>
 
                     {/* Profile dropdown */}
                     <div className="relative">
-                        <motion.button
-                            whileHover={{ scale: 1.04 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setProfileOpen(o => !o)}
-                            className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-2xl transition-colors"
-                            style={{
-                                background: profileOpen ? '#f5f3ff' : '#f8fafc',
-                                border: profileOpen ? '1px solid #ddd6fe' : '1px solid rgba(0,0,0,0.06)',
-                            }}
+                        <button
+                            type="button"
+                            onClick={() => setProfileOpen((o) => !o)}
+                            aria-expanded={profileOpen}
+                            aria-haspopup="menu"
+                            className={`flex items-center gap-2 rounded-lg border-2 border-ink py-1.5 pl-1.5 pr-2.5 text-sm font-bold text-ink transition-all duration-fast ${
+                                profileOpen
+                                    ? 'bg-paper-deep'
+                                    : 'bg-surface shadow-hard-xs hover:shadow-hard-sm'
+                            }`}
                         >
-                            {/* Avatar */}
-                            <div
-                                className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-black"
-                                style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', boxShadow: '0 4px 12px rgba(124,58,237,0.3)' }}
+                            <span
+                                aria-hidden="true"
+                                className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-[11px] font-bold text-paper"
                             >
                                 {initials}
-                            </div>
-                            <span className="hidden sm:block text-sm font-bold text-slate-700 max-w-[80px] truncate">
-                                {username}
                             </span>
-                            <motion.div animate={{ rotate: profileOpen ? 180 : 0 }} transition={sp}>
-                                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                            </motion.div>
-                        </motion.button>
+                            <span className="hidden max-w-[80px] truncate sm:block">{username}</span>
+                            <motion.span animate={{ rotate: profileOpen ? 180 : 0 }} transition={spring} className="flex">
+                                <ChevronDown className="h-3.5 w-3.5 text-ink-soft" aria-hidden="true" />
+                            </motion.span>
+                        </button>
 
-                        {/* Dropdown */}
                         <AnimatePresence>
                             {profileOpen && (
                                 <>
                                     {/* Click-away overlay */}
-                                    <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
+                                    <div
+                                        className="fixed inset-0 z-40"
+                                        onClick={() => setProfileOpen(false)}
+                                        aria-hidden="true"
+                                    />
 
                                     <motion.div
-                                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                                        transition={sp}
-                                        className="absolute right-0 top-full mt-2 w-52 rounded-2xl overflow-hidden z-50"
-                                        style={{ background: 'white', boxShadow: '0 16px 48px rgba(0,0,0,0.14)', border: '1px solid rgba(0,0,0,0.06)' }}
+                                        role="menu"
+                                        initial={{ opacity: 0, y: 6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 6 }}
+                                        transition={spring}
+                                        className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-lg border-2 border-ink bg-surface shadow-hard"
                                     >
                                         {/* User info banner */}
-                                        <div className="px-4 py-3.5" style={{ background: 'linear-gradient(135deg,#f5f3ff,#ede9fe)', borderBottom: '1px solid #ddd6fe' }}>
+                                        <div className="border-b-2 border-ink bg-paper px-4 py-3">
                                             <div className="flex items-center gap-3">
-                                                <div
-                                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-sm flex-shrink-0"
-                                                    style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)' }}
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 border-ink bg-ink text-xs font-bold text-paper"
                                                 >
                                                     {initials}
-                                                </div>
+                                                </span>
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-black text-slate-900 truncate">{username}</p>
-                                                    <p className="text-xs text-violet-500 font-semibold">Pro Member</p>
+                                                    <p className="truncate text-sm font-bold text-ink">{username}</p>
+                                                    <p className="text-[11px] font-medium text-ink-faint">Signed in</p>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* Menu items */}
-                                        <div className="p-1.5 space-y-0.5">
+                                        <div className="p-1.5">
                                             {[
                                                 { icon: User, label: 'Profile', to: '/profile' },
-                                                { icon: Settings, label: 'Settings', to: '/settings' },
                                             ].map(({ icon: Icon, label, to }) => (
-                                                <Link key={label} to={to} onClick={() => setProfileOpen(false)}>
-                                                    <motion.div
-                                                        whileHover={{ x: 3 }}
-                                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors hover:bg-violet-50 group"
-                                                    >
-                                                        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-slate-100 group-hover:bg-violet-100 transition-colors">
-                                                            <Icon className="w-3.5 h-3.5 text-slate-500 group-hover:text-violet-600 transition-colors" />
-                                                        </div>
-                                                        <span className="text-sm font-semibold text-slate-700 group-hover:text-violet-700 transition-colors">
-                                                            {label}
-                                                        </span>
-                                                    </motion.div>
+                                                <Link
+                                                    key={label}
+                                                    to={to}
+                                                    role="menuitem"
+                                                    onClick={() => setProfileOpen(false)}
+                                                    className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-semibold text-ink transition-colors duration-fast hover:bg-paper-deep"
+                                                >
+                                                    <Icon className="h-4 w-4 text-ink-soft" aria-hidden="true" />
+                                                    {label}
                                                 </Link>
                                             ))}
 
-                                            <div className="h-px my-1" style={{ background: 'rgba(0,0,0,0.05)' }} />
+                                            <div className="mx-2 my-1 h-px bg-line" />
 
-                                            <motion.button
-                                                whileHover={{ x: 3 }}
-                                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-rose-50 group transition-colors"
+                                            <button
+                                                type="button"
+                                                role="menuitem"
+                                                onClick={handleLogout}
+                                                className="flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-semibold text-alert-deep transition-colors duration-fast hover:bg-alert-tint"
                                             >
-                                                <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-slate-100 group-hover:bg-rose-100 transition-colors">
-                                                    <LogOut className="w-3.5 h-3.5 text-slate-500 group-hover:text-rose-500 transition-colors" />
-                                                </div>
-                                                <span className="text-sm font-semibold text-slate-700 group-hover:text-rose-600 transition-colors"
-                                                    onClick={handleLogout}
-                                                >
-                                                    Sign Out
-                                                </span>
-                                            </motion.button>
+                                                <LogOut className="h-4 w-4" aria-hidden="true" />
+                                                Sign Out
+                                            </button>
                                         </div>
                                     </motion.div>
                                 </>

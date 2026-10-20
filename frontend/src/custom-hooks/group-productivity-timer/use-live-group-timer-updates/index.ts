@@ -17,6 +17,11 @@ export const useLiveGroupTimerUpdates = () => {
         const handler = (payload: IGroupTimerUpdatedPayload) => {
             if (payload.recipients.includes(userId)) {
                 queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.ACTIVE_GROUP_TIMERS(userId) });
+                // * Someone answered an invitation: refresh *my* pending invites too
+                // * (so an accepted/declined timer disappears from this list live).
+                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUP_PRODUCTIVITY_TIMER.PENDING_INVITES(userId) });
+                // * Keep the dashboard's group-timer snapshot/progress fresh as well.
+                queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD.SUMMARY(userId) });
             }
         };
         socket.on("group.timer.participant.updated", handler);

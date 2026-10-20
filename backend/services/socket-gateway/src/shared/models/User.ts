@@ -1,7 +1,9 @@
 import mongoose, { Model } from "mongoose";
-import bcrypt from "bcrypt";
+// * NOTE: bcrypt was imported here but never used (this service never hashes
+// * or saves passwords), and the package isn't even a dependency of this
+// * service — removed so the model can compile/load on a clean install.
 
-interface IUser extends mongoose.Document {
+export interface IUser extends mongoose.Document {
     _id:mongoose.Types.ObjectId ,
     username:string ,
     email:string , 

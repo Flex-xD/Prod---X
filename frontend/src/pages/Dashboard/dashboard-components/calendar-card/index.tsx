@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { formatDateLabel, formatDuration } from "@/utils/activity-format";
-import { spring, quick } from "@/lib/motion";
+import { spring } from "@/lib/motion";
 import SkeletonBlock from "../skeleton-block";
 
 type Intensity = "high" | "medium" | "low" | "none";

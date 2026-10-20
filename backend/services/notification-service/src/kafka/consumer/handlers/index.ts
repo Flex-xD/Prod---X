@@ -1,11 +1,11 @@
 import mongoose, { Mongoose } from "mongoose"
 import { TgroupProductivityTimerForConsumer } from ".."
-import pLimit from "p-limit";
 import axios from "axios"
-import { ApiError, logger, toObjectId } from "../../../shared";
+import { ApiError, getUser, logger, toObjectId } from "../../../shared";
 import { StatusCodes } from "http-status-codes";
 import { INotification } from "../../../model/Notification";
 import { notificationServices } from "../../../service";
+import { emitEvent } from "../../../kafka/producer";
 
 type TEventGroupTimerCreated = {
     userId: string,
@@ -15,7 +15,6 @@ type TEventGroupTimerCreated = {
 
 type TEventNotificationCreated = {
     notification: INotification,
-    recipientId:mongoose.Types.ObjectId
 }
 
 export const handlers = {
@@ -48,39 +47,37 @@ export const handlers = {
         }
     },
 
-    // ? This event is for triggering the send-notification API
+    // ? This event links the notification to every invited user and pushes the
+    // * socket event that turns into the frontend toast + badge refresh.
+    "notification.created": async ({ notification }: TEventNotificationCreated) => {
+        logger.info("EVENT:notification.created -> linking recipients & notifying sockets");
 
-    "notification.created": async ({ notification , recipientId }: TEventNotificationCreated) => {
-        logger.info("Sending API request to : /send-notification")
-        const limit = pLimit(notification.to.length);
+        const recipients: mongoose.Types.ObjectId[] = notification?.to ?? [];
+        for (const recipientId of recipients) {
+            try {
+                await notificationServices.sendNotification(toObjectId(recipientId as any), notification._id);
+            } catch (err) {
+                // ? One bad recipient must not stop the others from being notified.
+                logger.error(`Failed to link notification ${notification._id} to user ${recipientId} : ${err}`);
+            }
+        }
 
-        await notificationServices.sendNotification(recipientId , notification._id)
+        if (!recipients.length) return;
 
-        // ? notification is not being emitted on the frontend
-        // * I can just use the notification-service directly 
-        // for (const notificationReceivingUserId of notification.to) {
-        //     await limit(async () => {
-        //         try {
-        //             logger.info(`Sending API request to : /send-notification/${notificationReceivingUserId}`)
+        // * username of the sender (the inviter) for the toast copy; a broken
+        // * sender lookup must not stop the toast from reaching recipients.
+        let senderName = "Someone";
+        try {
+            const sender = await getUser(toObjectId(notification.from as any));
+            senderName = sender.username;
+        } catch (err) {
+            logger.error(`Could not resolve the inviter for notification ${notification._id} : ${err}`);
+        }
 
-        //             const response = await axios.post("http://localhost:3000/api/v1/notification/send-notification", {
-        //                 notificationReceivingUserId,
-        //                 notificationId: notification._id,
-        //                 userId: notification.from
-        //             }, {
-        //                 headers: {
-        //                     "Content-Type": "application/json",
-        //                     "x-service-key": process.env.PRODX_SERVICE_KEY,
-        //                 }
-        //             })
-        //             console.log(`Event : notification.created , response :`, response.data);
-        //         } catch (error) {
-        //             logger.error({ error })
-        //             throw ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Error while sending the notification to userIds : ${notification.to}`);
-        //         }
-        //     })
-
-        // }
+        await emitEvent("invitation.notification.created", {
+            notification,
+            username: senderName,
+        });
     },
     "group.timer.invitation.updated": async ({ groupTimerId, userId, status }: {
     groupTimerId: string, userId: string, status: "accepted" | "declined"

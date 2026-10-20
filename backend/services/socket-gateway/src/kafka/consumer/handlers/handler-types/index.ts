@@ -23,6 +23,18 @@ export type TEventInvitationNotificationCreated = {
     notification:INotification
 }
 
+// Payload emitted by the group-productivity-timer service on create/accept/submit.
+export type TEventGroupTimerParticipantUpdated = {
+    groupTimerId: string,
+    recipients: string[],
+    participants?: unknown[],
+    submittedBy?: string,
+    productivityDuration?: number,
+    title?: string,
+    deadline?: Date | string,
+    specifiedTime?: number,
+}
+
 export interface INotification extends mongoose.Document {
     _id: mongoose.Types.ObjectId,
     notificationType: "group-timer-request" | "daily-quote" | "productivity-hack"

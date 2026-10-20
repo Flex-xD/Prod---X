@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Clock3, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 import { Pill, SectionDivider } from './timer-components/ui';
 import type { IGroupTimer, IProductivityTimer, ViewMode } from './timer-components/types';
 import { MAX_INDIVIDUAL_TIMERS, MAX_GROUP_TIMERS } from './timer-components/constants';
@@ -30,6 +31,9 @@ const TimerPage = () => {
     const [selectedInd, setSelectedInd] = useState<IProductivityTimer | null>(null);
     const [selectedGrp, setSelectedGrp] = useState<IGroupTimer | null>(null);
     const [dashboardTab, setDashboardTab] = useState<DashboardTab>('active');
+    // * True while the open detail view's stopwatch is running — back-navigation
+    // * is blocked until the user pauses or submits.
+    const [detailTimerRunning, setDetailTimerRunning] = useState(false);
     useLiveGroupTimerUpdates();
 
     const { data: activeGroupProductivityTimers } = useGetActiveGroupProductivityTimers();
@@ -65,6 +69,10 @@ const TimerPage = () => {
     const canCreateGroup = activeGroupTimersLength < MAX_GROUP_TIMERS;
 
     const handleBack = () => {
+        if (detailTimerRunning) {
+            toast.error('Pause or submit your productivity before going back !');
+            return;
+        }
         setView('dashboard');
         setSelectedInd(null);
         setSelectedGrp(null);
@@ -416,7 +424,11 @@ const TimerPage = () => {
                             exit={{ opacity: 0, y: -6 }}
                             transition={quick}
                         >
-                            <IndividualTimerDetail timer={selectedInd} onBack={handleBack} />
+                            <IndividualTimerDetail
+                                timer={selectedInd}
+                                onBack={handleBack}
+                                onRunningChange={setDetailTimerRunning}
+                            />
                         </motion.div>
                     )}
 
@@ -428,7 +440,11 @@ const TimerPage = () => {
                             exit={{ opacity: 0, y: -6 }}
                             transition={quick}
                         >
-                            <GroupTimerDetail timer={selectedGrp} onBack={handleBack} />
+                            <GroupTimerDetail
+                                timer={selectedGrp}
+                                onBack={handleBack}
+                                onRunningChange={setDetailTimerRunning}
+                            />
                         </motion.div>
                     )}
                 </AnimatePresence>

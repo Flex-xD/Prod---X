@@ -4,7 +4,7 @@ export type ViewMode = 'dashboard' | 'individual-detail' | 'group-detail';
 
 export interface IUser {
     provider: string;
-    email: ReactNode;
+    email: string;
     _id: string;
     username: string;
     avatar: string;

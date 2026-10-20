@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Timer, ChevronDown, User, Settings, LogOut } from 'lucide-react';
+import { Zap, Timer, ChevronDown, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useUserData } from '@/custom-hooks/user-related-fetching/user-data';
 import { useLogoutMutation } from '@/custom-hooks/auth-mutation/logout';
+import { useFocusLockStatus } from '@/custom-hooks/dashboard/use-focus-lock';
 import NotificationCenter from '@/pages/Notification';
 import { spring } from '@/lib/motion';
 
@@ -15,6 +17,18 @@ const DashboardHeader = () => {
     const [profileOpen, setProfileOpen] = useState(false);
 
     const { mutateAsync: handleLogoutMutation } = useLogoutMutation();
+
+    // * While the dashboard focus (pomodoro) timer is running, the Timers page
+    // * stays locked — the user must pause or log the session first.
+    const { data: focusLock } = useFocusLockStatus();
+    const pomodoroRunning =
+        focusLock?.data?.sessionType === 'pomodoro' && focusLock?.data?.isRunning === true;
+
+    const handleTimersClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (!pomodoroRunning) return;
+        e.preventDefault();
+        toast.error('Pause or log your focus session before opening the Timers page !');
+    };
 
     const handleLogout = async () => {
         await handleLogoutMutation();
@@ -48,6 +62,7 @@ const DashboardHeader = () => {
                     {/* Timer CTA: orange is the active-focus semantic */}
                     <Link
                         to="/timer"
+                        onClick={handleTimersClick}
                         aria-label="Timers"
                         className="inline-flex items-center gap-2 rounded-lg border-2 border-ink bg-focus px-3.5 py-2 text-sm font-bold text-ink shadow-hard-sm transition-all duration-fast hover:-translate-y-px hover:shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-xs"
                     >

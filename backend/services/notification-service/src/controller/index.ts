@@ -72,7 +72,7 @@ export const sendNotification = asyncHandler(async (req: IAuthRequest, res: Resp
 });
 
 export const getNotifications = asyncHandler(async (req: IAuthRequest, res: Response) => {
-    const userId = req.params.userId;
+    const userId = String(req.params.userId);
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 15;
 
@@ -89,7 +89,7 @@ export const getNotifications = asyncHandler(async (req: IAuthRequest, res: Resp
 });
 
 export const markNotificationAsRead = asyncHandler(async (req: IAuthRequest, res: Response) => {
-    const { notificationId } = req.params;
+    const notificationId = String(req.params.notificationId);
     // * This userId is going to be from the frontend
     const userId = req.body.userId;
     const notification = await notificationServices.markAsRead(toObjectId(notificationId), toObjectId(userId));
@@ -103,7 +103,7 @@ export const markNotificationAsRead = asyncHandler(async (req: IAuthRequest, res
 });
 
 export const markAllNotificationsAsRead = asyncHandler(async (req: IAuthRequest, res: Response) => {
-    const { userId } = req.params;
+    const userId = String(req.params.userId);
     await notificationServices.markAllAsRead(toObjectId(userId));
 
     return sendResponse(res, {

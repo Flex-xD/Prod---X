@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { logger } from "../../../shared";
-import { TEventInvitationNotificationCreated } from "./handler-types";
+import { TEventInvitationNotificationCreated, TEventGroupTimerParticipantUpdated } from "./handler-types";
 
 
 export const createHandlers = (io:Server) =>  ({
@@ -14,5 +14,15 @@ export const createHandlers = (io:Server) =>  ({
                 username
             });
         };
+    },
+
+    // * Forward rank/participant changes to every participant's room so group
+    // * timers update live instead of requiring a page reload.
+    "group.timer.participant.updated": async (payload: TEventGroupTimerParticipantUpdated) => {
+        logger.info("Event listened on : group.timer.participant.updated")
+        if (!payload?.recipients?.length) return;
+        for (const recipientId of payload.recipients) {
+            io.to(`user:${recipientId}`).emit("group.timer.participant.updated", payload);
+        }
     },
 });

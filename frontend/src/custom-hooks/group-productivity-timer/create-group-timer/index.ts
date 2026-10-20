@@ -1,6 +1,5 @@
 import ENDPOINTS from "@/constants/api-endpoints";
 import { QUERY_KEYS } from "@/constants/query-keys";
-import { applyOptimisticDashboardUpdate } from "@/custom-hooks/dashboard/apply-optimistic-activity";
 import type { IGroupTimer, IGroupTimerForm } from "@/pages/Productivity-timer-pages/timer-components/types";
 import { userAppStore } from "@/store";
 import type { ApiResponse } from "@/types/api-response";
@@ -43,11 +42,12 @@ const useCreateGroupProductivityTimer = () => {
                 status: "pending",
                 isActive: true,
                 participants: [{
-                    user: { _id: userId, username: "You", avatar: "", isOnline: true },
+                    user: { _id: userId, username: "You", avatar: "", isOnline: true, provider: "local", email: "" },
+                    username: "You",
                     productivityDone: 0, isCurrentlyActive: false, rank: 1,
                     hasCompleted: false, archived: false,
                 }],
-                author: { _id: userId, username: "You", avatar: "", isOnline: true },
+                author: { _id: userId, username: "You", avatar: "", isOnline: true, provider: "local", email: "" },
                 isJoined: true,
             };
 

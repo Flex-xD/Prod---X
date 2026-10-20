@@ -15,8 +15,17 @@ interface DetailsStepProps {
     onSubmit: () => void;
 }
 
+// * Deadlines can only be picked from tomorrow onwards.
+const getTomorrowKey = (): string => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 const DetailsStep = ({ form, onChange, timerType, invitedUsers, onSubmit }: DetailsStepProps) => {
-    const canSubmit = Boolean(form.title && form.deadline && form.specifiedTime);
+    // * Computed per render so a tab left open past midnight stays correct.
+    const tomorrowKey = getTomorrowKey();
+    const canSubmit = Boolean(form.title && form.deadline && form.specifiedTime && form.deadline >= tomorrowKey);
 
     const set = (key: keyof ITimerForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         // specifiedTime is a number in ITimerForm: coerce instead of
@@ -88,10 +97,16 @@ const DetailsStep = ({ form, onChange, timerType, invitedUsers, onSubmit }: Deta
                     <Input
                         id="timer-deadline"
                         type="date"
+                        min={tomorrowKey}
                         value={form.deadline}
                         onChange={set('deadline')}
                         className="rounded-lg text-sm"
                     />
+                    {form.deadline && form.deadline < tomorrowKey && (
+                        <p className="mt-1 text-[11px] font-semibold text-alert-deep">
+                            Pick tomorrow or a later date.
+                        </p>
+                    )}
                 </div>
             </div>
 

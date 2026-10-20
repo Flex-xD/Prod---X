@@ -49,6 +49,20 @@ export const getTodaysTask = asyncHandler(async (req: IAuthRequest, res: Respons
     })
 
 });
+export const getAllTimeTaskStats = asyncHandler(async (req: IAuthRequest, res: Response) => {
+    const userId = req.headers["x-user-id"] as string;
+    if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");
+
+    const stats = await taskService.getAllTimeTaskStats(toObjectId(userId));
+
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        data: stats,
+        success: true,
+        message: "All-time task stats fetched successfully !",
+    });
+});
+
 export const markTaskDone = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.headers["x-user-id"] as string;
     if (!userId) throw ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized access !");

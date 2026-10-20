@@ -7,7 +7,16 @@ import type { IProfileData } from "@/types/user";
 export interface ActivityDelta {
     tasksCreated?: number;
     tasksCompleted?: number;
+    /** Focus seconds added to summary/weekly/calendar (all focus types). */
     focusSeconds?: number;
+    /**
+     * How much of `focusSeconds` should bump the profile's *individual timer*
+     * total. Defaults to `focusSeconds`; pass 0 for focus that does not come
+     * from an individual timer (group submits, pomodoro sessions).
+     */
+    profileFocusSeconds?: number;
+    /** Focus seconds that belong to the profile's *group timer* total. */
+    groupFocusSeconds?: number;
 }
 
 export interface DashboardOptimisticContext {
@@ -57,6 +66,8 @@ export const applyOptimisticDashboardUpdate = async (
     const created = delta.tasksCreated ?? 0;
     const completed = delta.tasksCompleted ?? 0;
     const focus = delta.focusSeconds ?? 0;
+    const profileFocus = delta.profileFocusSeconds ?? focus;
+    const groupFocus = delta.groupFocusSeconds ?? 0;
 
     queryClient.setQueryData<ApiResponse<IDashboardSummary>>(summaryKey, (old) => {
         if (!old) return old;
@@ -111,7 +122,7 @@ export const applyOptimisticDashboardUpdate = async (
 
     queryClient.setQueryData<ApiResponse<IProfileData>>(profileKey, (old) => {
         if (!old) return old;
-        const { tasks, individualTimers } = old.data.stats;
+        const { tasks, individualTimers, groupTimers, allTimeTasks } = old.data.stats;
         return {
             ...old,
             data: {
@@ -124,10 +135,29 @@ export const applyOptimisticDashboardUpdate = async (
                         done: Math.max(0, tasks.done + completed),
                         pending: Math.max(0, tasks.pending + created - completed),
                     },
+                    // ? Only present after the all-time-stats payload arrives;
+                    // * older cached shapes simply skip it and reconcile later.
+                    ...(allTimeTasks
+                        ? {
+                            allTimeTasks: {
+                                total: Math.max(0, allTimeTasks.total + created),
+                                done: Math.max(0, allTimeTasks.done + completed),
+                                pending: Math.max(0, allTimeTasks.pending + created - completed),
+                            },
+                        }
+                        : {}),
                     individualTimers: {
                         ...individualTimers,
-                        totalFocusSeconds: Math.max(0, individualTimers.totalFocusSeconds + focus),
+                        totalFocusSeconds: Math.max(0, individualTimers.totalFocusSeconds + profileFocus),
                     },
+                    ...(groupTimers
+                        ? {
+                            groupTimers: {
+                                ...groupTimers,
+                                totalFocusSeconds: Math.max(0, groupTimers.totalFocusSeconds + groupFocus),
+                            },
+                        }
+                        : {}),
                 },
             },
         };

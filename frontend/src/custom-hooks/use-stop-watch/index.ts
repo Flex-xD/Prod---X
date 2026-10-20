@@ -7,9 +7,10 @@ interface UseStopwatchOptions {
 }
 
 interface PersistedState {
-    startedAt: number;
-    accumulatedSeconds: number;
+    /** Seconds already banked at the moment of the write. */
+    elapsedSeconds: number;
     isRunning: boolean;
+    updatedAt: number;
 }
 
 const readPersisted = (key: string): PersistedState | null => {
@@ -23,46 +24,63 @@ const writePersisted = (key: string, state: PersistedState) => {
     try { localStorage.setItem(key, JSON.stringify(state)); } catch { /* storage unavailable, degrade silently */ }
 };
 
+/**
+ * Stopwatch with lossless persistence.
+ *
+ * - The exact elapsed seconds are written on every tick, on start/pause/reset,
+ *   on unmount and on `pagehide`, so leaving the page never drops or
+ *   double-counts time (the old version persisted accumulated time *and* the
+ *   original start timestamp, which double-counted after a reload).
+ * - A restored stopwatch always comes back PAUSED with the time it had, so an
+ *   accidentally closed tab freezes the session exactly where it was.
+ */
 export const useStopwatch = ({ persistKey, maxSeconds, onCapped }: UseStopwatchOptions) => {
     const storageKey = `prodx:stopwatch:${persistKey}`;
 
     const initial = (() => {
         const persisted = readPersisted(storageKey);
-        if (!persisted) return { elapsedSeconds: 0, isRunning: false };
-        const liveElapsed = persisted.isRunning
-            ? persisted.accumulatedSeconds + Math.floor((Date.now() - persisted.startedAt) / 1000)
-            : persisted.accumulatedSeconds;
-        return { elapsedSeconds: Math.min(liveElapsed, maxSeconds ?? Infinity), isRunning: persisted.isRunning };
+        if (!persisted || typeof persisted.elapsedSeconds !== "number") {
+            return { elapsedSeconds: 0, isRunning: false };
+        }
+        return {
+            elapsedSeconds: Math.min(Math.max(0, persisted.elapsedSeconds), maxSeconds ?? Infinity),
+            isRunning: false, // * always resume paused — never silently keep counting
+        };
     })();
 
     const [elapsedSeconds, setElapsedSeconds] = useState(initial.elapsedSeconds);
     const [isRunning, setIsRunning] = useState(initial.isRunning);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const accumulatedRef = useRef(initial.isRunning ? initial.elapsedSeconds : initial.elapsedSeconds);
-    const startedAtRef = useRef(Date.now());
+    const elapsedRef = useRef(initial.elapsedSeconds);
 
-    const persist = useCallback((running: boolean) => {
-        writePersisted(storageKey, { startedAt: startedAtRef.current, accumulatedSeconds: accumulatedRef.current, isRunning: running });
+    const write = useCallback((running: boolean) => {
+        writePersisted(storageKey, {
+            elapsedSeconds: elapsedRef.current,
+            isRunning: running,
+            updatedAt: Date.now(),
+        });
     }, [storageKey]);
+
+    const setElapsed = useCallback((next: number) => {
+        elapsedRef.current = next;
+        setElapsedSeconds(next);
+    }, []);
 
     const start = useCallback(() => {
-        startedAtRef.current = Date.now();
         setIsRunning(true);
-        persist(true);
-    }, [persist]);
+        write(true);
+    }, [write]);
 
     const pause = useCallback(() => {
-        accumulatedRef.current = elapsedSeconds;
         setIsRunning(false);
-        persist(false);
-    }, [elapsedSeconds, persist]);
+        write(false);
+    }, [write]);
 
     const reset = useCallback(() => {
-        accumulatedRef.current = 0;
-        setElapsedSeconds(0);
+        setElapsed(0);
         setIsRunning(false);
         try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
-    }, [storageKey]);
+    }, [storageKey, setElapsed]);
 
     useEffect(() => {
         if (isRunning) {
@@ -70,13 +88,10 @@ export const useStopwatch = ({ persistKey, maxSeconds, onCapped }: UseStopwatchO
                 setElapsedSeconds((s) => {
                     const next = s + 1;
                     if (maxSeconds !== undefined && next >= maxSeconds) {
-                        accumulatedRef.current = maxSeconds;
                         setIsRunning(false);
-                        persist(false);
                         onCapped?.();
                         return maxSeconds;
                     }
-                    accumulatedRef.current = next;
                     return next;
                 });
             }, 1000);
@@ -84,12 +99,25 @@ export const useStopwatch = ({ persistKey, maxSeconds, onCapped }: UseStopwatchO
             clearInterval(intervalRef.current);
         }
         return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-    }, [isRunning, maxSeconds, onCapped, persist]);
+    }, [isRunning, maxSeconds, onCapped]);
 
+    // * Keep the ref in sync and flush on every change, so an abrupt close
+    // * can never lose more than the current second.
     useEffect(() => {
-        const interval = setInterval(() => { if (isRunning) persist(true); }, 10000);
-        return () => clearInterval(interval);
-    }, [isRunning, persist]);
+        elapsedRef.current = elapsedSeconds;
+        write(isRunning);
+    }, [elapsedSeconds, isRunning, write]);
+
+    // * Leaving the page (unmount) or closing/reloading the tab freezes the
+    // * session exactly where it is — no lost seconds, no double counting.
+    useEffect(() => {
+        const freeze = () => write(false);
+        window.addEventListener("pagehide", freeze);
+        return () => {
+            window.removeEventListener("pagehide", freeze);
+            freeze();
+        };
+    }, [write]);
 
     const isCapped = maxSeconds !== undefined && elapsedSeconds >= maxSeconds;
     return { elapsedSeconds, isRunning, isCapped, start, pause, reset };

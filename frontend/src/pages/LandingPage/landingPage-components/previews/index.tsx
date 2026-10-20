@@ -3,7 +3,7 @@ import { useReducedMotion } from 'framer-motion';
 import { cn } from '@/utils/utils';
 import ActivityCalendar from '../Activity-Calender';
 import { AiTipBlock, DaySummaryBlock } from '../context-block';
-import WeeklyBars from '../Record-Section';
+import WeeklyBars from '../weekly-bars';
 import {
     CountUp,
     LABEL,

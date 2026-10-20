@@ -2,6 +2,7 @@ import { Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { spring } from '@/lib/motion';
+import { LinkButton } from '@/pages/LandingPage/landingPage-components/shared';
 
 const container = {
     hidden: { opacity: 0 },
@@ -40,12 +41,11 @@ export const AuthHeader = () => (
         </motion.div>
 
         <motion.div variants={item}>
-            <Link
-                to="/"
-                className="inline-flex items-center rounded-lg border-2 border-ink bg-surface px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-ink shadow-hard-sm transition-all duration-fast hover:shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-xs"
+            <LinkButton
+                to="/" className="h-10 px-4 text-sm"
             >
                 Back to site
-            </Link>
+            </LinkButton>
         </motion.div>
     </motion.header>
 );

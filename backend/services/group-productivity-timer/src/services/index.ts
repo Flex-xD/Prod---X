@@ -85,11 +85,10 @@ export const groupProductivityTimerServices = {
 
             await User.findByIdAndUpdate(userId, { $addToSet: { userGroupProductivityTimer: groupTimerId } });
 
-            await emitEvent("group.timer.participant.updated", {
-                groupTimerId: groupTimer._id.toString(),
-                recipients: [groupTimer.author.toString(), ...groupTimer.participants.map((p) => p.user.toString())],
-                participants: groupTimer.participants,
-            });
+            // * NOTE: the participant-updated event is emitted once, by the controller
+            // * (with title/deadline/specifiedTime included). Emitting a second,
+            // * incomplete copy here caused duplicate live updates and was rejected
+            // * by the dashboard snapshot consumer anyway.
         } else if (status === "declined") {
             groupTimer.invitedUsersId = groupTimer.invitedUsersId.filter((id) => id.toString() !== userId.toString());
             await groupTimer.save();

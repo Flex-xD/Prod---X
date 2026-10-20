@@ -115,6 +115,19 @@ export const profileAggregationService = {
         };
     },
 
+    // * All-time task totals (the `tasks` bucket above is *today only*).
+    getAllTimeTaskStats: async (userId: string) => {
+        const result = await fetchData<{ total: number; done: number; pending: number }>(
+            "tasks:all-time",
+            `${serviceUrls().tasks}/api/v1/task/all-tasks-stats`,
+            userId
+        );
+        return {
+            failed: result.failed,
+            value: result.data ?? { total: 0, done: 0, pending: 0 },
+        } satisfies Stat<unknown>;
+    },
+
     getStreakAndWeeklyFocus: async (userId: string) => {
         const result = await fetchData<any>(
             "dashboard",
@@ -132,19 +145,21 @@ export const profileAggregationService = {
     },
 
     getFullProfileStats: async (userId: string) => {
-        const [tasks, individualTimers, groupTimers, streakData] = await Promise.all([
+        const [tasks, allTimeTasks, individualTimers, groupTimers, streakData] = await Promise.all([
             profileAggregationService.getTaskStats(userId),
+            profileAggregationService.getAllTimeTaskStats(userId),
             profileAggregationService.getIndividualTimerStats(userId),
             profileAggregationService.getGroupTimerStats(userId),
             profileAggregationService.getStreakAndWeeklyFocus(userId),
         ]);
 
-        const unavailable = Object.entries({ tasks, individualTimers, groupTimers, streakData })
+        const unavailable = Object.entries({ tasks, allTimeTasks, individualTimers, groupTimers, streakData })
             .filter(([, result]) => result.failed)
             .map(([name]) => name);
 
         return {
             tasks: tasks.value,
+            allTimeTasks: allTimeTasks.value,
             individualTimers: individualTimers.value,
             groupTimers: groupTimers.value,
             streakData: streakData.value,

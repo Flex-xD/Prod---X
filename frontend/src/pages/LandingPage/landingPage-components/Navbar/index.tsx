@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { AnimatePresence, motion, useScroll } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { pressSpring, quick } from '@/lib/motion';
 import { cn } from '@/utils/utils';
 import { SECTION_IDS, scrollToSection, useActiveSection } from '../scroll';
-import { LinkButton, Wordmark } from '../shared';
+import { LinkButton } from '../shared';
 
 const NAV_LINKS = [
     { id: 'how-it-works', label: 'How it works' },
@@ -33,8 +33,16 @@ function LandingNavbar() {
             }}
         >
             <nav aria-label="Primary" className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-                <Link to="/" aria-label="Prod-X home">
-                    <Wordmark />
+                <Link to="/" aria-label="Prod-X home" className='flex items-center'>
+                    <span
+                aria-hidden="true"
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-sm border-2 border-ink bg-ink text-paper"
+            >
+                <Zap className="h-5 w-5 text-sm" />
+            </span>
+            <div>
+                <p className="hidden px-2 py-2 text-lg font-bold underline-offset-4  sm:inline">ProdX</p>
+            </div>
                 </Link>
 
                 <ul className="hidden items-center gap-7 md:flex">
@@ -111,7 +119,6 @@ function LandingNavbar() {
                 )}
             </AnimatePresence>
 
-            {/* Reading progress: the header border fills with progress green as you scroll */}
             <motion.div
                 aria-hidden
                 style={{ scaleX: scrollYProgress }}

@@ -2,12 +2,16 @@
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import type { IDashboardSummary } from '@/types/dashboard';
+import type { ApiResponse } from '@/types/api-response';
 import { spring } from '@/lib/motion';
 import GroupTimerStatCard from '../group-timer-stat-card';
+import AllTimeStatCard from '../all-time-stat-card';
 import SkeletonBlock from '../skeleton-block';
 
 interface ProgressStripProps {
-    summary?: IDashboardSummary;
+    // * The dashboard passes the raw ApiResponse wrapper (all reads below go
+    // * through `.data`), so the prop type must match that shape.
+    summary?: ApiResponse<IDashboardSummary>;
     isLoading: boolean;
 }
 
@@ -73,13 +77,14 @@ const ProgressStrip = ({ summary, isLoading }: ProgressStripProps) => {
             </div>
 
             <div className="overflow-hidden rounded-lg border-2 border-ink bg-surface shadow-hard">
-                <div className="grid grid-cols-1 divide-y-2 divide-line lg:grid-cols-4 lg:divide-x-2 lg:divide-y-0">
+                <div className="grid grid-cols-1 divide-y-2 divide-line lg:grid-cols-5 lg:divide-x-2 lg:divide-y-0">
                     {isLoading ? (
                         <>
                             <CellSkeleton />
                             <CellSkeleton />
                             <CellSkeleton />
                             <CellSkeleton />
+                            <AllTimeStatCard />
                         </>
                     ) : (
                         <>
@@ -130,6 +135,9 @@ const ProgressStrip = ({ summary, isLoading }: ProgressStripProps) => {
                             />
 
                             <GroupTimerStatCard data={summary?.data.latestGroupTimer ?? null} />
+
+                            {/* All-time counterpart to the today-scoped cells above. */}
+                            <AllTimeStatCard />
                         </>
                     )}
                 </div>

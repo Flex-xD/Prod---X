@@ -34,6 +34,7 @@ export const QUERY_KEYS = {
         CALENDAR: (userId: string) => ["dashboard", "calendar", userId],
         AI_TIP: (userId: string) => ["dashboard", "ai-tip", userId],
         ACTIVITY_MESSAGE: (userId: string) => ["dashboard", "activity-message", userId],
+        FOCUS_LOCK: (userId: string) => ["focus-lock", userId],
     }, 
     PROFILE_PAGE: {
     DATA: (userId: string) => ["profile-page", userId],

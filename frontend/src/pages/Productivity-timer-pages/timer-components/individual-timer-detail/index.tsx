@@ -12,9 +12,11 @@ import CompletionModal from '../completion-modal';
 interface IndividualTimerDetailProps {
     timer: IProductivityTimer;
     onBack: () => void;
+    /** Lets the timer page block back-navigation while the stopwatch runs. */
+    onRunningChange?: (running: boolean) => void;
 }
 
-const IndividualTimerDetail = ({ timer, onBack }: IndividualTimerDetailProps) => {
+const IndividualTimerDetail = ({ timer, onBack, onRunningChange }: IndividualTimerDetailProps) => {
     const [localCompletedOffset, setLocalCompletedOffset] = useState(0);
     const { mutateAsync: submitProductivity, isPending } = useSubmitProductivityTimeMutation();
 
@@ -28,6 +30,13 @@ const IndividualTimerDetail = ({ timer, onBack }: IndividualTimerDetailProps) =>
         maxSeconds: remainingSeconds > 0 ? remainingSeconds : undefined,
         persistKey: `productivity-timer-${timer._id}`,
     });
+
+    // * Report the running state up so the page can gate "back" navigation,
+    // * and make sure it resets when this view unmounts.
+    useEffect(() => {
+        onRunningChange?.(isRunning);
+        return () => onRunningChange?.(false);
+    }, [isRunning, onRunningChange]);
 
     const liveCompletedTime = baseCompletedTime + elapsedSeconds;
     const pct = progressPercent(liveCompletedTime, timer.specifiedTime);

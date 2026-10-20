@@ -62,6 +62,16 @@ const taskService = {
         return responseData;
     },
 
+    // * All-time counts used by the dashboard's "all-time" stat card.
+    getAllTimeTaskStats: async (userId: Types.ObjectId) => {
+        const [total, done, pending] = await Promise.all([
+            Task.countDocuments({ author: userId }),
+            Task.countDocuments({ author: userId, status: "done" }),
+            Task.countDocuments({ author: userId, status: "pending" }),
+        ]);
+        return { total, done, pending };
+    },
+
     markTaskDone: async (userId: Types.ObjectId, taskId: Types.ObjectId) => {
         const task = await transitionTask(userId, taskId, "pending", "done");
         await emitEvent("task.completed", { userId: userId.toString(), taskId: task._id.toString() });

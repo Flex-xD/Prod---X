@@ -18,9 +18,11 @@ import CompletionModal from '../completion-modal';
 interface GroupTimerDetailProps {
     timer: IGroupTimer;
     onBack: () => void;
+    /** Lets the timer page block back-navigation while the stopwatch runs. */
+    onRunningChange?: (running: boolean) => void;
 }
 
-const GroupTimerDetail = ({ timer, onBack }: GroupTimerDetailProps) => {
+const GroupTimerDetail = ({ timer, onBack, onRunningChange }: GroupTimerDetailProps) => {
     const currentUserId = userAppStore((state) => state.user_id) ?? '';
     const [localOffset, setLocalOffset] = useState(0);
     const [showCompletionModal, setShowCompletionModal] = useState(false);
@@ -48,6 +50,13 @@ const GroupTimerDetail = ({ timer, onBack }: GroupTimerDetailProps) => {
         maxSeconds: remainingSeconds > 0 ? remainingSeconds : undefined,
         persistKey: `group-timer-${timer._id}-${currentUserId || 'anonymous'}`,
     });
+
+    // * Report the running state up so the page can gate "back" navigation,
+    // * and make sure it resets when this view unmounts.
+    useEffect(() => {
+        onRunningChange?.(isRunning);
+        return () => onRunningChange?.(false);
+    }, [isRunning, onRunningChange]);
 
     const liveCompletedTime = baseCompletedTime + elapsedSeconds;
     const myProgress = progressPercent(liveCompletedTime, timer.specifiedTime);

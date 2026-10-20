@@ -39,19 +39,23 @@ function App() {
 
   const { data, isPending, isError } = useUserData();
 
+  // * SINGLE source of truth for invitation toasts.
+  // * (There used to be a second listener below with a broken cleanup that never
+  // *  unregistered itself, which is why the same toast showed up 2-3 times.)
   useEffect(() => {
-  const handleNotification = (payload: any) => {
-    toast.info(`You are invited to a group-timer by ${payload.username}` , {id:payload.notification._id});
-    if (user_id) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notificationKeys.list(user_id) });
-    }
-  };
+    const handleNotification = (payload: any) => {
+      // The notification id dedupes the toast even if the event is emitted twice.
+      toast.info(`You are invited to a group-timer by ${payload.username}`, { id: payload.notification._id });
+      if (user_id) {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notificationKeys.list(user_id) });
+      }
+    };
 
-  socket.on("invitation-notification", handleNotification);
-  return () => {
-    socket.off("invitation-notification", handleNotification);
-  };
-}, [user_id, queryClient]);
+    socket.on("invitation-notification", handleNotification);
+    return () => {
+      socket.off("invitation-notification", handleNotification);
+    };
+  }, [user_id, queryClient]);
 
   useEffect(() => {
     if (data?.success) {
@@ -62,19 +66,6 @@ function App() {
       setIsAuthenticated(false);
     }
   }, [data, setIsAuthenticated]);
-
-  // * Let's see how many toast I will get this time
-  useEffect(() => {
-    const handleNotification = (payload: any) => {
-      toast.info(`You are invited to group-timer from ${payload.username}`)
-      console.log("Payload : " , payload);
-    };
-    
-    socket.on("invitation-notification" , handleNotification);
-    () => {
-      socket.off("invitation-notification" , handleNotification);
-    }
-  }, []);
 
   if (isPending) {
     return <div className="h-screen w-screen flex justify-center items-center">

@@ -18,7 +18,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     const accessToken = userAppStore((state) => state.accessToken);
 
     useEffect(() => {
-        if (isConnected) return;
         if (!accessToken) {
             socket.disconnect();
             return;
@@ -27,7 +26,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         socket.auth = { token: accessToken };
         socket.connect();
 
-        const handleConnect = () => { 
+        const handleConnect = () => {
             setIsConnected(true);
             console.log(`Socket Connected : ${socket.id}`);
         };
@@ -44,12 +43,13 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         socket.on("disconnect", handleDisconnect);
         socket.on("connect_error", handleConnectionError);
 
-        () => {
+        // * This cleanup MUST be returned — the old code wrote it as a bare
+        // * expression, so handlers accumulated on every token change.
+        return () => {
             socket.off("connect", handleConnect);
             socket.off("disconnect", handleDisconnect);
             socket.off("connect_error", handleConnectionError);
         };
-
     }, [accessToken])
     return (
         <socketContext.Provider value={{ isConnected }}>

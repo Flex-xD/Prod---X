@@ -19,6 +19,16 @@ export const createGroupProductivityTimer = asyncHandler(async (req: Request, re
     if (!title || !specifiedTime || !deadline) {
         throw ApiError(StatusCodes.BAD_REQUEST, "Title , specifiedTime and deadline are required !");
     }
+    // * Deadline must not be a past date (the UI already restricts picking to tomorrow+).
+    const deadlineDate = new Date(deadline);
+    if (Number.isNaN(deadlineDate.getTime())) {
+        throw ApiError(StatusCodes.BAD_REQUEST, "Invalid deadline !");
+    }
+    const startOfTodayUTC = new Date();
+    startOfTodayUTC.setUTCHours(0, 0, 0, 0);
+    if (deadlineDate.getTime() < startOfTodayUTC.getTime()) {
+        throw ApiError(StatusCodes.BAD_REQUEST, "Deadline cannot be a past date ! Choose tomorrow or later.");
+    }
 
     const groupProductivityTimer = await groupProductivityTimerServices.createGroupProductivityTimerService(
         toObjectId(userId), { title, description, deadline, specifiedTime, invitedUsersId } as TcreateGroupProductivityTimerInputForBody
@@ -48,7 +58,16 @@ export const respondToGroupTimerInvitation = asyncHandler(async (req: Request, r
 
     const groupTimer = await groupProductivityTimerServices.respondToInvitation(toObjectId(groupTimerId), toObjectId(userId), status);
 
-    // ? changes group.timer.invitation.responded -- > group.timer.participant.updated
+    // * Tell the notification-service that this invitation was answered so it can
+    // * record the response (and stop returning the notification / unread badge).
+    await emitEvent("group.timer.invitation.updated", {
+        groupTimerId,
+        userId,
+        status,
+    });
+
+    // * Live participant/rank update for everyone in the timer (also feeds the
+    // * dashboard's group-timer snapshots — payload must keep title/deadline/specifiedTime).
     await emitEvent("group.timer.participant.updated", {
                 groupTimerId: groupTimer._id.toString(),
                 recipients: [groupTimer.author.toString(), ...groupTimer.participants.map((p) => p.user.toString())],

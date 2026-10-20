@@ -1,12 +1,18 @@
 import { StatusCodes } from "http-status-codes";
-import { IAuthRequest } from "../shared/middlewares/auth-middleware";
 import { ApiError } from "../shared/utils/api-error";
 import { asyncHandler } from "../shared/utils/async-handler";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { userRelatedService } from "../service-layer/user-realted-service";
 import { sendError, sendResponse } from "../shared/utils/response-utils";
 import mongoose from "mongoose";
 import { toObjectId } from "../shared/utils/into-objectId";
+
+// * The shared auth-middleware module is fully commented out upstream, so the
+// * request shape is declared locally here (the api-gateway already authenticates
+// * and injects x-user-id before requests reach this service).
+interface IAuthRequest extends Request {
+    userId?: mongoose.Types.ObjectId;
+}
 
 // ! USER-RELATED-FETCHING
 export const userDataController = asyncHandler(async (req: IAuthRequest, res: Response) => {

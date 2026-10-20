@@ -107,6 +107,14 @@ const useRespondToInvitationMutation = (userId: string) => {
             await queryClient.invalidateQueries({ predicate: notificationQueryPredicate(userId) });
             await queryClient.invalidateQueries({ queryKey: pendingKey });
             if (payload.status === "accepted") await queryClient.invalidateQueries({ queryKey: activeGroupKey });
+
+            // * The backend records the response through Kafka, which can land a
+            // * few ms after this refetch. Re-check once so a not-yet-recorded
+            // * notification can't reappear (and be answerable) a second later.
+            const notificationPredicate = notificationQueryPredicate(userId);
+            setTimeout(() => {
+                queryClient.invalidateQueries({ predicate: notificationPredicate });
+            }, 2000);
         },
     });
 };

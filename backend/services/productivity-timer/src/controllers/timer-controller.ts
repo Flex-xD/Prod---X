@@ -14,6 +14,17 @@ export const createProductivityTimer = asyncHandler(async (req: Request, res: Re
         throw ApiError(StatusCodes.BAD_REQUEST, "Title , specified time and deadline are required !");
     }
 
+    // * Deadline must not be a past date (the UI already restricts picking to tomorrow+).
+    const deadlineDate = new Date(deadline);
+    if (Number.isNaN(deadlineDate.getTime())) {
+        throw ApiError(StatusCodes.BAD_REQUEST, "Invalid deadline !");
+    }
+    const startOfTodayUTC = new Date();
+    startOfTodayUTC.setUTCHours(0, 0, 0, 0);
+    if (deadlineDate.getTime() < startOfTodayUTC.getTime()) {
+        throw ApiError(StatusCodes.BAD_REQUEST, "Deadline cannot be a past date ! Choose tomorrow or later.");
+    }
+
     const productivityTimer = await productivityTimerServices.createProductivityTimer(
         toObjectId(userId), { title, description, deadline, specifiedTime } as TcreateProductivityTimerInputForBody
     );

@@ -64,7 +64,10 @@ const callOpenRouter = async (systemPrompt: string, userPrompt: string): Promise
             }
         );
 
-        const content: string | undefined = response.data?.choices?.[0]?.message?.content;
+        const data = response.data as {
+            choices?: Array<{ message?: { content?: string } }>;
+        };
+        const content: string | undefined = data?.choices?.[0]?.message?.content;
         return content?.trim() || null;
     } catch (error) {
         logger.error("❌ OpenRouter call failed, falling back : ", { error: (error as Error).message });
